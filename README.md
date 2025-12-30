@@ -349,9 +349,7 @@ This project is for educational purposes (IIITM Gwalior).
 
 ## 👨‍💻 Author
 
-**Your Name**
-- GitHub: [@yourusername](https://github.com/yourusername)
-- LinkedIn: [Your Profile](https://linkedin.com/in/yourprofile)
+ **Panugothu Sri charan**
 
 ---
 
