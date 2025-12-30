@@ -17,6 +17,7 @@ const CategoryPage = lazy(() => import("./components/CategoryPage"));
 const MyListings = lazy(() => import("./components/MyListings"));
 const EditProduct = lazy(() => import("./components/EditProduct"));
 const AdminDashboard = lazy(() => import("./components/AdminDashboard"));
+const ContactAdmin = lazy(() => import("./components/ContactAdmin"));
 
 const GOOGLE_CLIENT_ID = "45965234451-stt1nfrj264pphitcqnve10ov8c54tgv.apps.googleusercontent.com";
 
@@ -100,6 +101,9 @@ const root = createRoot(document.getElementById("root"));
 root.render(
   <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <RouterProvider router={router} />
+    <Suspense fallback={null}>
+      <ContactAdmin />
+    </Suspense>
   </GoogleOAuthProvider>
 );
 

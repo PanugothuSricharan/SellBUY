@@ -167,7 +167,7 @@ function MyListings() {
         )}
       </div>
       <div className="listing-info">
-        <h3 className="listing-price">₹{item.price}</h3>
+        <h3 className="listing-price">₹{Number(item.price).toLocaleString('en-IN')}</h3>
         <p className="listing-title">{item.pname}</p>
         <p className="listing-category">{item.category}</p>
         {item.productAge && (

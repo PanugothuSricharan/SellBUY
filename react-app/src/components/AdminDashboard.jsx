@@ -9,10 +9,14 @@ function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState([]);
   const [sellers, setSellers] = useState([]);
-  const [activeTab, setActiveTab] = useState('products'); // products, sellers
+  const [messages, setMessages] = useState([]);
+  const [messageCounts, setMessageCounts] = useState({ unread: 0, read: 0, resolved: 0 });
+  const [activeTab, setActiveTab] = useState('products'); // products, sellers, messages
   const [filter, setFilter] = useState('ALL'); // ALL, APPROVED, HIDDEN
+  const [messageFilter, setMessageFilter] = useState('all'); // all, unread, read, resolved
   const [actionLoading, setActionLoading] = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
+  const [selectedMessage, setSelectedMessage] = useState(null);
   const navigate = useNavigate();
 
   const fetchProducts = useCallback(async () => {
@@ -41,6 +45,23 @@ function AdminDashboard() {
     }
   }, []);
 
+  const fetchMessages = useCallback(async () => {
+    const userId = localStorage.getItem('userId');
+    try {
+      const response = await axios.get(`${API_URL}/admin/messages/${userId}`);
+      let filteredMessages = response.data.messages || [];
+      setMessageCounts(response.data.counts || { unread: 0, read: 0, resolved: 0 });
+      
+      if (messageFilter !== 'all') {
+        filteredMessages = filteredMessages.filter(m => m.status === messageFilter);
+      }
+      
+      setMessages(filteredMessages);
+    } catch (error) {
+      console.error('Error fetching messages:', error);
+    }
+  }, [messageFilter]);
+
   useEffect(() => {
     checkAdminStatus();
   }, []);
@@ -49,11 +70,13 @@ function AdminDashboard() {
     if (isAdmin) {
       if (activeTab === 'products') {
         fetchProducts();
-      } else {
+      } else if (activeTab === 'sellers') {
         fetchSellers();
+      } else if (activeTab === 'messages') {
+        fetchMessages();
       }
     }
-  }, [isAdmin, activeTab, filter, fetchProducts, fetchSellers]);
+  }, [isAdmin, activeTab, filter, messageFilter, fetchProducts, fetchSellers, fetchMessages]);
 
   const checkAdminStatus = async () => {
     const userId = localStorage.getItem('userId');
@@ -196,6 +219,66 @@ function AdminDashboard() {
     }
   };
 
+  // Message handlers
+  const handleMarkAsRead = async (messageId) => {
+    const userId = localStorage.getItem('userId');
+    try {
+      await axios.put(`${API_URL}/admin/message/read/${messageId}`, { userId });
+      setMessages(prev => prev.map(m => 
+        m._id === messageId ? { ...m, status: 'read', readAt: new Date() } : m
+      ));
+      setMessageCounts(prev => ({ ...prev, unread: prev.unread - 1 }));
+      if (selectedMessage?._id === messageId) {
+        setSelectedMessage(prev => ({ ...prev, status: 'read', readAt: new Date() }));
+      }
+    } catch (error) {
+      console.error('Error marking message as read:', error);
+    }
+  };
+
+  const handleResolveMessage = async (messageId, reply = '') => {
+    const userId = localStorage.getItem('userId');
+    try {
+      await axios.put(`${API_URL}/admin/message/resolve/${messageId}`, { userId, reply });
+      const wasUnread = messages.find(m => m._id === messageId)?.status === 'unread';
+      setMessages(prev => prev.map(m => 
+        m._id === messageId ? { ...m, status: 'resolved', adminReply: reply, resolvedAt: new Date() } : m
+      ));
+      setMessageCounts(prev => ({ 
+        ...prev, 
+        unread: wasUnread ? prev.unread - 1 : prev.unread,
+        resolved: prev.resolved + 1 
+      }));
+      setSelectedMessage(null);
+    } catch (error) {
+      console.error('Error resolving message:', error);
+      alert('Failed to resolve message');
+    }
+  };
+
+  const handleDeleteMessage = async (messageId) => {
+    if (!window.confirm('Are you sure you want to delete this message?')) return;
+    
+    const userId = localStorage.getItem('userId');
+    try {
+      await axios.delete(`${API_URL}/admin/message/${messageId}`, { data: { userId } });
+      const deletedMessage = messages.find(m => m._id === messageId);
+      setMessages(prev => prev.filter(m => m._id !== messageId));
+      setMessageCounts(prev => ({
+        ...prev,
+        total: prev.total - 1,
+        unread: deletedMessage?.status === 'unread' ? prev.unread - 1 : prev.unread,
+        resolved: deletedMessage?.status === 'resolved' ? prev.resolved - 1 : prev.resolved
+      }));
+      if (selectedMessage?._id === messageId) {
+        setSelectedMessage(null);
+      }
+    } catch (error) {
+      console.error('Error deleting message:', error);
+      alert('Failed to delete message');
+    }
+  };
+
   if (loading) {
     return (
       <div className="admin-loading">
@@ -243,6 +326,15 @@ function AdminDashboard() {
           onClick={() => setActiveTab('sellers')}
         >
           👥 Sellers
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'messages' ? 'active' : ''}`}
+          onClick={() => setActiveTab('messages')}
+        >
+          📩 Messages
+          {messageCounts.unread > 0 && (
+            <span className="unread-badge">{messageCounts.unread}</span>
+          )}
         </button>
       </div>
 
@@ -300,7 +392,7 @@ function AdminDashboard() {
                   
                   <div className="product-details">
                     <h3 className="product-name">{product.pname}</h3>
-                    <p className="product-price">₹{product.price}</p>
+                    <p className="product-price">₹{Number(product.price).toLocaleString('en-IN')}</p>
                     <p className="product-desc">{product.pdesc?.substring(0, 100)}...</p>
                     
                     <div className="product-meta">
@@ -425,6 +517,187 @@ function AdminDashboard() {
             </div>
           )}
         </>
+      )}
+
+      {/* Messages Tab */}
+      {activeTab === 'messages' && (
+        <>
+          <div className="admin-filters">
+            <button 
+              className={`filter-btn ${messageFilter === 'all' ? 'active' : ''}`}
+              onClick={() => setMessageFilter('all')}
+            >
+              📬 All ({messageCounts.total})
+            </button>
+            <button 
+              className={`filter-btn ${messageFilter === 'unread' ? 'active' : ''}`}
+              onClick={() => setMessageFilter('unread')}
+            >
+              🔴 Unread ({messageCounts.unread})
+            </button>
+            <button 
+              className={`filter-btn ${messageFilter === 'read' ? 'active' : ''}`}
+              onClick={() => setMessageFilter('read')}
+            >
+              📖 Read
+            </button>
+            <button 
+              className={`filter-btn ${messageFilter === 'resolved' ? 'active' : ''}`}
+              onClick={() => setMessageFilter('resolved')}
+            >
+              ✅ Resolved ({messageCounts.resolved})
+            </button>
+          </div>
+
+          {messages.length === 0 ? (
+            <div className="no-items">
+              <span className="no-icon">📭</span>
+              <p>No {messageFilter === 'all' ? '' : messageFilter} messages</p>
+            </div>
+          ) : (
+            <div className="messages-list">
+              {messages.map((message) => (
+                <div 
+                  key={message._id} 
+                  className={`message-card ${message.status}`}
+                  onClick={() => {
+                    setSelectedMessage(message);
+                    if (message.status === 'unread') {
+                      handleMarkAsRead(message._id);
+                    }
+                  }}
+                >
+                  <div className="message-header">
+                    <div className="message-sender">
+                      <span className="sender-avatar">
+                        {(message.userId?.username || message.userId?.email || 'U').charAt(0).toUpperCase()}
+                      </span>
+                      <div className="sender-info">
+                        <span className="sender-name">{message.userId?.username || message.userId?.email?.split('@')[0] || 'Unknown User'}</span>
+                        <span className="sender-email">{message.userId?.email || 'No email'}</span>
+                      </div>
+                    </div>
+                    <div className="message-meta">
+                      <span className={`status-badge ${message.status}`}>
+                        {message.status === 'unread' ? '🔴' : message.status === 'read' ? '📖' : '✅'} {message.status}
+                      </span>
+                      <span className="message-date">
+                        {new Date(message.createdAt).toLocaleDateString()} {new Date(message.createdAt).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="message-subject">
+                    <strong>{message.subject}</strong>
+                  </div>
+                  <div className="message-preview">
+                    {message.message.length > 150 ? message.message.substring(0, 150) + '...' : message.message}
+                  </div>
+                  <div className="message-actions" onClick={(e) => e.stopPropagation()}>
+                    {message.status !== 'resolved' && (
+                      <button 
+                        className="resolve-quick-btn"
+                        onClick={() => handleResolveMessage(message._id)}
+                        title="Mark as resolved"
+                      >
+                        ✅ Resolve
+                      </button>
+                    )}
+                    <button 
+                      className="delete-msg-btn"
+                      onClick={() => handleDeleteMessage(message._id)}
+                      title="Delete message"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {/* Message Detail Modal */}
+      {selectedMessage && (
+        <div className="message-modal-overlay" onClick={() => setSelectedMessage(null)}>
+          <div className="message-modal" onClick={(e) => e.stopPropagation()}>
+            <button className="modal-close" onClick={() => setSelectedMessage(null)}>×</button>
+            
+            <div className="message-modal-header">
+              <div className="modal-sender">
+                <span className="sender-avatar large">
+                  {(selectedMessage.userId?.username || selectedMessage.userId?.email || 'U').charAt(0).toUpperCase()}
+                </span>
+                <div className="sender-info">
+                  <span className="sender-name">{selectedMessage.userId?.username || selectedMessage.userId?.email?.split('@')[0]}</span>
+                  <span className="sender-email">{selectedMessage.userId?.email}</span>
+                  {selectedMessage.userId?.mobile && (
+                    <span className="sender-mobile">📞 {selectedMessage.userId.mobile}</span>
+                  )}
+                </div>
+              </div>
+              <span className={`status-badge ${selectedMessage.status}`}>
+                {selectedMessage.status === 'unread' ? '🔴 Unread' : selectedMessage.status === 'read' ? '📖 Read' : '✅ Resolved'}
+              </span>
+            </div>
+
+            <div className="message-modal-body">
+              <div className="modal-subject">
+                <label>Subject:</label>
+                <strong>{selectedMessage.subject}</strong>
+              </div>
+              <div className="modal-message">
+                <label>Message:</label>
+                <p>{selectedMessage.message}</p>
+              </div>
+              <div className="modal-timestamps">
+                <span>Sent: {new Date(selectedMessage.createdAt).toLocaleString()}</span>
+                {selectedMessage.readAt && (
+                  <span>Read: {new Date(selectedMessage.readAt).toLocaleString()}</span>
+                )}
+                {selectedMessage.resolvedAt && (
+                  <span>Resolved: {new Date(selectedMessage.resolvedAt).toLocaleString()}</span>
+                )}
+              </div>
+              {selectedMessage.adminReply && (
+                <div className="modal-reply">
+                  <label>Admin Reply:</label>
+                  <p>{selectedMessage.adminReply}</p>
+                </div>
+              )}
+            </div>
+
+            <div className="message-modal-actions">
+              {selectedMessage.status !== 'resolved' && (
+                <>
+                  <button 
+                    className="resolve-btn with-reply"
+                    onClick={() => {
+                      const reply = prompt('Add an optional reply (leave empty for no reply):');
+                      if (reply !== null) {
+                        handleResolveMessage(selectedMessage._id, reply);
+                      }
+                    }}
+                  >
+                    ✅ Resolve with Reply
+                  </button>
+                  <button 
+                    className="resolve-btn"
+                    onClick={() => handleResolveMessage(selectedMessage._id)}
+                  >
+                    ✅ Resolve
+                  </button>
+                </>
+              )}
+              <button 
+                className="delete-btn"
+                onClick={() => handleDeleteMessage(selectedMessage._id)}
+              >
+                🗑️ Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Confirmation Modal */}

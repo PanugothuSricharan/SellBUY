@@ -131,6 +131,7 @@ function EditProduct() {
     if (!category) newErrors.category = "Please select a category";
     if (!location) newErrors.location = "Please select a location";
     if (!condition) newErrors.condition = "Please select product condition";
+    if (!productAge) newErrors.productAge = "Please select product age";
     if (!pimage && !existingImage1)
       newErrors.pimage = "At least one image is required";
 
@@ -239,9 +240,9 @@ function EditProduct() {
         <form onSubmit={handleSubmit} className="add-product-form">
           {/* Image Upload Section */}
           <div className="form-section">
-            <h2 className="section-title">
+            <h3 className="form-section-title">
               <FaCamera /> Product Images
-            </h2>
+            </h3>
             <div className="image-upload-grid">
               {/* Primary Image */}
               <div
@@ -316,51 +317,57 @@ function EditProduct() {
               </div>
             </div>
             {errors.pimage && (
-              <span className="error-message">{errors.pimage}</span>
+              <p className="error-message">{errors.pimage}</p>
             )}
           </div>
 
           {/* Product Details Section */}
           <div className="form-section">
-            <h2 className="section-title">
-              <FaTag /> Product Details
-            </h2>
+            <h3 className="form-section-title">
+              <FaTag /> Basic Information
+            </h3>
 
             <div className="form-group">
-              <label>Product Name *</label>
+              <label className="form-label">
+                Product Name <span className="required">*</span>
+              </label>
               <input
                 type="text"
+                className={`form-input ${errors.pname ? "error" : ""}`}
                 value={pname}
                 onChange={(e) => setPname(e.target.value)}
                 placeholder="e.g., Dell Laptop, Study Table"
-                className={errors.pname ? "error" : ""}
               />
               {errors.pname && (
-                <span className="error-message">{errors.pname}</span>
+                <p className="error-message">{errors.pname}</p>
               )}
             </div>
 
             <div className="form-row">
               <div className="form-group">
-                <label>Price (₹) *</label>
+                <label className="form-label">
+                  Price (₹) <span className="required">*</span>
+                </label>
                 <input
                   type="number"
+                  className={`form-input ${errors.price ? "error" : ""}`}
                   value={price}
                   onChange={(e) => setPrice(e.target.value)}
                   placeholder="Enter price"
-                  className={errors.price ? "error" : ""}
                 />
                 {errors.price && (
-                  <span className="error-message">{errors.price}</span>
+                  <p className="error-message">{errors.price}</p>
                 )}
               </div>
 
               <div className="form-group">
-                <label>Category *</label>
+                <label className="form-label">
+                  Category <span className="required">*</span>
+                </label>
                 <select
+                  className={`form-select ${errors.category ? "error" : ""}`}
                   value={category}
                   onChange={(e) => setCategory(e.target.value)}
-                  className={errors.category ? "error" : ""}
                 >
                   <option value="">Select Category</option>
                   {categories.map((cat, index) => (
@@ -370,39 +377,43 @@ function EditProduct() {
                   ))}
                 </select>
                 {errors.category && (
-                  <span className="error-message">{errors.category}</span>
+                  <p className="error-message">{errors.category}</p>
                 )}
               </div>
             </div>
 
             <div className="form-group">
-              <label>Description *</label>
+              <label className="form-label">
+                Description <span className="required">*</span>
+              </label>
               <textarea
+                className={`form-textarea ${errors.pdesc ? "error" : ""}`}
                 value={pdesc}
                 onChange={(e) => setPdesc(e.target.value)}
                 placeholder="Describe your product, include details like brand, specifications, any defects..."
                 rows={4}
-                className={errors.pdesc ? "error" : ""}
               />
               {errors.pdesc && (
-                <span className="error-message">{errors.pdesc}</span>
+                <p className="error-message">{errors.pdesc}</p>
               )}
             </div>
           </div>
 
           {/* Condition & Location Section */}
           <div className="form-section">
-            <h2 className="section-title">
+            <h3 className="form-section-title">
               <FaBoxOpen /> Condition & Location
-            </h2>
+            </h3>
 
             <div className="form-row">
               <div className="form-group">
-                <label>Condition *</label>
+                <label className="form-label">
+                  Condition <span className="required">*</span>
+                </label>
                 <select
+                  className={`form-select ${errors.condition ? "error" : ""}`}
                   value={condition}
                   onChange={(e) => setCondition(e.target.value)}
-                  className={errors.condition ? "error" : ""}
                 >
                   <option value="">Select condition</option>
                   {PRODUCT_CONDITIONS.map((cond, index) => (
@@ -412,15 +423,16 @@ function EditProduct() {
                   ))}
                 </select>
                 {errors.condition && (
-                  <span className="error-message">{errors.condition}</span>
+                  <p className="error-message">{errors.condition}</p>
                 )}
               </div>
 
               <div className="form-group">
-                <label>
-                  <FaClock /> Product Age
+                <label className="form-label">
+                  <FaClock style={{ marginRight: "4px" }} /> Product Age <span className="required">*</span>
                 </label>
                 <select
+                  className={`form-select ${errors.productAge ? "error" : ""}`}
                   value={productAge}
                   onChange={(e) => setProductAge(e.target.value)}
                 >
@@ -431,20 +443,23 @@ function EditProduct() {
                     </option>
                   ))}
                 </select>
-                <span className="input-hint">
+                {errors.productAge && (
+                  <p className="error-message">{errors.productAge}</p>
+                )}
+                <p className="form-hint">
                   Helps buyers understand the product's usage
-                </span>
+                </p>
               </div>
             </div>
 
             <div className="form-group">
-              <label>
-                <FaMapMarkerAlt /> Hostel / Location *
+              <label className="form-label">
+                <FaMapMarkerAlt style={{ marginRight: "4px" }} /> Hostel / Location <span className="required">*</span>
               </label>
               <select
+                className={`form-select ${errors.location ? "error" : ""}`}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                className={errors.location ? "error" : ""}
               >
                 <option value="">Select your hostel</option>
                 {PRODUCT_LOCATIONS.map((loc, index) => (
@@ -454,33 +469,33 @@ function EditProduct() {
                 ))}
               </select>
               {errors.location && (
-                <span className="error-message">{errors.location}</span>
+                <p className="error-message">{errors.location}</p>
               )}
             </div>
 
             <div className="form-group">
-              <label>
-                <FaLink /> Original Product URL
+              <label className="form-label">
+                <FaLink style={{ marginRight: "4px" }} /> Original Product Link
               </label>
               <input
                 type="url"
+                className={`form-input ${errors.originalUrl ? "error" : ""}`}
                 value={originalUrl}
                 onChange={(e) => setOriginalUrl(e.target.value)}
                 placeholder="https://amazon.in/... or Flipkart link"
-                className={errors.originalUrl ? "error" : ""}
               />
               {errors.originalUrl && (
-                <span className="error-message">{errors.originalUrl}</span>
+                <p className="error-message">{errors.originalUrl}</p>
               )}
-              <span className="input-hint">
+              <p className="form-hint">
                 Link to original product page (Amazon, Flipkart etc.) for price
                 comparison
-              </span>
+              </p>
             </div>
 
             {/* Contact Preference */}
             <div className="form-group">
-              <label>
+              <label className="form-label">
                 <FaPhone style={{ marginRight: "4px" }} /> Contact Preference
               </label>
               <div className="contact-preference-options">
@@ -514,25 +529,30 @@ function EditProduct() {
                   </label>
                 ))}
               </div>
-              <span className="input-hint">
+              <p className="form-hint">
                 How would you like buyers to contact you?
-              </span>
+              </p>
             </div>
           </div>
 
           {/* Submit Button */}
-          <button type="submit" className="submit-btn" disabled={isSubmitting}>
-            {isSubmitting ? (
-              <>
-                <span className="loading-spinner-small"></span>
-                Updating...
-              </>
-            ) : (
-              <>
-                <FaSave /> Save Changes
-              </>
-            )}
-          </button>
+          <div className="submit-section">
+            <button type="submit" className="submit-btn" disabled={isSubmitting}>
+              {isSubmitting ? (
+                <>
+                  <span className="loading-spinner"></span>
+                  Updating...
+                </>
+              ) : (
+                <>
+                  <FaSave /> Save Changes
+                </>
+              )}
+            </button>
+            <p className="submit-hint">
+              🛡️ Your changes will be saved immediately
+            </p>
+          </div>
         </form>
       </div>
 

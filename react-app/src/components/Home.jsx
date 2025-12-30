@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from "react";
 import Header from "./Header";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
 import Categories from "./Categories";
 import {
@@ -28,6 +28,7 @@ const VIEW_MODES = { GRID: "grid", LIST: "list", COMPACT: "compact" };
 
 function Home() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [products, setproducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
@@ -49,6 +50,31 @@ function Home() {
     localStorage.getItem("productViewMode") || VIEW_MODES.GRID
   );
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+
+  // Check for search query from URL (from ProductDetail page)
+  useEffect(() => {
+    const searchQuery = searchParams.get('search');
+    if (searchQuery) {
+      setsearch(searchQuery);
+    }
+  }, [searchParams]);
+
+  // Auto-trigger search when products load and there's a URL search query
+  useEffect(() => {
+    const searchQuery = searchParams.get('search');
+    if (searchQuery && products.length > 0 && !isLoading) {
+      // Apply the search filter
+      const searchFiltered = products.filter((item) => {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          item.pname?.toLowerCase().includes(searchLower) ||
+          item.pdesc?.toLowerCase().includes(searchLower) ||
+          item.category?.toLowerCase().includes(searchLower)
+        );
+      });
+      setFilteredProducts(searchFiltered);
+    }
+  }, [products, isLoading, searchParams]);
 
   // Fetch all products
   const fetchProducts = useCallback((location) => {
@@ -288,7 +314,7 @@ function Home() {
         )}
       </div>
       <div className="product-info">
-        <h3 className="product-price">₹{item.price}</h3>
+        <h3 className="product-price">₹{Number(item.price).toLocaleString('en-IN')}</h3>
         <p className="product-title">{item.pname}</p>
         <p className="product-category">{item.category}</p>
         {item.productAge && (
@@ -632,11 +658,44 @@ function Home() {
             <div className="footer-brand">
               <span className="footer-logo">🛒 SellBUY</span>
               <p>Your trusted IIITM campus marketplace</p>
+              <span className="developer-tagline">
+                🚁 Built by a drone enthusiast who codes at 3 AM
+              </span>
             </div>
+            
+            {/* Open Source & Developer Section */}
+            <div className="footer-developer">
+              <div className="open-source-banner">
+                <span className="open-source-icon">🚀</span>
+                <div className="open-source-text">
+                  <strong>Open Source Project</strong>
+                  <p>Hey juniors! This is an open-source platform. Grab the opportunity to build with me!</p>
+                </div>
+              </div>
+              <a 
+                href="https://youtu.be/Ph_beNQsIp0?si=cpiAN9HihHm1-yg1" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="developer-profile-btn"
+              >
+                <span className="btn-icon">🚁</span>
+                <span className="btn-text">
+                  <strong>View Developer's Profile</strong>
+                  <small>Watch the project journey on YouTube</small>
+                </span>
+                <FaExternalLinkAlt className="external-icon" />
+              </a>
+            </div>
+
             <div className="footer-links">
-              <span>© 2025 SellBUY. Made for IIITM Gwalior</span>
+              <span>© 2025 SellBUY. Made with ❤️ & ☕ for IIITM Gwalior</span>
             </div>
           </div>
+        </div>
+        
+        {/* Flying Drone Animation */}
+        <div className="drone-animation">
+          <span className="flying-drone">🚁</span>
         </div>
       </footer>
     </div>

@@ -82,6 +82,20 @@ const Users = mongoose.model("User", {
   blockedAt: Date,
 });
 
+// ============ ADMIN MESSAGES SCHEMA ============
+const MessageSchema = new mongoose.Schema({
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  subject: { type: String, required: true },
+  message: { type: String, required: true },
+  status: { type: String, enum: ["unread", "read", "resolved"], default: "unread" },
+  adminReply: String,
+  createdAt: { type: Date, default: Date.now },
+  readAt: Date,
+  resolvedAt: Date,
+});
+
+const Messages = mongoose.model("Message", MessageSchema);
+
 // ============ PRODUCT CONDITION ENUM ============
 const VALID_CONDITIONS = ["New", "Sealed", "Mint", "Used"];
 const VALID_STATUS = ["Available", "Sold"];
@@ -1040,6 +1054,138 @@ app.get("/admin/all-sellers/:userId", async (req, res) => {
     res.json({ message: "success", sellers: sellersWithProductCount });
   } catch (error) {
     console.error("Error fetching sellers:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ============ CONTACT ADMIN - MESSAGE SYSTEM ============
+
+// Send a message to admin
+app.post("/contact-admin", async (req, res) => {
+  try {
+    const { userId, subject, message } = req.body;
+
+    if (!userId || !subject || !message) {
+      return res.status(400).json({ message: "User ID, subject and message are required" });
+    }
+
+    // Verify user exists
+    const user = await Users.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    const newMessage = new Messages({
+      userId,
+      subject,
+      message,
+    });
+
+    await newMessage.save();
+    res.json({ message: "Message sent successfully! Admin will review it soon." });
+  } catch (error) {
+    console.error("Error sending message:", error);
+    res.status(500).json({ message: "Failed to send message" });
+  }
+});
+
+// Get all messages (admin only)
+app.get("/admin/messages/:userId", async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized: Admin access required" });
+    }
+
+    const messages = await Messages.find({})
+      .populate("userId", "username email")
+      .sort({ createdAt: -1 });
+
+    // Get counts by status
+    const unreadCount = await Messages.countDocuments({ status: "unread" });
+    const readCount = await Messages.countDocuments({ status: "read" });
+    const resolvedCount = await Messages.countDocuments({ status: "resolved" });
+
+    res.json({ 
+      message: "success", 
+      messages,
+      counts: { unread: unreadCount, read: readCount, resolved: resolvedCount }
+    });
+  } catch (error) {
+    console.error("Error fetching messages:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Mark message as read (admin only)
+app.put("/admin/message/read/:messageId", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await Users.findById(userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const msg = await Messages.findByIdAndUpdate(
+      req.params.messageId,
+      { status: "read", readAt: new Date() },
+      { new: true }
+    );
+
+    if (!msg) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    res.json({ message: "Marked as read", data: msg });
+  } catch (error) {
+    console.error("Error updating message:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Resolve message with optional reply (admin only)
+app.put("/admin/message/resolve/:messageId", async (req, res) => {
+  try {
+    const { userId, adminReply } = req.body;
+    const user = await Users.findById(userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    const msg = await Messages.findByIdAndUpdate(
+      req.params.messageId,
+      { 
+        status: "resolved", 
+        resolvedAt: new Date(),
+        adminReply: adminReply || ""
+      },
+      { new: true }
+    );
+
+    if (!msg) {
+      return res.status(404).json({ message: "Message not found" });
+    }
+
+    res.json({ message: "Message resolved", data: msg });
+  } catch (error) {
+    console.error("Error resolving message:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Delete message (admin only)
+app.delete("/admin/message/:messageId", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await Users.findById(userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized" });
+    }
+
+    await Messages.findByIdAndDelete(req.params.messageId);
+    res.json({ message: "Message deleted" });
+  } catch (error) {
+    console.error("Error deleting message:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

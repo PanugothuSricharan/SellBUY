@@ -60,6 +60,8 @@ function AddProduct() {
   const [uploadProgress, setUploadProgress] = useState(0);
   const [remainingUploads, setRemainingUploads] = useState(5);
   const [showLimitModal, setShowLimitModal] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -158,6 +160,7 @@ function AddProduct() {
     if (!category) newErrors.category = "Please select a category";
     if (!location) newErrors.location = "Please select a location";
     if (!condition) newErrors.condition = "Please select product condition";
+    if (!productAge) newErrors.productAge = "Please select product age";
     if (!pimage) newErrors.pimage = "At least one image is required";
 
     // Validate URL if provided
@@ -413,10 +416,10 @@ function AddProduct() {
 
               <div className="form-group">
                 <label className="form-label">
-                  <FaClock style={{ marginRight: "4px" }} /> Product Age
+                  <FaClock style={{ marginRight: "4px" }} /> Product Age <span className="required">*</span>
                 </label>
                 <select
-                  className="form-select"
+                  className={`form-select ${errors.productAge ? "error" : ""}`}
                   value={productAge}
                   onChange={(e) => setProductAge(e.target.value)}
                 >
@@ -427,6 +430,9 @@ function AddProduct() {
                     </option>
                   ))}
                 </select>
+                {errors.productAge && (
+                  <p className="error-message">{errors.productAge}</p>
+                )}
                 <p className="form-hint">
                   Helps buyers understand the product's usage
                 </p>
@@ -604,11 +610,58 @@ function AddProduct() {
             }}>
               📦 You can post {remainingUploads} more product{remainingUploads !== 1 ? 's' : ''} today
             </p>
+
+            {/* Terms Agreement Checkbox */}
+            <div className="terms-agreement">
+              <label className="terms-checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="terms-checkbox"
+                />
+                <span>
+                  I confirm that the product I am selling is <strong>legal and authentic</strong>, and I agree to the{" "}
+                  <button
+                    type="button"
+                    className="terms-link"
+                    onClick={() => setShowTermsModal(true)}
+                  >
+                    Terms & Conditions
+                  </button>
+                </span>
+              </label>
+              {errors.terms && (
+                <p className="error-message">{errors.terms}</p>
+              )}
+            </div>
+            
+            {/* Upload Progress Bar */}
+            {isSubmitting && (
+              <div className="upload-progress-container">
+                <div className="upload-progress-header">
+                  <span className="upload-icon">🚀</span>
+                  <span className="upload-text">
+                    {uploadProgress < 100 ? 'Uploading your product...' : 'Processing...'}
+                  </span>
+                </div>
+                <div className="upload-progress-bar">
+                  <div 
+                    className="upload-progress-fill"
+                    style={{ width: `${uploadProgress}%` }}
+                  ></div>
+                </div>
+                <div className="upload-progress-info">
+                  <span>{uploadProgress}% complete</span>
+                  <span>Please don't close this page</span>
+                </div>
+              </div>
+            )}
             
             <button
               className="submit-btn"
               onClick={handleApi}
-              disabled={isSubmitting || remainingUploads <= 0}
+              disabled={isSubmitting || remainingUploads <= 0 || !agreedToTerms}
             >
               {isSubmitting ? (
                 <>
@@ -629,7 +682,7 @@ function AddProduct() {
               )}
             </button>
             <p className="submit-hint">
-              By posting, you agree to our terms and conditions
+              🛡️ Your listing will go live immediately after posting
             </p>
           </div>
         </div>
@@ -721,6 +774,95 @@ function AddProduct() {
             <div className="mobile-modal-footer">
               <button className="btn-primary" onClick={() => navigate("/")}>
                 Back to Home
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Terms & Conditions Modal */}
+      {showTermsModal && (
+        <div className="modal-overlay">
+          <div className="terms-modal">
+            <div className="terms-modal-header">
+              <h2>📜 Terms & Conditions</h2>
+              <button 
+                className="close-modal-btn"
+                onClick={() => setShowTermsModal(false)}
+              >
+                <FaTimes />
+              </button>
+            </div>
+            
+            <div className="terms-modal-body">
+              <div className="terms-section">
+                <h3>🛡️ Platform Disclaimer</h3>
+                <p>
+                  SellBUY is a <strong>listing and discovery platform</strong> that connects students within the campus. 
+                  We do <strong>not manufacture, own, verify, or guarantee</strong> any product listed on this platform.
+                </p>
+              </div>
+
+              <div className="terms-section">
+                <h3>✅ Seller Responsibilities</h3>
+                <ul>
+                  <li>All products listed must be <strong>legal, authentic, and compliant</strong> with applicable laws.</li>
+                  <li>Sellers are solely responsible for the <strong>accuracy, quality, safety, and legality</strong> of their listings.</li>
+                  <li>Sellers must ensure items are <strong>not stolen, counterfeit, or prohibited</strong>.</li>
+                  <li>Any misrepresentation or false claims are the seller's responsibility.</li>
+                </ul>
+              </div>
+
+              <div className="terms-section">
+                <h3>⚠️ Liability Disclaimer</h3>
+                <ul>
+                  <li>The platform and its developers are <strong>not responsible</strong> for any disputes, losses, fraud, damage, or legal issues arising from transactions.</li>
+                  <li>All interactions between buyers and sellers are <strong>at their own risk</strong>.</li>
+                  <li>We do not guarantee delivery, quality, or authenticity of any product.</li>
+                  <li>The developers/owners will <strong>not be held liable</strong> under any circumstances for user actions.</li>
+                </ul>
+              </div>
+
+              <div className="terms-section">
+                <h3>🚫 Moderation Rights</h3>
+                <ul>
+                  <li>We reserve the right to <strong>remove listings</strong> or <strong>block sellers</strong> if violations are reported.</li>
+                  <li>Such actions do <strong>not imply prior approval</strong> or verification of other listings.</li>
+                  <li>Repeated violations may result in <strong>permanent account suspension</strong>.</li>
+                </ul>
+              </div>
+
+              <div className="terms-section">
+                <h3>🤝 User Agreement</h3>
+                <p>
+                  By using SellBUY, you acknowledge and agree that:
+                </p>
+                <ul>
+                  <li>The platform is not responsible for misuse, illegal activity, or consequences caused by users.</li>
+                  <li>You will not list or purchase prohibited, illegal, or stolen items.</li>
+                  <li>You understand all transactions are between users and at your own risk.</li>
+                  <li>You will report any suspicious or fraudulent activity.</li>
+                </ul>
+              </div>
+
+              <div className="terms-highlight">
+                <span className="highlight-icon">⚡</span>
+                <p>
+                  <strong>Important:</strong> Misuse of this platform may lead to account suspension and/or legal action. 
+                  Always transact responsibly and verify products before purchase.
+                </p>
+              </div>
+            </div>
+
+            <div className="terms-modal-footer">
+              <button 
+                className="btn-primary"
+                onClick={() => {
+                  setAgreedToTerms(true);
+                  setShowTermsModal(false);
+                }}
+              >
+                I Understand & Agree
               </button>
             </div>
           </div>
