@@ -20,7 +20,7 @@
     rgba(26, 26, 26, 0.98) 0%,
     rgba(20, 20, 20, 0.98) 100%
   );
-  border-bottom: 1px solid rgba(255, 122, 77, 0.15);
+  border-bottom: 1px solid rgba(96, 165, 250, 0.15);
   box-shadow: 0 2px 15px rgba(0, 0, 0, 0.2);
 }
 
@@ -129,19 +129,19 @@
     rgba(40, 40, 40, 0.9) 0%,
     rgba(30, 30, 30, 0.9) 100%
   );
-  border: 1px solid rgba(255, 122, 77, 0.2);
+  border: 1px solid rgba(96, 165, 250, 0.2);
   color: var(--text-secondary);
 }
 
 [data-theme="dark"] .category-chip:hover {
-  background: rgba(255, 122, 77, 0.15);
+  background: rgba(96, 165, 250, 0.15);
   border-color: var(--accent-orange);
   color: var(--accent-orange);
   box-shadow: 0 0 15px var(--accent-orange-glow);
 }
 
 [data-theme="dark"] .category-chip.active {
-  background: linear-gradient(135deg, var(--accent-orange), #ff9966);
+  background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: #1a1a1a;
   border-color: transparent;
   box-shadow: 0 4px 20px var(--accent-orange-glow);
@@ -217,21 +217,21 @@
 }
 
 [data-theme="dark"] .category-chip:hover {
-  background: rgba(255, 122, 77, 0.15);
+  background: rgba(96, 165, 250, 0.15);
   color: var(--accent-orange);
   border-color: var(--accent-orange);
   box-shadow: 0 0 15px var(--accent-orange-glow);
 }
 
 [data-theme="dark"] .category-chip.active {
-  background: linear-gradient(135deg, var(--accent-orange), #ff9966);
+  background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: #1a1a1a;
   border-color: transparent;
   box-shadow: 0 0 20px var(--accent-orange-glow);
 }
 
 [data-theme="dark"] .all-categories-btn {
-  background: linear-gradient(135deg, var(--accent-orange), #ff9966);
+  background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: #1a1a1a;
   box-shadow: 0 0 15px var(--accent-orange-glow);
 }

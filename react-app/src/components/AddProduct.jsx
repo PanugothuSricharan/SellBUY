@@ -782,7 +782,7 @@ function AddProduct() {
 
               <div className="share-buttons">
                 <a 
-                  href={`https://wa.me/?text=${encodeURIComponent(`🔥 Grab a deal on SellBUY! 🛒\n\n${pname}\n💰 ₹${price}${(condition === 'New' || condition === 'Sealed') ? `\n✨ Condition: ${condition}` : ''}\n\n👉 ${window.location.origin}/product/${createdProductId}`)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(`${pname}\nPrice: Rs.${price}${condition ? `\nCondition: ${condition}` : ''}${isNegotiable ? '\nPrice Negotiable' : ''}\n\nView on SellBUY: ${window.location.origin}/product/${createdProductId}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="share-btn whatsapp"

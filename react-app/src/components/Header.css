@@ -393,7 +393,7 @@
 }
 
 [data-theme="dark"] .search-btn:hover {
-  background: #ff8c5a;
+  background: #93c5fd;
 }
 
 /* Right Section - Actions */
@@ -507,7 +507,7 @@
 }
 
 [data-theme="dark"] .dropdown-item:hover {
-  background: rgba(255, 122, 77, 0.15);
+  background: rgba(96, 165, 250, 0.15);
 }
 
 .dropdown-divider {
@@ -528,7 +528,7 @@
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--accent-orange), #ff8c5a);
+  background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: white;
   display: flex;
   align-items: center;
@@ -562,7 +562,7 @@
 }
 
 [data-theme="dark"] .dropdown-divider {
-  background: rgba(255, 122, 77, 0.2);
+  background: rgba(96, 165, 250, 0.2);
 }
 
 /* Admin Menu Item */
@@ -679,7 +679,7 @@
     rgba(40, 40, 40, 0.9) 0%,
     rgba(30, 30, 30, 0.9) 100%
   );
-  border: 1px solid rgba(255, 122, 77, 0.3);
+  border: 1px solid rgba(96, 165, 250, 0.3);
   color: var(--accent-orange);
 }
 
@@ -697,21 +697,21 @@
   align-items: center;
   gap: var(--space-sm);
   padding: var(--space-sm) var(--space-lg);
-  background: linear-gradient(135deg, var(--accent-orange) 0%, #ff8c5a 100%);
+  background: linear-gradient(135deg, var(--accent-orange) 0%, #93c5fd 100%);
   color: var(--white);
   text-decoration: none;
   border-radius: var(--radius-full);
   font-weight: 700;
   transition: all var(--transition-fast);
-  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.3);
+  box-shadow: 0 4px 15px rgba(96, 165, 250, 0.3);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
 .sell-btn:hover {
-  background: linear-gradient(135deg, #ff8c5a 0%, var(--accent-orange) 100%);
+  background: linear-gradient(135deg, #93c5fd 0%, var(--accent-orange) 100%);
   transform: translateY(-2px);
-  box-shadow: 0 6px 25px rgba(255, 107, 53, 0.4);
+  box-shadow: 0 6px 25px rgba(96, 165, 250, 0.4);
   color: var(--white);
 }
 
@@ -900,7 +900,7 @@
    ============================================ */
 
 [data-theme="dark"] .sell-btn {
-  background: linear-gradient(135deg, var(--accent-orange), #ff9966);
+  background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: #1a1a1a;
   box-shadow: 0 4px 20px var(--accent-orange-glow);
   animation: glow-pulse 3s ease-in-out infinite;
@@ -908,12 +908,12 @@
 
 [data-theme="dark"] .sell-btn:hover {
   box-shadow: 0 6px 35px var(--accent-orange-glow),
-    0 0 50px rgba(255, 122, 77, 0.3);
+    0 0 50px rgba(96, 165, 250, 0.3);
   transform: translateY(-3px) scale(1.02);
 }
 
 [data-theme="dark"] .login-btn {
-  background: linear-gradient(135deg, var(--accent-orange), #ff9966);
+  background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: #1a1a1a;
   box-shadow: 0 4px 15px var(--accent-orange-glow);
 }
@@ -931,7 +931,7 @@
   }
   50% {
     box-shadow: 0 4px 30px var(--accent-orange-glow),
-      0 0 40px rgba(255, 122, 77, 0.2);
+      0 0 40px rgba(96, 165, 250, 0.2);
   }
 }
 
@@ -946,7 +946,7 @@
 }
 
 [data-theme="dark"] .category:hover {
-  background: rgba(255, 122, 77, 0.1);
+  background: rgba(96, 165, 250, 0.1);
   color: var(--accent-orange);
 }
 
@@ -1038,7 +1038,7 @@
 
 .mobile-modal .mobile-input:focus {
   border-color: var(--accent-orange);
-  box-shadow: 0 0 0 3px rgba(255, 122, 77, 0.1);
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.1);
 }
 
 [data-theme="dark"] .mobile-modal .mobile-input {

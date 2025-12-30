@@ -492,14 +492,14 @@
 }
 
 [data-theme="dark"] .action-btn-primary {
-  background: linear-gradient(135deg, var(--accent-orange), #ff9966);
+  background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: #1a1a1a;
   box-shadow: 0 4px 20px var(--accent-orange-glow);
 }
 
 [data-theme="dark"] .action-btn-primary:hover {
   box-shadow: 0 6px 30px var(--accent-orange-glow),
-    0 0 50px rgba(255, 122, 77, 0.3);
+    0 0 50px rgba(96, 165, 250, 0.3);
 }
 
 [data-theme="dark"] .action-btn-secondary {
@@ -509,7 +509,7 @@
 }
 
 [data-theme="dark"] .action-btn-secondary:hover {
-  background: rgba(255, 122, 77, 0.1);
+  background: rgba(96, 165, 250, 0.1);
 }
 
 [data-theme="dark"] .action-btn-wishlist {
@@ -534,7 +534,7 @@
 }
 
 [data-theme="dark"] .seller-avatar {
-  background: linear-gradient(135deg, var(--accent-orange), #ff9966);
+  background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: #1a1a1a;
   box-shadow: 0 0 15px var(--accent-orange-glow);
 }
@@ -706,7 +706,7 @@
 }
 
 [data-theme="dark"] .contact-action-btn.call-btn {
-  background: linear-gradient(135deg, var(--accent-orange), #ff9966);
+  background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   box-shadow: 0 0 15px var(--accent-orange-glow);
 }
 

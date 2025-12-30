@@ -69,7 +69,7 @@
 }
 
 [data-theme="dark"] .stat-card:hover {
-  box-shadow: 0 4px 20px rgba(255, 122, 77, 0.15);
+  box-shadow: 0 4px 20px rgba(96, 165, 250, 0.15);
 }
 
 .stat-value {
@@ -161,7 +161,7 @@
 }
 
 [data-theme="dark"] .listing-card:hover {
-  box-shadow: 0 8px 30px rgba(255, 122, 77, 0.2);
+  box-shadow: 0 8px 30px rgba(96, 165, 250, 0.2);
   border-color: var(--accent-orange);
 }
 
@@ -314,7 +314,7 @@
 }
 
 .listing-status.sold {
-  background: rgba(255, 122, 77, 0.1);
+  background: rgba(96, 165, 250, 0.1);
   color: var(--accent-orange);
 }
 
@@ -371,13 +371,13 @@
 }
 
 .status-btn.mark-available {
-  background: linear-gradient(135deg, var(--accent-orange), #ff9966);
+  background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: white;
 }
 
 .status-btn.mark-available:hover:not(:disabled) {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(255, 122, 77, 0.4);
+  box-shadow: 0 4px 12px rgba(96, 165, 250, 0.4);
 }
 
 .delete-btn {
