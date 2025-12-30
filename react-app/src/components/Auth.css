@@ -760,3 +760,40 @@
 [data-theme="dark"] .auth-divider::after {
   background: var(--border-color);
 }
+
+/* Dark mode for security notice */
+[data-theme="dark"] .security-notice {
+  background: linear-gradient(135deg, rgba(255, 122, 77, 0.1) 0%, rgba(255, 122, 77, 0.05) 100%);
+  border: 2px solid rgba(255, 122, 77, 0.3);
+  box-shadow: 0 0 30px rgba(255, 122, 77, 0.1);
+}
+
+[data-theme="dark"] .security-icon {
+  color: var(--accent-orange);
+  text-shadow: 0 0 20px var(--accent-orange-glow);
+}
+
+[data-theme="dark"] .security-content h3 {
+  color: var(--text-primary);
+  background: linear-gradient(135deg, #ffffff, var(--accent-orange));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+[data-theme="dark"] .security-content p {
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .security-content ul li {
+  color: var(--text-muted);
+}
+
+/* Dark mode for google login */
+[data-theme="dark"] .google-note {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .google-note svg {
+  color: var(--accent-orange);
+}

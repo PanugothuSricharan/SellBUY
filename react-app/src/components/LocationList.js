@@ -20,7 +20,7 @@ export const PRODUCT_LOCATIONS = [
   LOCATIONS.GH,
   LOCATIONS.IVH,
   LOCATIONS.SATPURA,
-];
+].sort((a, b) => a.localeCompare(b));
 
 // All locations including "Entire Campus" for the browse dropdown
 export const BROWSE_LOCATIONS = [LOCATIONS.ENTIRE_CAMPUS, ...PRODUCT_LOCATIONS];

@@ -16,6 +16,7 @@ import {
   FaChevronDown,
   FaShieldAlt,
   FaPhone,
+  FaHome,
 } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import { BROWSE_LOCATIONS, LOCATIONS } from "./LocationList";
@@ -228,6 +229,9 @@ function Header(props) {
 
         {/* Center Section - Search */}
         <div className="header-center">
+          <Link to="/" className="home-btn" title="Go to Home">
+            <FaHome />
+          </Link>
           <div className="search-container">
             <input
               className="search-input"

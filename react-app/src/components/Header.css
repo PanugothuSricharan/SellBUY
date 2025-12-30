@@ -288,6 +288,43 @@
 .header-center {
   flex: 1;
   max-width: 500px;
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+/* Home Button */
+.home-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  background: var(--gray-100);
+  border: 2px solid var(--gray-200);
+  border-radius: var(--radius-md);
+  color: var(--gray-600);
+  text-decoration: none;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.home-btn:hover {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  color: white;
+}
+
+[data-theme="dark"] .home-btn {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #aaa;
+}
+
+[data-theme="dark"] .home-btn:hover {
+  background: var(--accent-orange);
+  border-color: var(--accent-orange);
+  color: white;
 }
 
 .search-container {

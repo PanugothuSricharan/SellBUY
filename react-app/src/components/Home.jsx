@@ -10,7 +10,7 @@ import {
   FaFilter,
   FaTimes,
   FaBoxOpen,
-  FaExternalLinkAlt,
+  FaHome,
   FaTh,
   FaThLarge,
   FaList,
@@ -308,12 +308,6 @@ function Home() {
           >
             <FaHeart />
           </button>
-        <span className="product-location-badge">
-          <FaMapMarkerAlt /> {item.location}
-        </span>
-        {item.condition && (
-          <span className="product-condition-badge">{item.condition}</span>
-        )}
       </div>
       <div className="product-info">
         <h3 className="product-price">₹{Number(item.price).toLocaleString('en-IN')}</h3>
@@ -325,6 +319,14 @@ function Home() {
           </p>
         )}
         <p className="product-desc">{item.pdesc}</p>
+        <div className="product-badges">
+          <span className="product-location-badge">
+            <FaMapMarkerAlt /> {item.location}
+          </span>
+          {item.condition && (
+            <span className="product-condition-badge">{item.condition}</span>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -379,25 +381,27 @@ function Home() {
         selectedCategories={selectedCategories}
       />
 
-      {/* Hero Banner */}
-      <section className="hero-section">
-        <div className="hero-content">
-          <h1 className="hero-title">Buy & Sell Within Your Campus</h1>
-          <p className="hero-subtitle">
-            Find great deals from students in {selectedLocation}
+      {/* Hero Banner - Hide when searching */}
+      {!search && (
+        <section className="hero-section">
+          <div className="hero-content">
+            <h1 className="hero-title">Buy & Sell Within Your Campus</h1>
+            <p className="hero-subtitle">
+              Find great deals from students in {selectedLocation}
+            </p>
+            {!localStorage.getItem("token") && (
+              <Link to="/signup" className="btn btn-accent btn-lg">
+                Get Started - It's Free
+              </Link>
+            )}
+          </div>
+          {/* Disclaimer */}
+          <p className="hero-disclaimer">
+            🎓 This platform is built to help students buy and sell responsibly. 
+            Misuse of this service may lead to account suspension.
           </p>
-          {!localStorage.getItem("token") && (
-            <Link to="/signup" className="btn btn-accent btn-lg">
-              Get Started - It's Free
-            </Link>
-          )}
-        </div>
-        {/* Disclaimer */}
-        <p className="hero-disclaimer">
-          🎓 This platform is built to help students buy and sell responsibly. 
-          Misuse of this service may lead to account suspension.
-        </p>
-      </section>
+        </section>
+      )}
 
       {/* Main Content */}
       <main className="main-content">
@@ -676,7 +680,7 @@ function Home() {
                 rel="noopener noreferrer"
                 className="footer-dev-link"
               >
-                Built with ❤️ by a drone enthusiast
+                👏 Hit me if you like this website!!,  
               </a>
             </div>
 

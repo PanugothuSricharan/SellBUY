@@ -106,7 +106,7 @@ const VALID_APPROVAL_STATUS = ["APPROVED", "HIDDEN"]; // Products go live immedi
 const ADMIN_EMAIL = "imt_2021072@iiitm.ac.in";
 
 // ============ RATE LIMIT CONFIGURATION ============
-const PRODUCTS_PER_DAY_LIMIT = 5;
+const PRODUCTS_PER_DAY_LIMIT = 10;
 const RATE_LIMIT_HOURS = 24;
 
 // ============ PRODUCT SCHEMA WITH INDEXES ============

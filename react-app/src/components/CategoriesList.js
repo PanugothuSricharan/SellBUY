@@ -1,15 +1,15 @@
 let Categories = [
-  "Sports Equipment",
-  "Computer Accessories",
   "Air Cooler",
-  "Laptop",
-  "Speaker",
-  "Monitor",
-  "Furniture",
-  "Books",
   "Bicycle",
+  "Books",
   "Calculator",
+  "Computer Accessories",
+  "Furniture",
+  "Laptop",
+  "Monitor",
   "Room Heater",
+  "Speaker",
+  "Sports Equipment",
   "Other",
 ];
 
