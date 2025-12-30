@@ -659,19 +659,19 @@ function Home() {
               <span className="footer-logo">🛒 SellBUY</span>
               <p>Your trusted IIITM campus marketplace</p>
               <span className="developer-tagline">
-                🚁 Built by a drone enthusiast who codes at 3 AM
+                🚁 Always FlyHigh 
               </span>
             </div>
             
             {/* Open Source & Developer Section */}
             <div className="footer-developer">
-              <div className="open-source-banner">
+              {/* <div className="open-source-banner">
                 <span className="open-source-icon">🚀</span>
                 <div className="open-source-text">
                   <strong>Open Source Project</strong>
                   <p>Hey juniors! This is an open-source platform. Grab the opportunity to build with me!</p>
                 </div>
-              </div>
+              </div> */}
               <a 
                 href="https://youtu.be/Ph_beNQsIp0?si=cpiAN9HihHm1-yg1" 
                 target="_blank" 
@@ -680,23 +680,23 @@ function Home() {
               >
                 <span className="btn-icon">🚁</span>
                 <span className="btn-text">
-                  <strong>View Developer's Profile</strong>
-                  <small>Watch the project journey on YouTube</small>
+                  <strong>Wana know about me!!</strong>
+                  <small>Just a Glimpse what i like</small>
                 </span>
                 <FaExternalLinkAlt className="external-icon" />
               </a>
             </div>
 
             <div className="footer-links">
-              <span>© 2025 SellBUY. Made with ❤️ & ☕ for IIITM Gwalior</span>
+              <span>© 2025 SellBUY.Every coin counts</span>
             </div>
           </div>
         </div>
         
         {/* Flying Drone Animation */}
-        <div className="drone-animation">
+        {/* <div className="drone-animation">
           <span className="flying-drone">🚁</span>
-        </div>
+        </div> */}
       </footer>
     </div>
   );
