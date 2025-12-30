@@ -18,6 +18,11 @@ import {
   FaLink,
   FaWhatsapp,
   FaPhone,
+  FaInstagram,
+  FaCopy,
+  FaCheck,
+  FaHome,
+  FaShareAlt,
 } from "react-icons/fa";
 import API_URL from "../constants";
 
@@ -62,6 +67,8 @@ function AddProduct() {
   const [showLimitModal, setShowLimitModal] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [createdProductId, setCreatedProductId] = useState(null);
+  const [linkCopied, setLinkCopied] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -246,10 +253,9 @@ function AddProduct() {
         setIsSubmitting(false);
         setUploadProgress(0);
         if (res.data.message && res.data.message.includes("success")) {
+          setCreatedProductId(res.data.productId);
           setShowSuccess(true);
-          setTimeout(() => {
-            navigate("/");
-          }, 2000);
+          // Don't auto-redirect - let user share first
         } else if (res.data.limitReached) {
           // Rate limit reached
           setShowLimitModal(true);
@@ -727,20 +733,71 @@ function AddProduct() {
         </div>
       </div>
 
-      {/* Success Modal */}
+      {/* Success Modal with Share Options */}
       {showSuccess && (
         <div className="success-overlay">
-          <div className="success-modal">
+          <div className="success-modal share-modal">
             <div className="success-icon">
               <FaCheckCircle />
             </div>
             <h2>Product Listed! 🎉</h2>
             <p>
-              Your product is now live on the marketplace. Buyers can see it immediately!
+              Your product is now live on the marketplace. Share it with friends!
             </p>
-            <p style={{ fontSize: '14px', color: '#888', marginTop: '10px' }}>
-              Redirecting to home...
-            </p>
+            
+            {/* Share Section */}
+            <div className="share-section">
+              <h3><FaShareAlt /> Share your listing</h3>
+              
+              <div className="share-link-box">
+                <input 
+                  type="text" 
+                  readOnly 
+                  value={`${window.location.origin}/product/${createdProductId}`}
+                  className="share-link-input"
+                />
+                <button 
+                  className={`copy-link-btn ${linkCopied ? 'copied' : ''}`}
+                  onClick={() => {
+                    navigator.clipboard.writeText(`${window.location.origin}/product/${createdProductId}`);
+                    setLinkCopied(true);
+                    setTimeout(() => setLinkCopied(false), 2000);
+                  }}
+                >
+                  {linkCopied ? <><FaCheck /> Copied!</> : <><FaCopy /> Copy</>}
+                </button>
+              </div>
+
+              <div className="share-buttons">
+                <a 
+                  href={`https://wa.me/?text=${encodeURIComponent(`Check out my listing on SellBUY! 🛒\n\n${pname} - ₹${price}\n\n${window.location.origin}/product/${createdProductId}`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="share-btn whatsapp"
+                >
+                  <FaWhatsapp /> WhatsApp
+                </a>
+                <a 
+                  href={`https://www.instagram.com/`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="share-btn instagram"
+                  onClick={() => {
+                    navigator.clipboard.writeText(`Check out my listing on SellBUY! 🛒\n\n${pname} - ₹${price}\n\n${window.location.origin}/product/${createdProductId}`);
+                    alert("Link copied! Paste it in your Instagram story or DM.");
+                  }}
+                >
+                  <FaInstagram /> Instagram
+                </a>
+              </div>
+            </div>
+
+            <button 
+              className="go-home-btn"
+              onClick={() => navigate("/")}
+            >
+              <FaHome /> Go to Home
+            </button>
           </div>
         </div>
       )}

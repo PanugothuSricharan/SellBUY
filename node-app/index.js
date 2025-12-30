@@ -550,8 +550,11 @@ app.post(
 
     product
       .save()
-      .then(() => {
-        res.send({ message: "Product added successfully!" });
+      .then((savedProduct) => {
+        res.send({ 
+          message: "Product added successfully!",
+          productId: savedProduct._id 
+        });
       })
       .catch((err) => {
         console.error("Error saving product:", err);

@@ -50,7 +50,8 @@ function Home() {
     localStorage.getItem("productViewMode") || VIEW_MODES.GRID
   );
   const [filtersExpanded, setFiltersExpanded] = useState(false);
-  const [showMobileLocationDropdown, setShowMobileLocationDropdown] = useState(false);
+  const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
+  const [mobileLocationOpen, setMobileLocationOpen] = useState(false);
 
   // Check for search query from URL (from ProductDetail page)
   useEffect(() => {
@@ -401,102 +402,10 @@ function Home() {
       {/* Main Content */}
       <main className="main-content">
         <div className="container">
-          {/* Mobile Sticky Bar - Results + Filters Toggle */}
-          <div className="mobile-sticky-bar">
-            <div className="mobile-results-row">
-              <span className="results-count">{filteredProducts.length} items</span>
-              <div className="mobile-location-picker">
-                <button 
-                  className="mobile-location-btn"
-                  onClick={() => setShowMobileLocationDropdown(!showMobileLocationDropdown)}
-                >
-                  <FaMapMarkerAlt /> {selectedLocation} <FaChevronDown className={showMobileLocationDropdown ? 'rotate' : ''} />
-                </button>
-                {showMobileLocationDropdown && (
-                  <div className="mobile-location-dropdown">
-                    {BROWSE_LOCATIONS.map((loc) => (
-                      <div 
-                        key={loc} 
-                        className={`mobile-location-option ${selectedLocation === loc ? 'active' : ''}`}
-                        onClick={() => {
-                          setSelectedLocation(loc);
-                          setShowMobileLocationDropdown(false);
-                        }}
-                      >
-                        {loc}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div className="view-mode-toggle">
-                <button
-                  className={`view-btn ${viewMode === VIEW_MODES.GRID ? "active" : ""}`}
-                  onClick={() => handleViewModeChange(VIEW_MODES.GRID)}
-                  title="Grid View"
-                >
-                  <FaThLarge />
-                </button>
-                <button
-                  className={`view-btn ${viewMode === VIEW_MODES.COMPACT ? "active" : ""}`}
-                  onClick={() => handleViewModeChange(VIEW_MODES.COMPACT)}
-                  title="Compact View"
-                >
-                  <FaTh />
-                </button>
-                <button
-                  className={`view-btn ${viewMode === VIEW_MODES.LIST ? "active" : ""}`}
-                  onClick={() => handleViewModeChange(VIEW_MODES.LIST)}
-                  title="List View"
-                >
-                  <FaList />
-                </button>
-              </div>
-            </div>
-            <div className="mobile-filter-toggle" onClick={() => setFiltersExpanded(!filtersExpanded)}>
-              <span><FaFilter /> Filters {hasActiveFilters() && <span className="filter-count">{selectedCategories.length + selectedConditions.length + (priceRange.min > 0 || priceRange.max < maxPriceLimit ? 1 : 0)}</span>}</span>
-              <span className={`expand-arrow ${filtersExpanded ? 'open' : ''}`}><FaChevronDown /></span>
-            </div>
-            {filtersExpanded && (
-              <div className="mobile-filter-content">
-                {/* Price Range */}
-                <div className="filter-group">
-                  <h4 className="filter-title">Price Range</h4>
-                  <div className="price-inputs-compact">
-                    <div className="price-input-compact">
-                      <span>₹</span>
-                      <input type="number" value={priceRange.min} onChange={(e) => setPriceRange({...priceRange, min: Math.max(0, parseInt(e.target.value) || 0)})} min="0" max={priceRange.max} />
-                    </div>
-                    <span className="price-dash">-</span>
-                    <div className="price-input-compact">
-                      <span>₹</span>
-                      <input type="number" value={priceRange.max} onChange={(e) => setPriceRange({...priceRange, max: Math.min(maxPriceLimit, parseInt(e.target.value) || maxPriceLimit)})} min={priceRange.min} max={maxPriceLimit} />
-                    </div>
-                  </div>
-                </div>
-                {/* Condition */}
-                <div className="filter-group">
-                  <h4 className="filter-title">Condition</h4>
-                  <div className="filter-chips-compact">
-                    {PRODUCT_CONDITIONS.map((cond) => (
-                      <button key={cond} className={`filter-chip-compact ${selectedConditions.includes(cond) ? "active" : ""}`} onClick={() => toggleCondition(cond)}>{cond}</button>
-                    ))}
-                  </div>
-                </div>
-                {/* Categories */}
-                <div className="filter-group">
-                  <h4 className="filter-title">Categories</h4>
-                  <div className="filter-chips-compact category-list">
-                    {categories.map((cat) => (
-                      <button key={cat} className={`filter-chip-compact ${selectedCategories.includes(cat) ? "active" : ""}`} onClick={() => handleCategory(cat)}>{cat}</button>
-                    ))}
-                  </div>
-                </div>
-                {hasActiveFilters() && (
-                  <button className="clear-all-btn" onClick={clearAllFilters}><FaTimes /> Clear All Filters</button>
-                )}
-              </div>
-            )}
+          {/* Mobile Results Row - Simple count display */}
+          <div className="mobile-results-info">
+            <span className="results-count">{filteredProducts.length} items</span>
+            <span className="location-badge"><FaMapMarkerAlt /> {selectedLocation}</span>
           </div>
 
           {/* Layout with Sidebar Filters */}
@@ -783,6 +692,138 @@ function Home() {
         <Link to="/add-product" className="mobile-floating-sell-btn">
           <FaPlus /> SELL
         </Link>
+      )}
+
+      {/* Mobile Floating Filter FAB */}
+      <div className={`mobile-fab-filter ${mobileFilterOpen ? 'open' : ''}`}>
+        <button 
+          className="fab-trigger filter-fab"
+          onClick={() => {
+            setMobileFilterOpen(!mobileFilterOpen);
+            setMobileLocationOpen(false);
+          }}
+        >
+          <FaFilter />
+          {hasActiveFilters() && <span className="fab-badge">{selectedCategories.length + selectedConditions.length + (priceRange.min > 0 || priceRange.max < maxPriceLimit ? 1 : 0)}</span>}
+        </button>
+        
+        <div className="fab-panel filter-panel">
+          <div className="fab-panel-header">
+            <h3><FaFilter /> Filters</h3>
+            <button className="close-fab" onClick={() => setMobileFilterOpen(false)}><FaTimes /></button>
+          </div>
+          
+          {/* View Mode Toggle */}
+          <div className="filter-group">
+            <h4 className="filter-title">View Mode</h4>
+            <div className="view-mode-options">
+              <button
+                className={`view-option ${viewMode === VIEW_MODES.GRID ? "active" : ""}`}
+                onClick={() => handleViewModeChange(VIEW_MODES.GRID)}
+              >
+                <FaThLarge /> Grid
+              </button>
+              <button
+                className={`view-option ${viewMode === VIEW_MODES.COMPACT ? "active" : ""}`}
+                onClick={() => handleViewModeChange(VIEW_MODES.COMPACT)}
+              >
+                <FaTh /> Compact
+              </button>
+              <button
+                className={`view-option ${viewMode === VIEW_MODES.LIST ? "active" : ""}`}
+                onClick={() => handleViewModeChange(VIEW_MODES.LIST)}
+              >
+                <FaList /> List
+              </button>
+            </div>
+          </div>
+
+          {/* Price Range */}
+          <div className="filter-group">
+            <h4 className="filter-title">Price Range</h4>
+            <div className="price-inputs-compact">
+              <div className="price-input-compact">
+                <span>₹</span>
+                <input type="number" value={priceRange.min} onChange={(e) => setPriceRange({...priceRange, min: Math.max(0, parseInt(e.target.value) || 0)})} min="0" max={priceRange.max} />
+              </div>
+              <span className="price-dash">-</span>
+              <div className="price-input-compact">
+                <span>₹</span>
+                <input type="number" value={priceRange.max} onChange={(e) => setPriceRange({...priceRange, max: Math.min(maxPriceLimit, parseInt(e.target.value) || maxPriceLimit)})} min={priceRange.min} max={maxPriceLimit} />
+              </div>
+            </div>
+          </div>
+
+          {/* Condition */}
+          <div className="filter-group">
+            <h4 className="filter-title">Condition</h4>
+            <div className="filter-chips-compact">
+              {PRODUCT_CONDITIONS.map((cond) => (
+                <button key={cond} className={`filter-chip-compact ${selectedConditions.includes(cond) ? "active" : ""}`} onClick={() => toggleCondition(cond)}>{cond}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Categories */}
+          <div className="filter-group">
+            <h4 className="filter-title">Categories</h4>
+            <div className="filter-chips-compact category-list">
+              {categories.map((cat) => (
+                <button key={cat} className={`filter-chip-compact ${selectedCategories.includes(cat) ? "active" : ""}`} onClick={() => handleCategory(cat)}>{cat}</button>
+              ))}
+            </div>
+          </div>
+
+          {hasActiveFilters() && (
+            <button className="clear-all-btn" onClick={clearAllFilters}><FaTimes /> Clear All Filters</button>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Floating Location FAB */}
+      <div className={`mobile-fab-location ${mobileLocationOpen ? 'open' : ''}`}>
+        <button 
+          className="fab-trigger location-fab"
+          onClick={() => {
+            setMobileLocationOpen(!mobileLocationOpen);
+            setMobileFilterOpen(false);
+          }}
+        >
+          <FaMapMarkerAlt />
+        </button>
+        
+        <div className="fab-panel location-panel">
+          <div className="fab-panel-header">
+            <h3><FaMapMarkerAlt /> Location</h3>
+            <button className="close-fab" onClick={() => setMobileLocationOpen(false)}><FaTimes /></button>
+          </div>
+          
+          <div className="location-options">
+            {BROWSE_LOCATIONS.map((loc) => (
+              <button 
+                key={loc} 
+                className={`location-option ${selectedLocation === loc ? 'active' : ''}`}
+                onClick={() => {
+                  setSelectedLocation(loc);
+                  setMobileLocationOpen(false);
+                }}
+              >
+                {loc}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Backdrop for FAB panels */}
+      {(mobileFilterOpen || mobileLocationOpen) && (
+        <div 
+          className="fab-backdrop" 
+          onClick={() => {
+            setMobileFilterOpen(false);
+            setMobileLocationOpen(false);
+          }}
+        />
       )}
     </div>
   );
