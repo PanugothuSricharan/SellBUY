@@ -22,7 +22,7 @@ import categories from "./CategoriesList";
 import API_URL, { getImageUrl } from "../constants";
 
 // Product conditions for filter
-const PRODUCT_CONDITIONS = ["New", "Sealed", "Mint", "Used"];
+const PRODUCT_CONDITIONS = ["New", "Sealed", "Like New", "Used"];
 // View modes
 const VIEW_MODES = { GRID: "grid", LIST: "list", COMPACT: "compact" };
 

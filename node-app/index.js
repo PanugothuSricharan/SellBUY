@@ -97,7 +97,7 @@ const MessageSchema = new mongoose.Schema({
 const Messages = mongoose.model("Message", MessageSchema);
 
 // ============ PRODUCT CONDITION ENUM ============
-const VALID_CONDITIONS = ["New", "Sealed", "Mint", "Used"];
+const VALID_CONDITIONS = ["New", "Sealed", "Like New", "Used"];
 const VALID_STATUS = ["Available", "Sold"];
 const VALID_CONTACT_PREFERENCES = ["WhatsApp", "Phone Call", "Both"];
 const VALID_APPROVAL_STATUS = ["APPROVED", "HIDDEN"]; // Products go live immediately, admin can hide

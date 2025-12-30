@@ -22,7 +22,7 @@ import {
 import API_URL from "../constants";
 
 // Product condition and age options
-const PRODUCT_CONDITIONS = ["New", "Sealed", "Mint", "Used"];
+const PRODUCT_CONDITIONS = ["New", "Sealed", "Like New", "Used"];
 const PRODUCT_AGES = [
   "Less than 1 month",
   "1-3 months",
@@ -169,6 +169,16 @@ function AddProduct() {
     }
 
     setErrors(newErrors);
+    
+    // Scroll to first error
+    if (Object.keys(newErrors).length > 0) {
+      const firstErrorKey = Object.keys(newErrors)[0];
+      const errorElement = document.querySelector(`[class*="error"]`);
+      if (errorElement) {
+        errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }
+    
     return Object.keys(newErrors).length === 0;
   };
 
@@ -457,6 +467,25 @@ function AddProduct() {
                 Add Amazon/Flipkart link so buyers can check original specs &
                 price
               </p>
+              <div className="quick-search-links">
+                <span>Quick search:</span>
+                <a 
+                  href={`https://www.amazon.in/s?k=${encodeURIComponent(pname || 'product')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="quick-link amazon"
+                >
+                  🛒 Amazon
+                </a>
+                <a 
+                  href={`https://www.flipkart.com/search?q=${encodeURIComponent(pname || 'product')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="quick-link flipkart"
+                >
+                  📦 Flipkart
+                </a>
+              </div>
             </div>
 
             {/* Contact Preference */}

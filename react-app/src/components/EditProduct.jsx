@@ -23,7 +23,7 @@ import {
 } from "react-icons/fa";
 
 // Product condition and age options
-const PRODUCT_CONDITIONS = ["New", "Sealed", "Mint", "Used"];
+const PRODUCT_CONDITIONS = ["New", "Sealed", "Like New", "Used"];
 const PRODUCT_AGES = [
   "Less than 1 month",
   "1-3 months",
@@ -491,6 +491,25 @@ function EditProduct() {
                 Link to original product page (Amazon, Flipkart etc.) for price
                 comparison
               </p>
+              <div className="quick-search-links">
+                <span>Quick search:</span>
+                <a 
+                  href={`https://www.amazon.in/s?k=${encodeURIComponent(pname || 'product')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="quick-link amazon"
+                >
+                  🛒 Amazon
+                </a>
+                <a 
+                  href={`https://www.flipkart.com/search?q=${encodeURIComponent(pname || 'product')}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="quick-link flipkart"
+                >
+                  📦 Flipkart
+                </a>
+              </div>
             </div>
 
             {/* Contact Preference */}
