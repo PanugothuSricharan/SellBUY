@@ -579,9 +579,12 @@ function AddProduct() {
             <div className="success-icon">
               <FaCheckCircle />
             </div>
-            <h2>Product Posted!</h2>
+            <h2>Product Submitted!</h2>
             <p>
-              Your product has been listed successfully. Redirecting to home...
+              Your product has been submitted for review. Admin will approve it shortly and it will be visible on the marketplace.
+            </p>
+            <p style={{ fontSize: '14px', color: '#888', marginTop: '10px' }}>
+              Redirecting to home...
             </p>
           </div>
         </div>
