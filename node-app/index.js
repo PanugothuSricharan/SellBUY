@@ -82,7 +82,7 @@ const VALID_CONTACT_PREFERENCES = ["WhatsApp", "Phone Call", "Both"];
 const VALID_APPROVAL_STATUS = ["PENDING", "APPROVED", "REJECTED"];
 
 // ============ ADMIN CONFIGURATION ============
-const ADMIN_EMAIL = "imt_2021imt072@iiitm.ac.in";
+const ADMIN_EMAIL = "imt_2021072@iiitm.ac.in";
 
 const Products = mongoose.model("Product", {
   pname: String,

@@ -588,6 +588,33 @@
   color: var(--error) !important;
 }
 
+/* Admin Item */
+.admin-item {
+  color: #7c3aed !important;
+  font-weight: 600;
+}
+
+.admin-item:hover {
+  background: rgba(124, 58, 237, 0.1) !important;
+  color: #7c3aed !important;
+}
+
+.admin-item svg {
+  color: #7c3aed;
+}
+
+[data-theme="dark"] .admin-item {
+  color: #a78bfa !important;
+}
+
+[data-theme="dark"] .admin-item:hover {
+  background: rgba(167, 139, 250, 0.15) !important;
+}
+
+[data-theme="dark"] .admin-item svg {
+  color: #a78bfa;
+}
+
 /* Theme Toggle Simple (for non-logged users) */
 .theme-toggle-simple {
   display: flex;
