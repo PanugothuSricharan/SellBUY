@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1a1a2e"/>
+      <stop offset="100%" style="stop-color:#16213e"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#60a5fa"/>
+      <stop offset="100%" style="stop-color:#93c5fd"/>
+    </linearGradient>
+  </defs>
+  
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  
+  <!-- Logo Circle -->
+  <circle cx="600" cy="250" r="80" fill="url(#accent)"/>
+  
+  <!-- Cart Icon -->
+  <g transform="translate(555, 205)" fill="#1a1a2e">
+    <path d="M10 80h70l-15-50H20l-10 50zm5-55h75l5-15H10l5 15zm35-10a8 8 0 1 0 0 16 8 8 0 0 0 0-16zm-20 0a8 8 0 1 0 0 16 8 8 0 0 0 0-16z"/>
+  </g>
+  
+  <!-- Title -->
+  <text x="600" y="400" font-family="Arial, sans-serif" font-size="72" font-weight="bold" fill="#ffffff" text-anchor="middle">SellBUY</text>
+  
+  <!-- Subtitle -->
+  <text x="600" y="460" font-family="Arial, sans-serif" font-size="28" fill="#9ca3af" text-anchor="middle">Campus Marketplace</text>
+  
+  <!-- Tagline -->
+  <text x="600" y="520" font-family="Arial, sans-serif" font-size="24" fill="#60a5fa" text-anchor="middle">Buy &amp; Sell Within Your Campus</text>
+  
+  <!-- IIITM Badge -->
+  <rect x="480" y="550" width="240" height="40" rx="20" fill="rgba(96, 165, 250, 0.2)"/>
+  <text x="600" y="578" font-family="Arial, sans-serif" font-size="18" fill="#60a5fa" text-anchor="middle">For IIITM Students</text>
+</svg>

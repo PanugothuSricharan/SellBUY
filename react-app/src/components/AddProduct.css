@@ -299,69 +299,67 @@
   padding-left: 40px;
 }
 
-/* Negotiable Toggle */
-.negotiable-toggle {
+/* Price Type Selector (Fixed/Negotiable) */
+.price-type-selector {
   display: flex;
-  align-items: center;
   gap: var(--space-md);
   margin-top: var(--space-md);
+}
+
+.price-type-option {
+  flex: 1;
+  cursor: pointer;
+}
+
+.price-type-option input {
+  display: none;
+}
+
+.price-type-box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
   padding: var(--space-sm) var(--space-md);
   background: var(--gray-50);
+  border: 2px solid var(--gray-200);
   border-radius: var(--radius-md);
-  border: 1px solid var(--gray-200);
-}
-
-.toggle-switch {
-  position: relative;
-  display: inline-block;
-  width: 50px;
-  height: 26px;
-  flex-shrink: 0;
-}
-
-.toggle-switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.toggle-slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--gray-300);
-  transition: 0.3s;
-  border-radius: 26px;
-}
-
-.toggle-slider:before {
-  position: absolute;
-  content: "";
-  height: 20px;
-  width: 20px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.3s;
-  border-radius: 50%;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-}
-
-.toggle-switch input:checked + .toggle-slider {
-  background-color: var(--success);
-}
-
-.toggle-switch input:checked + .toggle-slider:before {
-  transform: translateX(24px);
-}
-
-.toggle-label {
   font-size: var(--font-size-sm);
-  color: var(--gray-700);
   font-weight: 600;
+  color: var(--gray-600);
+  transition: all 0.2s ease;
+}
+
+.price-type-check {
+  display: none;
+  color: white;
+  font-size: 12px;
+  background: var(--success);
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+}
+
+.price-type-option input:checked + .price-type-box {
+  background: rgba(34, 197, 94, 0.1);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.price-type-option input:checked + .price-type-box .price-type-check {
+  display: flex;
+}
+
+.price-type-box:hover {
+  border-color: var(--gray-400);
+  background: var(--gray-100);
+}
+
+.price-type-option input:checked + .price-type-box:hover {
+  border-color: var(--success);
+  background: rgba(34, 197, 94, 0.15);
 }
 
 /* Image Upload */
@@ -769,19 +767,25 @@
   border: 1px solid var(--border-color);
 }
 
-[data-theme="dark"] .toggle-switch input:checked + .toggle-slider {
-  background-color: var(--success);
-  border-color: var(--success);
-  box-shadow: 0 0 15px rgba(74, 222, 128, 0.4);
-}
-
-[data-theme="dark"] .toggle-label {
-  color: var(--text-primary);
-}
-
-[data-theme="dark"] .negotiable-toggle {
+[data-theme="dark"] .price-type-box {
   background: var(--bg-elevated);
   border-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .price-type-box:hover {
+  border-color: #555;
+  background: #2a2a2a;
+}
+
+[data-theme="dark"] .price-type-option input:checked + .price-type-box {
+  background: rgba(74, 222, 128, 0.15);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+[data-theme="dark"] .price-type-option input:checked + .price-type-box:hover {
+  background: rgba(74, 222, 128, 0.2);
 }
 
 [data-theme="dark"] .form-hint {

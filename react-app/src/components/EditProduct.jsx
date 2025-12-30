@@ -404,16 +404,31 @@ function EditProduct() {
                 {errors.price && (
                   <p className="error-message">{errors.price}</p>
                 )}
-                <div className="negotiable-toggle">
-                  <label className="toggle-switch">
+                <div className="price-type-selector">
+                  <label className="price-type-option">
                     <input
-                      type="checkbox"
-                      checked={isNegotiable}
-                      onChange={(e) => setIsNegotiable(e.target.checked)}
+                      type="radio"
+                      name="priceType"
+                      checked={!isNegotiable}
+                      onChange={() => setIsNegotiable(false)}
                     />
-                    <span className="toggle-slider"></span>
+                    <span className="price-type-box">
+                      <span className="price-type-check">✓</span>
+                      Fixed Price
+                    </span>
                   </label>
-                  <span className="toggle-label">{isNegotiable ? "Negotiable" : "Fixed Price"}</span>
+                  <label className="price-type-option">
+                    <input
+                      type="radio"
+                      name="priceType"
+                      checked={isNegotiable}
+                      onChange={() => setIsNegotiable(true)}
+                    />
+                    <span className="price-type-box">
+                      <span className="price-type-check">✓</span>
+                      Negotiable
+                    </span>
+                  </label>
                 </div>
               </div>
 
