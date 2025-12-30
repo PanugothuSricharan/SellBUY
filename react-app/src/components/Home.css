@@ -417,6 +417,13 @@
     justify-content: center;
   }
 
+  /* In list view, badges should be inline */
+  .products-grid.list .product-info-badges {
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+  }
+
   .products-grid.list .product-desc {
     display: none;
   }
@@ -669,7 +676,7 @@
 /* Category row with inline badges for list view */
 .product-category-row {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   gap: var(--space-sm);
   flex-wrap: wrap;
   margin: 0 0 var(--space-xs);
@@ -685,12 +692,12 @@
   margin: 0 0 var(--space-xs);
 }
 
-/* Info badges - shown in all views */
+/* Info badges - stacked by default, inline in list view */
 .product-info-badges {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
 }
 
 .info-location-badge,

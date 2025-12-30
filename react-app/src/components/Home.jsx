@@ -693,9 +693,9 @@ function Home() {
               </a>
             </div>
 
-            <div className="footer-right">
-              <span>© 2025 </span>
-            </div>
+            {/* <div className="footer-right">
+              <span>2025 </span>
+            </div> */}
           </div>
         </div>
       </footer>
