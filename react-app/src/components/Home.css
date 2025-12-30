@@ -1572,29 +1572,28 @@
     display: none;
   }
 
-  /* Mobile Sticky Bar - Fixed below header on mobile */
+  /* Mobile Sticky Bar - Sticky after scrolling past hero */
   .mobile-sticky-bar {
     display: block;
-    position: fixed;
-    top: 125px; /* Below mobile header (wraps to ~125px on mobile) */
-    left: 0;
-    right: 0;
+    position: sticky;
+    top: 0; /* Sticks to top when scrolled */
     z-index: 150;
     background: var(--white);
     padding: 0;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
+    margin: 0 calc(-1 * var(--space-md));
   }
 
   [data-theme="dark"] .mobile-sticky-bar {
     background: #1a1a1a;
   }
 
-  /* Add padding to main content to account for header + fixed mobile bar */
+  /* Normal padding for main content */
   .main-content {
-    padding-top: 100px; /* Extra space for fixed mobile sticky bar */
+    padding-top: var(--space-md);
   }
 
-  /* Keep hero section visible on mobile */
+  /* Hero section visible on mobile */
   .hero-section {
     padding: var(--space-lg) var(--space-md);
   }
