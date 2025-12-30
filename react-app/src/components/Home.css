@@ -388,9 +388,16 @@
     padding: var(--space-sm) var(--space-md);
   }
 
-  /* Hide view mode toggle on mobile */
+  /* Show view mode toggle on mobile - smaller buttons */
   .view-mode-toggle {
-    display: none !important;
+    display: flex !important;
+    gap: 2px;
+    padding: 3px;
+  }
+
+  .view-btn {
+    width: 32px;
+    height: 32px;
   }
 
   /* Mobile Product Card Improvements */
@@ -1507,9 +1514,19 @@
   }
 
   .filters-sidebar {
-    position: static;
+    position: sticky;
+    top: 110px; /* Below header (~60px) + categories (~50px) */
     max-height: none;
-    padding: var(--space-md);
+    padding: var(--space-sm) var(--space-md);
+    margin: 0 calc(-1 * var(--space-md));
+    border-radius: 0;
+    z-index: 50;
+    background: var(--white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  [data-theme="dark"] .filters-sidebar {
+    background: #1a1a1a;
   }
 
   /* Show expand arrow on mobile */
@@ -1527,15 +1544,18 @@
 
   .filters-sidebar.expanded .filters-content {
     display: block;
+    max-height: 50vh;
+    overflow-y: auto;
   }
 
   .sidebar-header {
     margin-bottom: 0;
-    padding-bottom: var(--space-md);
+    padding-bottom: var(--space-sm);
   }
 
   .filters-sidebar.expanded .sidebar-header {
-    margin-bottom: var(--space-md);
+    margin-bottom: var(--space-sm);
+    border-bottom: 1px solid var(--border-color);
   }
 }
 
@@ -1856,11 +1876,7 @@
     max-height: none;
   }
 
-  /* Better mobile filter spacing */
-  .filters-sidebar {
-    padding: var(--space-md);
-  }
-
+  /* Mobile filter sticky - inherits from earlier 768px rule */
   .filter-group {
     padding: var(--space-sm) 0;
   }
