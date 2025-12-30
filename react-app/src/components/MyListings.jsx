@@ -1,0 +1,324 @@
+import { useEffect, useState } from "react";
+import API_URL, { getImageUrl } from "../constants";
+import Header from "./Header";
+import { Link, useNavigate } from "react-router-dom";
+import axios from "axios";
+import {
+  FaTrash,
+  FaCheckCircle,
+  FaMapMarkerAlt,
+  FaPlus,
+  FaBoxOpen,
+  FaExclamationTriangle,
+  FaTimes,
+  FaEdit,
+} from "react-icons/fa";
+import "./MyListings.css";
+
+function MyListings() {
+  const navigate = useNavigate();
+  const [products, setProducts] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [productToDelete, setProductToDelete] = useState(null);
+  const [actionLoading, setActionLoading] = useState(null);
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+    fetchMyProducts();
+  }, [navigate]);
+
+  const fetchMyProducts = () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+
+    setIsLoading(true);
+    axios
+      .get(`${API_URL}/my-products/${userId}`)
+      .then((res) => {
+        if (res.data.products) {
+          setProducts(res.data.products);
+        }
+      })
+      .catch((err) => {
+        console.error("Error fetching products:", err);
+      })
+      .finally(() => {
+        setIsLoading(false);
+      });
+  };
+
+  const handleDelete = (product) => {
+    setProductToDelete(product);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    if (!productToDelete) return;
+
+    setActionLoading(productToDelete._id);
+    const userId = localStorage.getItem("userId");
+
+    axios
+      .delete(`${API_URL}/delete-product/${productToDelete._id}`, {
+        data: { userId },
+      })
+      .then((res) => {
+        if (res.data.message.includes("success")) {
+          setProducts(products.filter((p) => p._id !== productToDelete._id));
+        }
+      })
+      .catch((err) => {
+        console.error("Error deleting product:", err);
+        alert("Failed to delete product");
+      })
+      .finally(() => {
+        setActionLoading(null);
+        setShowDeleteModal(false);
+        setProductToDelete(null);
+      });
+  };
+
+  const toggleStatus = (product) => {
+    setActionLoading(product._id);
+    const userId = localStorage.getItem("userId");
+    const newStatus = product.status === "Available" ? "Sold" : "Available";
+
+    axios
+      .put(`${API_URL}/update-product-status/${product._id}`, {
+        userId,
+        status: newStatus,
+      })
+      .then((res) => {
+        if (res.data.message) {
+          setProducts(
+            products.map((p) =>
+              p._id === product._id ? { ...p, status: newStatus } : p
+            )
+          );
+        }
+      })
+      .catch((err) => {
+        console.error("Error updating status:", err);
+        alert("Failed to update product status");
+      })
+      .finally(() => {
+        setActionLoading(null);
+      });
+  };
+
+  const handleProduct = (id) => {
+    navigate(`/product/${id}`);
+  };
+
+  // Product Card Component
+  const ProductCard = ({ item }) => (
+    <div className="listing-card">
+      <div
+        className="listing-image-container"
+        onClick={() => handleProduct(item._id)}
+      >
+        <img
+          src={getImageUrl(item.pimage)}
+          alt={item.pname}
+          className="listing-image"
+        />
+        {item.status === "Sold" && (
+          <div className="sold-overlay">
+            <span>SOLD</span>
+          </div>
+        )}
+        <span className="listing-location-badge">
+          <FaMapMarkerAlt /> {item.location}
+        </span>
+        {item.condition && (
+          <span className="listing-condition-badge">{item.condition}</span>
+        )}
+      </div>
+      <div className="listing-info">
+        <h3 className="listing-price">₹{item.price}</h3>
+        <p className="listing-title">{item.pname}</p>
+        <p className="listing-category">{item.category}</p>
+        {item.productAge && (
+          <p className="listing-age">
+            <FaBoxOpen /> {item.productAge} old
+          </p>
+        )}
+        <span className={`listing-status ${item.status?.toLowerCase()}`}>
+          {item.status || "Available"}
+        </span>
+      </div>
+      <div className="listing-actions">
+        <button
+          className="action-btn edit-btn"
+          onClick={() => navigate(`/edit-product/${item._id}`)}
+        >
+          <FaEdit /> Edit
+        </button>
+        <button
+          className={`action-btn status-btn ${
+            item.status === "Sold" ? "mark-available" : "mark-sold"
+          }`}
+          onClick={() => toggleStatus(item)}
+          disabled={actionLoading === item._id}
+        >
+          {actionLoading === item._id ? (
+            <span className="loading-spinner-small"></span>
+          ) : item.status === "Sold" ? (
+            <>
+              <FaBoxOpen /> Mark Available
+            </>
+          ) : (
+            <>
+              <FaCheckCircle /> Mark as Sold
+            </>
+          )}
+        </button>
+        <button
+          className="action-btn delete-btn"
+          onClick={() => handleDelete(item)}
+          disabled={actionLoading === item._id}
+        >
+          <FaTrash /> Delete
+        </button>
+      </div>
+    </div>
+  );
+
+  // Skeleton Loader
+  const SkeletonCard = () => (
+    <div className="listing-card skeleton-card">
+      <div className="skeleton skeleton-image"></div>
+      <div className="listing-info">
+        <div className="skeleton skeleton-price"></div>
+        <div className="skeleton skeleton-title"></div>
+        <div className="skeleton skeleton-text"></div>
+      </div>
+      <div className="listing-actions">
+        <div className="skeleton skeleton-btn"></div>
+        <div className="skeleton skeleton-btn"></div>
+      </div>
+    </div>
+  );
+
+  // Empty State
+  const EmptyState = () => (
+    <div className="empty-state">
+      <div className="empty-state-icon">📦</div>
+      <h3>No listings yet</h3>
+      <p>Start selling by adding your first product!</p>
+      <Link to="/add-product" className="btn btn-accent">
+        <FaPlus /> Sell Something
+      </Link>
+    </div>
+  );
+
+  return (
+    <div className="my-listings-page">
+      <Header />
+
+      <main className="listings-content">
+        <div className="container">
+          <div className="listings-header">
+            <div>
+              <h1>My Listings</h1>
+              <p>Manage your products and track sales</p>
+            </div>
+            <Link to="/add-product" className="btn btn-accent">
+              <FaPlus /> Add New Product
+            </Link>
+          </div>
+
+          {/* Stats */}
+          {!isLoading && products.length > 0 && (
+            <div className="listings-stats">
+              <div className="stat-card">
+                <span className="stat-value">{products.length}</span>
+                <span className="stat-label">Total Listings</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-value available">
+                  {products.filter((p) => p.status !== "Sold").length}
+                </span>
+                <span className="stat-label">Available</span>
+              </div>
+              <div className="stat-card">
+                <span className="stat-value sold">
+                  {products.filter((p) => p.status === "Sold").length}
+                </span>
+                <span className="stat-label">Sold</span>
+              </div>
+            </div>
+          )}
+
+          {/* Products Grid */}
+          {isLoading ? (
+            <div className="listings-grid">
+              {[...Array(4)].map((_, i) => (
+                <SkeletonCard key={i} />
+              ))}
+            </div>
+          ) : products.length > 0 ? (
+            <div className="listings-grid">
+              {products.map((item) => (
+                <ProductCard key={item._id} item={item} />
+              ))}
+            </div>
+          ) : (
+            <EmptyState />
+          )}
+        </div>
+      </main>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowDeleteModal(false)}
+        >
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <button
+              className="modal-close"
+              onClick={() => setShowDeleteModal(false)}
+            >
+              <FaTimes />
+            </button>
+            <div className="modal-icon warning">
+              <FaExclamationTriangle />
+            </div>
+            <h2>Delete Listing?</h2>
+            <p>
+              Are you sure you want to delete "{productToDelete?.pname}"? This
+              action cannot be undone.
+            </p>
+            <div className="modal-actions">
+              <button
+                className="btn btn-secondary"
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </button>
+              <button
+                className="btn btn-danger"
+                onClick={confirmDelete}
+                disabled={actionLoading}
+              >
+                {actionLoading ? (
+                  <span className="loading-spinner-small"></span>
+                ) : (
+                  "Delete"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+export default MyListings;
