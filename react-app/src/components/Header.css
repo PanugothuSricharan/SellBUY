@@ -640,16 +640,55 @@
     font-size: var(--font-size-xl);
   }
 
+  .logo-icon {
+    font-size: 1.5rem;
+  }
+
   .search-input {
     min-width: 150px;
+    font-size: var(--font-size-sm);
   }
 
   .sell-btn {
     padding: var(--space-sm);
+    font-size: var(--font-size-sm);
   }
 
   .login-btn span {
     display: none;
+  }
+
+  .user-dropdown {
+    right: 0;
+    width: 200px;
+  }
+
+  .location-select {
+    font-size: var(--font-size-xs);
+  }
+}
+
+@media (max-width: 360px) {
+  /* Extra small phones */
+  .logo-text {
+    font-size: var(--font-size-lg);
+  }
+
+  .logo-icon {
+    font-size: 1.25rem;
+  }
+
+  .header-container {
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .search-input {
+    min-width: 120px;
+    padding: var(--space-xs) var(--space-sm);
+  }
+
+  .sell-btn {
+    padding: var(--space-xs) var(--space-sm);
   }
 }
 

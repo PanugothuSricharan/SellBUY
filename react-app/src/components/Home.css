@@ -1270,4 +1270,56 @@
   .category-chips {
     max-height: none;
   }
+
+  /* Better mobile filter spacing */
+  .filters-sidebar {
+    padding: var(--space-md);
+  }
+
+  .filter-group {
+    padding: var(--space-sm) 0;
+  }
+
+  .sidebar-header h2 {
+    font-size: var(--font-size-lg);
+  }
+}
+
+@media (max-width: 576px) {
+  /* Tighter spacing on small phones */
+  .container {
+    padding: 0 var(--space-sm);
+  }
+
+  .products-grid {
+    gap: var(--space-md);
+  }
+
+  .hero-section {
+    padding: var(--space-lg) var(--space-sm);
+  }
+
+  .filter-group {
+    gap: var(--space-xs);
+  }
+
+  .price-range-slider {
+    margin: var(--space-sm) 0;
+  }
+}
+
+@media (max-width: 400px) {
+  /* Very small screens */
+  .logo-text {
+    font-size: var(--font-size-lg);
+  }
+
+  .filter-chip-compact {
+    font-size: var(--font-size-xs);
+    padding: var(--space-xs);
+  }
+
+  .results-count {
+    font-size: var(--font-size-xs);
+  }
 }

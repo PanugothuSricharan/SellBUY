@@ -5,22 +5,15 @@ import { GoogleLogin } from "@react-oauth/google";
 import "./Auth.css";
 import API_URL from "../constants";
 import {
-  FaUser,
-  FaLock,
-  FaEye,
-  FaEyeSlash,
   FaArrowLeft,
   FaShoppingBag,
   FaMapMarkerAlt,
   FaHandshake,
+  FaShieldAlt,
 } from "react-icons/fa";
-import { FcGoogle } from "react-icons/fc";
 
 function Login() {
   const navigate = useNavigate();
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -50,37 +43,6 @@ function Login() {
 
   const handleGoogleError = () => {
     setError("Google Sign-In failed. Please try again.");
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError("");
-
-    // Validate empty fields
-    if (!username.trim() || !password.trim()) {
-      setError("Please enter both username and password");
-      return;
-    }
-
-    setIsLoading(true);
-    const url = `${API_URL}/login`;
-    const data = { username, password };
-
-    try {
-      const res = await axios.post(url, data);
-      if (res.data.success) {
-        localStorage.setItem("token", res.data.token);
-        localStorage.setItem("userId", res.data.userId);
-        navigate("/");
-      } else {
-        setError(res.data.message || "Login failed. Please try again.");
-      }
-    } catch (err) {
-      console.log(err);
-      setError("Error connecting to server. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   return (
@@ -135,7 +97,21 @@ function Login() {
             <div className="auth-header">
               <div className="auth-logo-mobile">🛒</div>
               <h2 className="auth-title">Welcome Back!</h2>
-              <p className="auth-subtitle">Sign in to continue to SellBUY</p>
+              <p className="auth-subtitle">Sign in with your IIITM college email</p>
+            </div>
+
+            {/* Security Notice */}
+            <div className="security-notice">
+              <div className="security-icon">
+                <FaShieldAlt />
+              </div>
+              <div className="security-content">
+                <h3>Secure Authentication</h3>
+                <p>
+                  Sign in securely using your IIITM college email. No passwords 
+                  to remember, just click the button below to continue.
+                </p>
+              </div>
             </div>
 
             {error && (
@@ -152,68 +128,6 @@ function Login() {
               </div>
             )}
 
-            <form className="auth-form" onSubmit={handleSubmit}>
-              <div className="form-group">
-                <label htmlFor="username">Username</label>
-                <div className="input-wrapper">
-                  <FaUser className="input-icon" />
-                  <input
-                    type="text"
-                    id="username"
-                    placeholder="Enter your username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    autoComplete="username"
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="password">Password</label>
-                <div className="input-wrapper">
-                  <FaLock className="input-icon" />
-                  <input
-                    type={showPassword ? "text" : "password"}
-                    id="password"
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    autoComplete="current-password"
-                  />
-                  <button
-                    type="button"
-                    className="password-toggle"
-                    onClick={() => setShowPassword(!showPassword)}
-                    aria-label={
-                      showPassword ? "Hide password" : "Show password"
-                    }
-                  >
-                    {showPassword ? <FaEyeSlash /> : <FaEye />}
-                  </button>
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="auth-submit-btn"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <span className="loading-spinner"></span>
-                    Signing in...
-                  </>
-                ) : (
-                  "Sign In"
-                )}
-              </button>
-            </form>
-
-            {/* Divider */}
-            <div className="auth-divider">
-              <span>or continue with</span>
-            </div>
-
             {/* Google Sign-In */}
             <div className="google-login-container">
               <GoogleLogin
@@ -228,7 +142,8 @@ function Login() {
             </div>
 
             <p className="google-note">
-              Only @iiitm.ac.in emails are allowed
+              <FaShieldAlt style={{ marginRight: "5px" }} />
+              Only @iiitm.ac.in college emails are allowed for security
             </p>
 
             <div className="auth-footer">
