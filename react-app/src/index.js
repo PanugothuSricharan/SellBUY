@@ -4,7 +4,7 @@ import Home from "./components/Home";
 import * as React from "react";
 import { createRoot } from "react-dom/client";
 import Login from "./components/Login";
-import { createBrowserRouter, RouterProvider, Link } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import Signup from "./components/Signup";
 import AddProduct from "./components/AddProduct";
@@ -13,6 +13,7 @@ import ProductDetail from "./components/ProductDetail";
 import CategoryPage from "./components/CategoryPage";
 import MyListings from "./components/MyListings";
 import EditProduct from "./components/EditProduct";
+import AdminDashboard from "./components/AdminDashboard";
 
 const GOOGLE_CLIENT_ID = "45965234451-stt1nfrj264pphitcqnve10ov8c54tgv.apps.googleusercontent.com";
 
@@ -64,6 +65,10 @@ const router = createBrowserRouter([
   {
     path: "/products/:productId",
     element: <ProductDetail />,
+  },
+  {
+    path: "/admin",
+    element: <AdminDashboard />,
   },
 ]);
 
