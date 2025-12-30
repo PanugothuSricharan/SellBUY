@@ -306,19 +306,68 @@ function AddProduct() {
               {errors.pname && <p className="error-message">{errors.pname}</p>}
             </div>
 
+            {/* Product URL - moved to 2nd position */}
+            <div className="form-group url-after-name">
+              <label className="form-label">
+                <FaLink style={{ marginRight: "4px" }} /> Original Product Link
+              </label>
+              <div className="quick-search-links top-position">
+                <span>Search product on:</span>
+                <a 
+                  href={pname ? `https://www.amazon.in/s?k=${encodeURIComponent(pname)}` : '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`quick-link amazon ${!pname ? 'disabled' : ''}`}
+                  onClick={(e) => !pname && e.preventDefault()}
+                  title={!pname ? "Enter product name first" : "Search on Amazon"}
+                >
+                  🛒 Amazon
+                </a>
+                <a 
+                  href={pname ? `https://www.flipkart.com/search?q=${encodeURIComponent(pname)}` : '#'}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={`quick-link flipkart ${!pname ? 'disabled' : ''}`}
+                  onClick={(e) => !pname && e.preventDefault()}
+                  title={!pname ? "Enter product name first" : "Search on Flipkart"}
+                >
+                  📦 Flipkart
+                </a>
+              </div>
+              <input
+                type="url"
+                className={`form-input ${errors.originalUrl ? "error" : ""}`}
+                placeholder="Paste Amazon/Flipkart product URL here"
+                value={originalUrl}
+                onChange={(e) => setOriginalUrl(e.target.value)}
+              />
+              {errors.originalUrl && (
+                <p className="error-message">{errors.originalUrl}</p>
+              )}
+              <p className="form-hint">
+                💡 Copy the product URL and paste here. Buyers can verify original price & specs.
+              </p>
+            </div>
+
             <div className="form-group">
               <label className="form-label">
                 Description <span className="required">*</span>
+                {originalUrl && <span className="desc-tip"> (Keep it short - buyers can check URL for details)</span>}
               </label>
               <textarea
-                className={`form-textarea ${errors.pdesc ? "error" : ""}`}
-                placeholder="Describe your product - condition, features, reason for selling..."
+                className={`form-textarea ${errors.pdesc ? "error" : ""} ${originalUrl ? "compact-desc" : ""}`}
+                placeholder={originalUrl 
+                  ? "Brief description - condition, any defects, reason for selling..." 
+                  : "Describe your product - condition, features, reason for selling..."}
                 value={pdesc}
                 onChange={(e) => setPdesc(e.target.value)}
+                maxLength={originalUrl ? 500 : 2000}
               />
               {errors.pdesc && <p className="error-message">{errors.pdesc}</p>}
               <p className="form-hint">
-                Tip: A detailed description helps buyers make a decision
+                {originalUrl 
+                  ? `Keep it brief since you've added product link (${pdesc.length}/500 chars)`
+                  : "Tip: A detailed description helps buyers make a decision"}
               </p>
             </div>
 
@@ -446,47 +495,6 @@ function AddProduct() {
                 <p className="form-hint">
                   Helps buyers understand the product's usage
                 </p>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label className="form-label">
-                <FaLink style={{ marginRight: "4px" }} /> Original Product Link
-              </label>
-              <input
-                type="url"
-                className={`form-input ${errors.originalUrl ? "error" : ""}`}
-                placeholder="https://amazon.in/product-link or https://flipkart.com/product-link"
-                value={originalUrl}
-                onChange={(e) => setOriginalUrl(e.target.value)}
-              />
-              {errors.originalUrl && (
-                <p className="error-message">{errors.originalUrl}</p>
-              )}
-              <p className="form-hint">
-                Add Amazon/Flipkart link so buyers can check original specs &
-                price
-              </p>
-              <div className="quick-search-links">
-                <span>Quick search:</span>
-                <a 
-                  href={pname ? `https://www.amazon.in/s?k=${encodeURIComponent(pname)}` : '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`quick-link amazon ${!pname ? 'disabled' : ''}`}
-                  onClick={(e) => !pname && e.preventDefault()}
-                >
-                  🛒 Amazon
-                </a>
-                <a 
-                  href={pname ? `https://www.flipkart.com/search?q=${encodeURIComponent(pname)}` : '#'}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`quick-link flipkart ${!pname ? 'disabled' : ''}`}
-                  onClick={(e) => !pname && e.preventDefault()}
-                >
-                  📦 Flipkart
-                </a>
               </div>
             </div>
 

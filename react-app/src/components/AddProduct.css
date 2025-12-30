@@ -181,6 +181,61 @@
   flex-wrap: wrap;
 }
 
+/* Quick search links at top position (before URL input) */
+.quick-search-links.top-position {
+  margin-top: 0;
+  margin-bottom: 0.75rem;
+  padding: 0.75rem;
+  background: var(--gray-50);
+  border-radius: 8px;
+  border: 1px dashed var(--gray-300);
+}
+
+[data-theme="dark"] .quick-search-links.top-position {
+  background: #1a1a1a;
+  border-color: #444;
+}
+
+.quick-search-links.top-position span {
+  font-weight: 500;
+  color: var(--gray-700);
+}
+
+[data-theme="dark"] .quick-search-links.top-position span {
+  color: var(--text-secondary);
+}
+
+/* URL field styling */
+.url-after-name {
+  background: linear-gradient(135deg, rgba(255, 107, 53, 0.03) 0%, rgba(255, 140, 90, 0.03) 100%);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 107, 53, 0.15);
+  margin-bottom: var(--space-md);
+}
+
+[data-theme="dark"] .url-after-name {
+  background: rgba(255, 107, 53, 0.05);
+  border-color: rgba(255, 107, 53, 0.2);
+}
+
+/* Compact description when URL is provided */
+.form-textarea.compact-desc {
+  min-height: 80px;
+  max-height: 120px;
+}
+
+.desc-tip {
+  font-size: 0.75rem;
+  color: var(--success);
+  font-weight: 400;
+  margin-left: 0.5rem;
+}
+
+[data-theme="dark"] .desc-tip {
+  color: #4ade80;
+}
+
 .quick-search-links span {
   font-size: 0.8rem;
   color: var(--gray-500);
