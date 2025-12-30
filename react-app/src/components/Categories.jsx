@@ -1,3 +1,4 @@
+import React, { useRef, useState, useEffect } from "react";
 import "./Categories.css";
 import categories from "./CategoriesList";
 import { useNavigate, useParams } from "react-router-dom";
@@ -15,6 +16,8 @@ import {
   FaCalculator,
   FaFire,
   FaEllipsisH,
+  FaChevronLeft,
+  FaChevronRight,
 } from "react-icons/fa";
 
 // Map categories to icons - matching actual CategoriesList
@@ -37,9 +40,39 @@ function Categories({ handleCategory, selectedCategories = [] }) {
   const navigate = useNavigate();
   const params = useParams();
   const currentCategory = params.categoryName;
+  const containerRef = useRef(null);
+  const [showLeftArrow, setShowLeftArrow] = useState(false);
+  const [showRightArrow, setShowRightArrow] = useState(false);
 
   // Check if we're on a category page or using filter mode
   const isFilterMode = typeof handleCategory === "function";
+
+  // Check scroll position to show/hide arrows
+  const checkScrollPosition = () => {
+    const container = containerRef.current;
+    if (container) {
+      const { scrollLeft, scrollWidth, clientWidth } = container;
+      setShowLeftArrow(scrollLeft > 10);
+      setShowRightArrow(scrollLeft < scrollWidth - clientWidth - 10);
+    }
+  };
+
+  useEffect(() => {
+    checkScrollPosition();
+    window.addEventListener('resize', checkScrollPosition);
+    return () => window.removeEventListener('resize', checkScrollPosition);
+  }, []);
+
+  const scrollCategories = (direction) => {
+    const container = containerRef.current;
+    if (container) {
+      const scrollAmount = 200;
+      container.scrollBy({
+        left: direction === 'left' ? -scrollAmount : scrollAmount,
+        behavior: 'smooth'
+      });
+    }
+  };
 
   const getCategoryIcon = (category) => {
     const Icon = categoryIcons[category] || FaThLarge;
@@ -63,7 +96,22 @@ function Categories({ handleCategory, selectedCategories = [] }) {
 
   return (
     <div className="categories-bar">
-      <div className="categories-container">
+      {/* Left scroll arrow - desktop only */}
+      {showLeftArrow && (
+        <button 
+          className="category-scroll-btn scroll-left" 
+          onClick={() => scrollCategories('left')}
+          aria-label="Scroll left"
+        >
+          <FaChevronLeft />
+        </button>
+      )}
+
+      <div 
+        className="categories-container" 
+        ref={containerRef}
+        onScroll={checkScrollPosition}
+      >
         {!isFilterMode && (
           <button
             className={`category-chip ${!currentCategory ? "active" : ""}`}
@@ -85,6 +133,17 @@ function Categories({ handleCategory, selectedCategories = [] }) {
           </button>
         ))}
       </div>
+
+      {/* Right scroll arrow - desktop only */}
+      {showRightArrow && (
+        <button 
+          className="category-scroll-btn scroll-right" 
+          onClick={() => scrollCategories('right')}
+          aria-label="Scroll right"
+        >
+          <FaChevronRight />
+        </button>
+      )}
     </div>
   );
 }
