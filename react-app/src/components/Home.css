@@ -16,13 +16,26 @@
   background: linear-gradient(
     135deg,
     var(--primary-dark) 0%,
-    #004a52 50%,
-    #006d77 100%
+    #004a52 25%,
+    #006d77 50%,
+    #004a52 75%,
+    var(--primary-dark) 100%
   );
+  background-size: 400% 400%;
+  animation: gradientShift 8s ease-in-out infinite;
   padding: var(--space-2xl) var(--space-lg);
   text-align: center;
   position: relative;
   overflow: hidden;
+}
+
+@keyframes gradientShift {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
 }
 
 .hero-section::before {
@@ -79,7 +92,17 @@
   font-weight: 700;
   color: var(--white);
   margin-bottom: var(--space-sm);
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+  animation: titleGlow 3s ease-in-out infinite;
+}
+
+@keyframes titleGlow {
+  0%, 100% {
+    text-shadow: 0 2px 15px rgba(0, 0, 0, 0.3), 0 0 30px rgba(255, 255, 255, 0.1);
+  }
+  50% {
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.4), 0 0 40px rgba(255, 255, 255, 0.2);
+  }
 }
 
 .hero-subtitle {
