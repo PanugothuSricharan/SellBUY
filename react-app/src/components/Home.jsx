@@ -113,10 +113,11 @@ function Home() {
       });
   };
 
-  // Apply filters whenever filter states change
+  // Apply filters whenever filter states change (except search - that's on button click only)
   useEffect(() => {
     applyFilters();
-  }, [selectedCategories, selectedConditions, priceRange, search, products]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedCategories, selectedConditions, priceRange, products]);
 
   const applyFilters = () => {
     let result = [...products];
@@ -165,7 +166,39 @@ function Home() {
   };
 
   const handleClick = () => {
-    applyFilters();
+    // Manually trigger search filter when button is clicked
+    let result = [...products];
+
+    // Search filter
+    if (search.trim()) {
+      const searchLower = search.toLowerCase();
+      result = result.filter(
+        (item) =>
+          item.pname.toLowerCase().includes(searchLower) ||
+          item.pdesc?.toLowerCase().includes(searchLower) ||
+          item.category?.toLowerCase().includes(searchLower)
+      );
+    }
+
+    // Apply other active filters
+    if (selectedCategories.length > 0) {
+      result = result.filter((item) =>
+        selectedCategories.includes(item.category)
+      );
+    }
+
+    if (selectedConditions.length > 0) {
+      result = result.filter((item) =>
+        selectedConditions.includes(item.condition)
+      );
+    }
+
+    result = result.filter((item) => {
+      const price = parseFloat(item.price) || 0;
+      return price >= priceRange.min && price <= priceRange.max;
+    });
+
+    setFilteredProducts(result);
   };
 
   const handleCategory = (value) => {

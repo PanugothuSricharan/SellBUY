@@ -12,6 +12,8 @@ import {
   FaExclamationTriangle,
   FaTimes,
   FaEdit,
+  FaClock,
+  FaTimesCircle,
 } from "react-icons/fa";
 import "./MyListings.css";
 
@@ -137,6 +139,14 @@ function MyListings() {
         </span>
         {item.condition && (
           <span className="listing-condition-badge">{item.condition}</span>
+        )}
+        {/* Approval Status Badge */}
+        {item.approvalStatus && (
+          <span className={`approval-badge ${item.approvalStatus.toLowerCase()}`}>
+            {item.approvalStatus === "PENDING" && <><FaClock /> Pending Approval</>}
+            {item.approvalStatus === "APPROVED" && <><FaCheckCircle /> Approved</>}
+            {item.approvalStatus === "REJECTED" && <><FaTimesCircle /> Rejected</>}
+          </span>
         )}
       </div>
       <div className="listing-info">

@@ -14,6 +14,7 @@ import {
   FaBoxOpen,
   FaShoppingCart,
   FaChevronDown,
+  FaShieldAlt,
 } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import { BROWSE_LOCATIONS, LOCATIONS } from "./LocationList";
@@ -30,6 +31,7 @@ function Header(props) {
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
   const userMenuRef = useRef(null);
   const locationRef = useRef(null);
 
@@ -42,6 +44,7 @@ function Header(props) {
     // Fetch user info if logged in
     if (token && userId) {
       fetchUserInfo(userId);
+      checkAdminStatus(userId);
     }
 
     // Get user location from localStorage on component mount (global app state)
@@ -85,6 +88,15 @@ function Header(props) {
     }
   };
 
+  const checkAdminStatus = async (userId) => {
+    try {
+      const res = await axios.get(`${API_URL}/check-admin/${userId}`);
+      setIsAdmin(res.data.isAdmin);
+    } catch (err) {
+      console.log("Error checking admin status:", err);
+    }
+  };
+
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
@@ -103,6 +115,7 @@ function Header(props) {
     setIsLoggedIn(false);
     setUserName("");
     setUserEmail("");
+    setIsAdmin(false);
     setShowUserMenu(false);
     navigate("/login");
   };
@@ -237,6 +250,19 @@ function Header(props) {
                       <FaHeart />
                       <span>Wishlist</span>
                     </Link>
+                    {isAdmin && (
+                      <>
+                        <div className="dropdown-divider"></div>
+                        <Link
+                          to="/admin"
+                          className="dropdown-item admin-item"
+                          onClick={() => setShowUserMenu(false)}
+                        >
+                          <FaShieldAlt />
+                          <span>Admin Panel</span>
+                        </Link>
+                      </>
+                    )}
                     <div className="dropdown-divider"></div>
                     <button
                       className="dropdown-item theme-item"

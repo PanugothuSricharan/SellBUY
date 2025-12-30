@@ -79,6 +79,10 @@ const Users = mongoose.model("User", {
 const VALID_CONDITIONS = ["New", "Sealed", "Mint", "Used"];
 const VALID_STATUS = ["Available", "Sold"];
 const VALID_CONTACT_PREFERENCES = ["WhatsApp", "Phone Call", "Both"];
+const VALID_APPROVAL_STATUS = ["PENDING", "APPROVED", "REJECTED"];
+
+// ============ ADMIN CONFIGURATION ============
+const ADMIN_EMAIL = "imt_2021imt072@iiitm.ac.in";
 
 const Products = mongoose.model("Product", {
   pname: String,
@@ -97,6 +101,7 @@ const Products = mongoose.model("Product", {
     default: "Both",
   },
   status: { type: String, enum: VALID_STATUS, default: "Available" },
+  approvalStatus: { type: String, enum: VALID_APPROVAL_STATUS, default: "PENDING" },
   addedBy: mongoose.Schema.Types.ObjectId,
   createdAt: { type: Date, default: Date.now },
 });
@@ -494,6 +499,9 @@ app.get("/get-products", (req, res) => {
     filter.location = location;
   }
 
+  // Only show APPROVED products to public
+  filter.approvalStatus = "APPROVED";
+
   console.log("Filter:", filter);
 
   // TODO: Add index on 'location' field for O(log n) query performance
@@ -719,6 +727,9 @@ app.get("/filter-products", (req, res) => {
     ];
   }
 
+  // Only show approved products
+  filter.approvalStatus = "APPROVED";
+
   console.log("Advanced Filter:", JSON.stringify(filter, null, 2));
 
   Products.find(filter)
@@ -730,6 +741,113 @@ app.get("/filter-products", (req, res) => {
       console.error("Error filtering products:", err);
       res.status(500).send({ message: "server err" });
     });
+});
+
+// ============ ADMIN ENDPOINTS ============
+
+// Check if user is admin
+app.get("/check-admin/:userId", async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found", isAdmin: false });
+    }
+    const isAdmin = user.email === ADMIN_EMAIL;
+    res.json({ isAdmin, email: user.email });
+  } catch (error) {
+    console.error("Error checking admin:", error);
+    res.status(500).json({ message: "Server error", isAdmin: false });
+  }
+});
+
+// Get all pending products (admin only)
+app.get("/admin/pending-products/:userId", async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized: Admin access required" });
+    }
+
+    const pendingProducts = await Products.find({ approvalStatus: "PENDING" })
+      .populate("addedBy", "username email mobile")
+      .sort({ createdAt: -1 });
+
+    res.json({ message: "success", products: pendingProducts });
+  } catch (error) {
+    console.error("Error fetching pending products:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get all products for admin (including pending and rejected)
+app.get("/admin/all-products/:userId", async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized: Admin access required" });
+    }
+
+    const allProducts = await Products.find({})
+      .populate("addedBy", "username email mobile")
+      .sort({ createdAt: -1 });
+
+    res.json({ message: "success", products: allProducts });
+  } catch (error) {
+    console.error("Error fetching all products:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Approve a product (admin only)
+app.put("/admin/approve-product/:productId", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await Users.findById(userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized: Admin access required" });
+    }
+
+    const product = await Products.findByIdAndUpdate(
+      req.params.productId,
+      { approvalStatus: "APPROVED" },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json({ message: "Product approved successfully", product });
+  } catch (error) {
+    console.error("Error approving product:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Reject a product (admin only)
+app.put("/admin/reject-product/:productId", async (req, res) => {
+  try {
+    const { userId, rejectionReason } = req.body;
+    const user = await Users.findById(userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized: Admin access required" });
+    }
+
+    const product = await Products.findByIdAndUpdate(
+      req.params.productId,
+      { approvalStatus: "REJECTED" },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json({ message: "Product rejected", product, reason: rejectionReason });
+  } catch (error) {
+    console.error("Error rejecting product:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 });
 
 // Start Server
