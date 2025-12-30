@@ -1,6 +1,7 @@
 import "./Header.css";
 import { Link } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 import {
   FaSearch,
   FaHeart,
@@ -16,6 +17,7 @@ import {
 } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import { BROWSE_LOCATIONS, LOCATIONS } from "./LocationList";
+import API_URL from "../constants";
 
 function Header(props) {
   const navigate = useNavigate();
@@ -26,12 +28,21 @@ function Header(props) {
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showLocationDropdown, setShowLocationDropdown] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [userEmail, setUserEmail] = useState("");
   const userMenuRef = useRef(null);
   const locationRef = useRef(null);
 
   useEffect(() => {
     // Check login status
-    setIsLoggedIn(!!localStorage.getItem("token"));
+    const token = localStorage.getItem("token");
+    const userId = localStorage.getItem("userId");
+    setIsLoggedIn(!!token);
+
+    // Fetch user info if logged in
+    if (token && userId) {
+      fetchUserInfo(userId);
+    }
 
     // Get user location from localStorage on component mount (global app state)
     const savedLocation = localStorage.getItem("selectedLocation");
@@ -62,6 +73,18 @@ function Header(props) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const fetchUserInfo = async (userId) => {
+    try {
+      const res = await axios.get(`${API_URL}/get-user/${userId}`);
+      if (res.data.user) {
+        setUserName(res.data.user.username || res.data.user.email?.split("@")[0] || "User");
+        setUserEmail(res.data.user.email || "");
+      }
+    } catch (err) {
+      console.log("Error fetching user info:", err);
+    }
+  };
+
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
@@ -78,6 +101,8 @@ function Header(props) {
     localStorage.removeItem("token");
     localStorage.removeItem("userId");
     setIsLoggedIn(false);
+    setUserName("");
+    setUserEmail("");
     setShowUserMenu(false);
     navigate("/login");
   };
@@ -185,6 +210,17 @@ function Header(props) {
 
                 {showUserMenu && (
                   <div className="user-dropdown">
+                    {/* User Info Section */}
+                    <div className="dropdown-user-info">
+                      <div className="user-avatar">
+                        {userName.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="user-details">
+                        <span className="user-name">{userName}</span>
+                        {userEmail && <span className="user-email">{userEmail}</span>}
+                      </div>
+                    </div>
+                    <div className="dropdown-divider"></div>
                     <Link
                       to="/my-listings"
                       className="dropdown-item"

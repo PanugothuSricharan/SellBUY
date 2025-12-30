@@ -14,6 +14,7 @@ import {
   FaTh,
   FaThLarge,
   FaList,
+  FaChevronDown,
 } from "react-icons/fa";
 import "./Home.css";
 import { LOCATIONS } from "./LocationList";
@@ -47,6 +48,7 @@ function Home() {
   const [viewMode, setViewMode] = useState(
     localStorage.getItem("productViewMode") || VIEW_MODES.GRID
   );
+  const [filtersExpanded, setFiltersExpanded] = useState(false);
 
   // Fetch all products
   const fetchProducts = useCallback((location) => {
@@ -361,23 +363,30 @@ function Home() {
           {/* Layout with Sidebar Filters */}
           <div className="home-layout">
             {/* Filters Sidebar */}
-            <aside className="filters-sidebar">
-              <div className="sidebar-header">
+            <aside className={`filters-sidebar ${filtersExpanded ? 'expanded' : 'collapsed'}`}>
+              <div className="sidebar-header" onClick={() => setFiltersExpanded(!filtersExpanded)}>
                 <h3 className="sidebar-title">
                   <FaFilter /> Filters
+                  {hasActiveFilters() && <span className="filter-count">{selectedCategories.length + selectedConditions.length + (priceRange.min > 0 || priceRange.max < maxPriceLimit ? 1 : 0)}</span>}
                 </h3>
-                {hasActiveFilters() && (
-                  <button
-                    className="clear-filters-link"
-                    onClick={clearAllFilters}
-                  >
-                    Clear All
-                  </button>
-                )}
+                <div className="sidebar-header-right">
+                  {hasActiveFilters() && (
+                    <button
+                      className="clear-filters-link"
+                      onClick={(e) => { e.stopPropagation(); clearAllFilters(); }}
+                    >
+                      Clear
+                    </button>
+                  )}
+                  <span className={`expand-arrow ${filtersExpanded ? 'open' : ''}`}>
+                    <FaChevronDown />
+                  </span>
+                </div>
               </div>
 
-              {/* Price Range */}
-              <div className="filter-group">
+              <div className="filters-content">
+                {/* Price Range */}
+                <div className="filter-group">
                 <h4 className="filter-title">Price Range</h4>
                 <div className="price-slider-container">
                   <div className="price-inputs-compact">
@@ -498,6 +507,7 @@ function Home() {
                     </button>
                   ))}
                 </div>
+              </div>
               </div>
             </aside>
 

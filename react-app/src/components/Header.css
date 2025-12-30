@@ -477,6 +477,51 @@
   margin: var(--space-xs) 0;
 }
 
+/* User Info Section in Dropdown */
+.dropdown-user-info {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  padding: var(--space-md) var(--space-lg);
+}
+
+.user-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-orange), #ff8c5a);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: var(--font-size-lg);
+  flex-shrink: 0;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.user-name {
+  font-weight: 600;
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.user-email {
+  font-size: var(--font-size-xs);
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 [data-theme="dark"] .dropdown-divider {
   background: rgba(255, 122, 77, 0.2);
 }
@@ -660,8 +705,9 @@
     max-width: 350px;
   }
 
-  .sell-btn span:not(:first-child) {
-    display: none;
+  /* Keep SELL text visible on all screens */
+  .sell-btn span {
+    display: inline;
   }
 }
 
