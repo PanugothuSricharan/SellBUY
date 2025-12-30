@@ -25,7 +25,9 @@ function Header(props) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showLocationDropdown, setShowLocationDropdown] = useState(false);
   const userMenuRef = useRef(null);
+  const locationRef = useRef(null);
 
   useEffect(() => {
     // Check login status
@@ -51,6 +53,9 @@ function Header(props) {
     const handleClickOutside = (event) => {
       if (userMenuRef.current && !userMenuRef.current.contains(event.target)) {
         setShowUserMenu(false);
+      }
+      if (locationRef.current && !locationRef.current.contains(event.target)) {
+        setShowLocationDropdown(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -81,6 +86,7 @@ function Header(props) {
     // Persist location as global app state
     localStorage.setItem("selectedLocation", newLocation);
     setSelectedLocation(newLocation);
+    setShowLocationDropdown(false);
 
     // Notify parent component to refetch data with new location filter
     if (props.onLocationChange) {
@@ -111,23 +117,30 @@ function Header(props) {
             </span>
           </Link>
 
-          <div className="location-picker">
-            <FaMapMarkerAlt className="location-icon" />
-            <span className="location-text">{selectedLocation}</span>
-            <div className="location-dropdown-trigger">
-              <FaChevronDown className="location-arrow" />
-              <select
-                value={selectedLocation}
-                onChange={(e) => handleLocationChange(e.target.value)}
-                className="location-select"
-              >
+          <div className="location-picker" ref={locationRef}>
+            <button 
+              className="location-btn"
+              onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+            >
+              <FaMapMarkerAlt className="location-icon" />
+              <span className="location-text">{selectedLocation}</span>
+              <FaChevronDown className={`location-arrow ${showLocationDropdown ? 'open' : ''}`} />
+            </button>
+            
+            {showLocationDropdown && (
+              <div className="location-dropdown">
                 {BROWSE_LOCATIONS.map((loc, index) => (
-                  <option value={loc} key={index}>
-                    {loc}
-                  </option>
+                  <button
+                    key={index}
+                    className={`location-option ${selectedLocation === loc ? 'active' : ''}`}
+                    onClick={() => handleLocationChange(loc)}
+                  >
+                    <FaMapMarkerAlt />
+                    <span>{loc}</span>
+                  </button>
                 ))}
-              </select>
-            </div>
+              </div>
+            )}
           </div>
         </div>
 

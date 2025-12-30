@@ -482,11 +482,13 @@ function AddProduct() {
                       Primary Image{" "}
                       <span style={{ color: "var(--error)" }}>*</span>
                     </p>
-                    <p className="image-upload-hint">Click to upload</p>
+                    <p className="image-upload-hint">Tap to take photo or upload</p>
+                    {/* Camera capture for mobile */}
                     <input
                       type="file"
                       className="image-upload-input"
                       accept="image/*"
+                      capture="environment"
                       onChange={(e) => handleImageChange(e, 1)}
                     />
                   </>
@@ -521,11 +523,13 @@ function AddProduct() {
                       Secondary Image{" "}
                       <span className="optional">(Optional)</span>
                     </p>
-                    <p className="image-upload-hint">Click to upload</p>
+                    <p className="image-upload-hint">Tap to take photo or upload</p>
+                    {/* Camera capture for mobile */}
                     <input
                       type="file"
                       className="image-upload-input"
                       accept="image/*"
+                      capture="environment"
                       onChange={(e) => handleImageChange(e, 2)}
                     />
                   </>

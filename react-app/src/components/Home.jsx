@@ -11,6 +11,9 @@ import {
   FaTimes,
   FaBoxOpen,
   FaExternalLinkAlt,
+  FaTh,
+  FaThLarge,
+  FaList,
 } from "react-icons/fa";
 import "./Home.css";
 import { LOCATIONS } from "./LocationList";
@@ -19,6 +22,8 @@ import API_URL, { getImageUrl } from "../constants";
 
 // Product conditions for filter
 const PRODUCT_CONDITIONS = ["New", "Sealed", "Mint", "Used"];
+// View modes
+const VIEW_MODES = { GRID: "grid", LIST: "list", COMPACT: "compact" };
 
 function Home() {
   const navigate = useNavigate();
@@ -39,6 +44,9 @@ function Home() {
   const [selectedConditions, setSelectedConditions] = useState([]);
   const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
   const [maxPriceLimit, setMaxPriceLimit] = useState(100000);
+  const [viewMode, setViewMode] = useState(
+    localStorage.getItem("productViewMode") || VIEW_MODES.GRID
+  );
 
   // Fetch all products
   const fetchProducts = useCallback((location) => {
@@ -234,6 +242,11 @@ function Home() {
 
   const handleProduct = (id) => {
     navigate(`/products/${id}`);
+  };
+
+  const handleViewModeChange = (mode) => {
+    setViewMode(mode);
+    localStorage.setItem("productViewMode", mode);
   };
 
   // Product Card Component
@@ -500,6 +513,29 @@ function Home() {
                     <FaMapMarkerAlt /> {selectedLocation}
                   </span>
                 </div>
+                <div className="view-mode-toggle">
+                  <button
+                    className={`view-btn ${viewMode === VIEW_MODES.GRID ? "active" : ""}`}
+                    onClick={() => handleViewModeChange(VIEW_MODES.GRID)}
+                    title="Grid View"
+                  >
+                    <FaThLarge />
+                  </button>
+                  <button
+                    className={`view-btn ${viewMode === VIEW_MODES.COMPACT ? "active" : ""}`}
+                    onClick={() => handleViewModeChange(VIEW_MODES.COMPACT)}
+                    title="Compact View"
+                  >
+                    <FaTh />
+                  </button>
+                  <button
+                    className={`view-btn ${viewMode === VIEW_MODES.LIST ? "active" : ""}`}
+                    onClick={() => handleViewModeChange(VIEW_MODES.LIST)}
+                    title="List View"
+                  >
+                    <FaList />
+                  </button>
+                </div>
               </div>
 
               {/* Active Filters Pills */}
@@ -546,13 +582,13 @@ function Home() {
 
               {/* Products Grid */}
               {isLoading ? (
-                <div className="products-grid">
+                <div className={`products-grid ${viewMode}`}>
                   {[...Array(8)].map((_, i) => (
                     <SkeletonCard key={i} />
                   ))}
                 </div>
               ) : filteredProducts.length > 0 ? (
-                <div className="products-grid">
+                <div className={`products-grid ${viewMode}`}>
                   {filteredProducts.map((item) => (
                     <ProductCard key={item._id} item={item} />
                   ))}
