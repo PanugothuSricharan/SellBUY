@@ -229,9 +229,23 @@ function Header(props) {
 
         {/* Center Section - Search */}
         <div className="header-center">
-          <Link to="/" className="home-btn" title="Go to Home">
+          <button 
+            className="home-btn" 
+            title="Go to Home"
+            onClick={() => {
+              // Clear search and navigate to home
+              if (props.handlesearch) {
+                props.handlesearch("");
+              }
+              navigate("/");
+              // Force page reload if already on home to reset filters
+              if (window.location.pathname === "/") {
+                window.location.reload();
+              }
+            }}
+          >
             <FaHome />
-          </Link>
+          </button>
           <div className="search-container">
             <input
               className="search-input"

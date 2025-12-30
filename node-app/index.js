@@ -114,6 +114,7 @@ const ProductSchema = new mongoose.Schema({
   pname: { type: String, index: true },
   pdesc: String,
   price: String,
+  isNegotiable: { type: Boolean, default: false },
   category: { type: String, index: true },
   pimage: String,
   pimage2: String,
@@ -452,6 +453,7 @@ app.post(
     const pname = req.body.pname;
     const pdesc = req.body.pdesc;
     const price = req.body.price;
+    const isNegotiable = req.body.isNegotiable === 'true' || req.body.isNegotiable === true;
     const category = req.body.category;
     const location = req.body.location;
     const condition = req.body.condition || "Good";
@@ -537,6 +539,7 @@ app.post(
       pname,
       pdesc,
       price,
+      isNegotiable,
       category,
       location,
       condition,
@@ -675,6 +678,7 @@ app.put(
         pname: req.body.pname || product.pname,
         pdesc: req.body.pdesc || product.pdesc,
         price: req.body.price || product.price,
+        isNegotiable: req.body.isNegotiable === 'true' || req.body.isNegotiable === true,
         category: req.body.category || product.category,
         location: req.body.location || product.location,
         condition: req.body.condition || product.condition,

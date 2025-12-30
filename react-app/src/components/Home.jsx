@@ -10,7 +10,6 @@ import {
   FaFilter,
   FaTimes,
   FaBoxOpen,
-  FaHome,
   FaTh,
   FaThLarge,
   FaList,
@@ -308,9 +307,25 @@ function Home() {
           >
             <FaHeart />
           </button>
+          {/* Stacked badges at bottom left of image */}
+          <div className="product-badges-overlay">
+            <span className="product-location-badge">
+              <FaMapMarkerAlt /> {item.location}
+            </span>
+            {item.condition && (
+              <span className="product-condition-badge">{item.condition}</span>
+            )}
+          </div>
       </div>
       <div className="product-info">
-        <h3 className="product-price">₹{Number(item.price).toLocaleString('en-IN')}</h3>
+        <div className="product-price-row">
+          <h3 className="product-price">₹{Number(item.price).toLocaleString('en-IN')}</h3>
+          {item.isNegotiable !== undefined && (
+            <span className={`negotiable-badge ${item.isNegotiable ? 'negotiable' : 'fixed'}`}>
+              {item.isNegotiable ? 'Negotiable' : 'Fixed'}
+            </span>
+          )}
+        </div>
         <p className="product-title">{item.pname}</p>
         <p className="product-category">{item.category}</p>
         {item.productAge && (
@@ -319,14 +334,6 @@ function Home() {
           </p>
         )}
         <p className="product-desc">{item.pdesc}</p>
-        <div className="product-badges">
-          <span className="product-location-badge">
-            <FaMapMarkerAlt /> {item.location}
-          </span>
-          {item.condition && (
-            <span className="product-condition-badge">{item.condition}</span>
-          )}
-        </div>
       </div>
     </div>
   );

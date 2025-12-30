@@ -18,7 +18,6 @@ import {
   FaLink,
   FaWhatsapp,
   FaPhone,
-  FaInstagram,
   FaCopy,
   FaCheck,
   FaHome,
@@ -43,6 +42,7 @@ function AddProduct() {
   const [pname, setPname] = useState("");
   const [pdesc, setPdesc] = useState("");
   const [price, setPrice] = useState("");
+  const [isNegotiable, setIsNegotiable] = useState(false);
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [condition, setCondition] = useState("");
@@ -227,6 +227,7 @@ function AddProduct() {
     formData.append("pname", pname);
     formData.append("pdesc", pdesc);
     formData.append("price", price);
+    formData.append("isNegotiable", isNegotiable);
     formData.append("category", category);
     formData.append("location", location);
     formData.append("condition", condition);
@@ -395,6 +396,17 @@ function AddProduct() {
                 {errors.price && (
                   <p className="error-message">{errors.price}</p>
                 )}
+                <div className="negotiable-toggle">
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={isNegotiable}
+                      onChange={(e) => setIsNegotiable(e.target.checked)}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <span className="toggle-label">{isNegotiable ? "Negotiable" : "Fixed Price"}</span>
+                </div>
               </div>
 
               <div className="form-group">
@@ -770,24 +782,12 @@ function AddProduct() {
 
               <div className="share-buttons">
                 <a 
-                  href={`https://wa.me/?text=${encodeURIComponent(`Check out my listing on SellBUY! 🛒\n\n${pname} - ₹${price}\n\n${window.location.origin}/product/${createdProductId}`)}`}
+                  href={`https://wa.me/?text=${encodeURIComponent(`🔥 Grab a deal on SellBUY! 🛒\n\n${pname}\n💰 ₹${price}${(condition === 'New' || condition === 'Sealed') ? `\n✨ Condition: ${condition}` : ''}\n\n👉 ${window.location.origin}/product/${createdProductId}`)}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="share-btn whatsapp"
                 >
-                  <FaWhatsapp /> WhatsApp
-                </a>
-                <a 
-                  href={`https://www.instagram.com/`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="share-btn instagram"
-                  onClick={() => {
-                    navigator.clipboard.writeText(`Check out my listing on SellBUY! 🛒\n\n${pname} - ₹${price}\n\n${window.location.origin}/product/${createdProductId}`);
-                    alert("Link copied! Paste it in your Instagram story or DM.");
-                  }}
-                >
-                  <FaInstagram /> Instagram
+                  <FaWhatsapp /> Share on WhatsApp
                 </a>
               </div>
             </div>

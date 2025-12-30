@@ -111,11 +111,39 @@
   box-shadow: var(--shadow-md);
 }
 
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-sm);
+}
+
 .product-detail-price {
   font-size: 2rem;
   font-weight: 700;
   color: var(--primary-dark);
-  margin: 0 0 var(--space-sm);
+  margin: 0;
+}
+
+.negotiable-tag {
+  font-size: var(--font-size-xs);
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.negotiable-tag.negotiable {
+  background: rgba(74, 222, 128, 0.15);
+  color: var(--success);
+  border: 1px solid rgba(74, 222, 128, 0.3);
+}
+
+.negotiable-tag.fixed {
+  background: rgba(107, 114, 128, 0.15);
+  color: var(--gray-600);
+  border: 1px solid rgba(107, 114, 128, 0.3);
 }
 
 .product-detail-title {
@@ -429,6 +457,18 @@
 [data-theme="dark"] .product-detail-price {
   color: var(--accent-orange);
   text-shadow: 0 0 20px var(--accent-orange-glow);
+}
+
+[data-theme="dark"] .negotiable-tag.negotiable {
+  background: rgba(74, 222, 128, 0.2);
+  color: var(--success);
+  border-color: rgba(74, 222, 128, 0.4);
+}
+
+[data-theme="dark"] .negotiable-tag.fixed {
+  background: rgba(156, 163, 175, 0.2);
+  color: var(--text-muted);
+  border-color: rgba(156, 163, 175, 0.3);
 }
 
 [data-theme="dark"] .product-detail-title {

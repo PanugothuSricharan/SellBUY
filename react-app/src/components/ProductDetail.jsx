@@ -215,9 +215,16 @@ function ProductDetail() {
               <div className="product-info-sidebar">
                 {/* Price Card */}
                 <div className="product-price-card">
-                  <h2 className="product-detail-price">
-                    ₹{product.price?.toLocaleString("en-IN")}
-                  </h2>
+                  <div className="price-row">
+                    <h2 className="product-detail-price">
+                      ₹{product.price?.toLocaleString("en-IN")}
+                    </h2>
+                    {product.isNegotiable !== undefined && (
+                      <span className={`negotiable-tag ${product.isNegotiable ? 'negotiable' : 'fixed'}`}>
+                        {product.isNegotiable ? 'Negotiable' : 'Fixed Price'}
+                      </span>
+                    )}
+                  </div>
                   <h1 className="product-detail-title">{product.pname}</h1>
 
                   <div className="product-meta">

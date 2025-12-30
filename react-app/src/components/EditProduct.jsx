@@ -40,6 +40,7 @@ function EditProduct() {
   const [pname, setPname] = useState("");
   const [pdesc, setPdesc] = useState("");
   const [price, setPrice] = useState("");
+  const [isNegotiable, setIsNegotiable] = useState(false);
   const [category, setCategory] = useState("");
   const [location, setLocation] = useState("");
   const [condition, setCondition] = useState("");
@@ -73,6 +74,7 @@ function EditProduct() {
           setPname(p.pname || "");
           setPdesc(p.pdesc || "");
           setPrice(p.price || "");
+          setIsNegotiable(p.isNegotiable || false);
           setCategory(p.category || "");
           setLocation(p.location || "");
           setCondition(p.condition || "");
@@ -164,6 +166,7 @@ function EditProduct() {
     formData.append("pname", pname);
     formData.append("pdesc", pdesc);
     formData.append("price", price);
+    formData.append("isNegotiable", isNegotiable);
     formData.append("category", category);
     formData.append("location", location);
     formData.append("condition", condition);
@@ -401,6 +404,17 @@ function EditProduct() {
                 {errors.price && (
                   <p className="error-message">{errors.price}</p>
                 )}
+                <div className="negotiable-toggle">
+                  <label className="toggle-switch">
+                    <input
+                      type="checkbox"
+                      checked={isNegotiable}
+                      onChange={(e) => setIsNegotiable(e.target.checked)}
+                    />
+                    <span className="toggle-slider"></span>
+                  </label>
+                  <span className="toggle-label">{isNegotiable ? "Negotiable" : "Fixed Price"}</span>
+                </div>
               </div>
 
               <div className="form-group">
