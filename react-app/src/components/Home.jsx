@@ -668,12 +668,12 @@ function Home() {
                 rel="noopener noreferrer"
                 className="footer-dev-link"
               >
-                Built with ☕ by a drone enthusiast
+                Built with ❤️ by a drone enthusiast
               </a>
             </div>
 
             <div className="footer-right">
-              <span>© 2025</span>
+              <span>© 2025 </span>
             </div>
           </div>
         </div>
