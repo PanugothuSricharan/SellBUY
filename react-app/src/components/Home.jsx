@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Header from "./Header";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -259,7 +259,7 @@ function Home() {
   };
 
   // Product Card Component
-  const ProductCard = ({ item }) => {
+  const ProductCard = React.memo(({ item }) => {
     const isLiked = likedProducts.has(item._id);
     
     return (
@@ -269,6 +269,8 @@ function Home() {
             src={getImageUrl(item.pimage)}
             alt={item.pname}
             className="product-image"
+            loading="lazy"
+            decoding="async"
           />
           <button
             className={`like-btn ${isLiked ? "liked" : ""}`}
@@ -298,7 +300,7 @@ function Home() {
       </div>
     </div>
   );
-};
+  });
 
   // Skeleton Loader
   const SkeletonCard = () => (

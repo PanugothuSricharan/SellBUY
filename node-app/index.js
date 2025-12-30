@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const compression = require("compression");
 const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
 const mongoose = require("mongoose");
@@ -11,6 +12,9 @@ require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// ============ COMPRESSION MIDDLEWARE ============
+app.use(compression());
 
 // ============ GOOGLE OAUTH CONFIGURATION ============
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "45965234451-stt1nfrj264pphitcqnve10ov8c54tgv.apps.googleusercontent.com";
@@ -84,27 +88,35 @@ const VALID_APPROVAL_STATUS = ["PENDING", "APPROVED", "REJECTED"];
 // ============ ADMIN CONFIGURATION ============
 const ADMIN_EMAIL = "imt_2021072@iiitm.ac.in";
 
-const Products = mongoose.model("Product", {
-  pname: String,
+// ============ PRODUCT SCHEMA WITH INDEXES ============
+const ProductSchema = new mongoose.Schema({
+  pname: { type: String, index: true },
   pdesc: String,
   price: String,
-  category: String,
+  category: { type: String, index: true },
   pimage: String,
   pimage2: String,
-  location: String,
+  location: { type: String, index: true },
   condition: { type: String, enum: VALID_CONDITIONS, default: "Good" },
-  productAge: String, // e.g., "6 months", "1 year"
-  originalUrl: String, // Amazon/Flipkart URL for specs
+  productAge: String,
+  originalUrl: String,
   contactPreference: {
     type: String,
     enum: VALID_CONTACT_PREFERENCES,
     default: "Both",
   },
-  status: { type: String, enum: VALID_STATUS, default: "Available" },
-  approvalStatus: { type: String, enum: VALID_APPROVAL_STATUS, default: "PENDING" },
-  addedBy: mongoose.Schema.Types.ObjectId,
-  createdAt: { type: Date, default: Date.now },
+  status: { type: String, enum: VALID_STATUS, default: "Available", index: true },
+  approvalStatus: { type: String, enum: VALID_APPROVAL_STATUS, default: "PENDING", index: true },
+  addedBy: { type: mongoose.Schema.Types.ObjectId, index: true },
+  createdAt: { type: Date, default: Date.now, index: true },
 });
+
+// Compound indexes for common queries
+ProductSchema.index({ approvalStatus: 1, location: 1 });
+ProductSchema.index({ approvalStatus: 1, category: 1 });
+ProductSchema.index({ addedBy: 1, createdAt: -1 });
+
+const Products = mongoose.model("Product", ProductSchema);
 
 // Routes
 app.get("/", (req, res) => {
