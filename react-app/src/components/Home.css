@@ -47,12 +47,12 @@
   height: 100%;
   overflow: hidden;
   pointer-events: none;
-  z-index: 0;
+  z-index: 1;
 }
 
 .shape {
   position: absolute;
-  opacity: 0.6;
+  opacity: 0.85;
 }
 
 .circle {
@@ -68,80 +68,80 @@
   width: 0 !important;
   height: 0 !important;
   background: transparent !important;
-  border-left: 20px solid transparent;
-  border-right: 20px solid transparent;
-  border-bottom: 35px solid rgba(255, 193, 7, 0.5);
+  border-left: 25px solid transparent;
+  border-right: 25px solid transparent;
+  border-bottom: 45px solid #ffd54f;
 }
 
 .donut {
   border-radius: 50%;
   background: transparent !important;
-  border: 8px solid rgba(233, 30, 99, 0.5);
+  border: 10px solid #ff7043;
 }
 
 /* Individual Shape Positions and Animations */
 .shape-1 {
-  width: 60px;
-  height: 60px;
-  background: rgba(255, 107, 53, 0.4);
+  width: 70px;
+  height: 70px;
+  background: #ff6b35;
   top: 10%;
   left: 5%;
   animation: floatBounce 6s ease-in-out infinite;
 }
 
 .shape-2 {
-  width: 40px;
-  height: 40px;
-  background: rgba(35, 229, 219, 0.4);
-  top: 20%;
+  width: 50px;
+  height: 50px;
+  background: #ffd54f;
+  top: 15%;
   right: 10%;
   animation: floatBounce 8s ease-in-out infinite 1s;
 }
 
 .shape-3 {
-  top: 60%;
+  top: 55%;
   left: 8%;
   animation: floatBounce 7s ease-in-out infinite 0.5s;
 }
 
 .shape-4 {
-  width: 30px;
-  height: 30px;
-  background: rgba(156, 39, 176, 0.4);
-  top: 70%;
-  right: 15%;
+  width: 40px;
+  height: 40px;
+  background: #ba68c8;
+  top: 65%;
+  right: 12%;
   animation: floatBounce 5s ease-in-out infinite 2s;
 }
 
 .shape-5 {
-  width: 50px;
-  height: 50px;
-  background: rgba(76, 175, 80, 0.4);
-  bottom: 15%;
-  left: 15%;
+  width: 55px;
+  height: 55px;
+  background: #81c784;
+  bottom: 20%;
+  left: 12%;
   animation: floatBounce 9s ease-in-out infinite 1.5s;
 }
 
 .shape-6 {
-  width: 25px;
-  height: 25px;
-  background: rgba(255, 87, 34, 0.4);
-  top: 40%;
-  right: 5%;
+  width: 35px;
+  height: 35px;
+  background: #ff8a65;
+  top: 35%;
+  right: 6%;
   animation: floatBounce 6s ease-in-out infinite 3s;
 }
 
 .shape-7 {
-  top: 15%;
-  left: 20%;
+  top: 20%;
+  left: 18%;
   animation: floatBounce 7s ease-in-out infinite 2.5s;
 }
 
 .shape-8 {
-  width: 45px;
-  height: 45px;
-  bottom: 25%;
-  right: 8%;
+  width: 55px;
+  height: 55px;
+  bottom: 30%;
+  right: 5%;
   animation: floatBounce 8s ease-in-out infinite 0.8s;
 }
 
