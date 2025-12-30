@@ -218,6 +218,13 @@
   transform: translateY(-1px);
 }
 
+/* Disabled state for quick links when no product name */
+.quick-link.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* Price Input */
 .price-input-wrapper {
   position: relative;

@@ -494,18 +494,20 @@ function EditProduct() {
               <div className="quick-search-links">
                 <span>Quick search:</span>
                 <a 
-                  href={`https://www.amazon.in/s?k=${encodeURIComponent(pname || 'product')}`}
+                  href={pname ? `https://www.amazon.in/s?k=${encodeURIComponent(pname)}` : '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="quick-link amazon"
+                  className={`quick-link amazon ${!pname ? 'disabled' : ''}`}
+                  onClick={(e) => !pname && e.preventDefault()}
                 >
                   🛒 Amazon
                 </a>
                 <a 
-                  href={`https://www.flipkart.com/search?q=${encodeURIComponent(pname || 'product')}`}
+                  href={pname ? `https://www.flipkart.com/search?q=${encodeURIComponent(pname)}` : '#'}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="quick-link flipkart"
+                  className={`quick-link flipkart ${!pname ? 'disabled' : ''}`}
+                  onClick={(e) => !pname && e.preventDefault()}
                 >
                   📦 Flipkart
                 </a>

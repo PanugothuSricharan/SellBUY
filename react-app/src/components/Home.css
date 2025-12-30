@@ -1502,6 +1502,11 @@
   border: 1px solid var(--border-color);
 }
 
+/* Mobile sticky bar - hidden on desktop, shown on mobile */
+.mobile-sticky-bar {
+  display: none;
+}
+
 /* Responsive Sidebar */
 @media (max-width: 900px) {
   .home-layout {
@@ -1648,11 +1653,6 @@
     color: var(--text-secondary);
     font-size: 12px;
   }
-}
-
-/* Hide mobile sticky bar on desktop */
-.mobile-sticky-bar {
-  display: none;
 }
 
 .results-info {
