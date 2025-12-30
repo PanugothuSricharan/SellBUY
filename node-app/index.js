@@ -6,10 +6,15 @@ const mongoose = require("mongoose");
 const multer = require("multer");
 const { CloudinaryStorage } = require("multer-storage-cloudinary");
 const cloudinary = require("cloudinary").v2;
+const { OAuth2Client } = require("google-auth-library");
 require("dotenv").config();
 
 const app = express();
 const PORT = process.env.PORT || 4000;
+
+// ============ GOOGLE OAUTH CONFIGURATION ============
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "45965234451-stt1nfrj264pphitcqnve10ov8c54tgv.apps.googleusercontent.com";
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
 // ============ CLOUDINARY CONFIGURATION ============
 cloudinary.config({
@@ -66,6 +71,7 @@ const Users = mongoose.model("User", {
   password: String,
   email: String,
   mobile: String,
+  googleId: String, // For Google OAuth users
   likedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
 });
 
@@ -131,12 +137,36 @@ app.post("/like-product", (req, res) => {
   let productId = req.body.productId;
   let userId = req.body.userId;
 
-  Users.updateOne({ _id: userId }, { $addToSet: { likedProducts: productId } })
-    .then(() => {
-      res.send({ message: "Product liked successfully" });
+  // Check if product is already liked
+  Users.findOne({ _id: userId })
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: "User not found" });
+      }
+
+      const isLiked = user.likedProducts.includes(productId);
+
+      if (isLiked) {
+        // Unlike: Remove from array
+        return Users.updateOne(
+          { _id: userId },
+          { $pull: { likedProducts: productId } }
+        ).then(() => {
+          res.send({ message: "unliked", isLiked: false });
+        });
+      } else {
+        // Like: Add to array
+        return Users.updateOne(
+          { _id: userId },
+          { $addToSet: { likedProducts: productId } }
+        ).then(() => {
+          res.send({ message: "liked", isLiked: true });
+        });
+      }
     })
-    .catch(() => {
-      res.send({ message: "Error liking product" });
+    .catch((err) => {
+      console.error("Error toggling like:", err);
+      res.status(500).send({ message: "Error toggling like" });
     });
 });
 
@@ -257,6 +287,95 @@ app.post("/login", (req, res) => {
     .catch((err) => {
       console.log(err);
       res.json({ message: "Error logging in user" });
+    });
+});
+
+// ============ GOOGLE AUTHENTICATION ============
+app.post("/google-login", async (req, res) => {
+  try {
+    const { credential } = req.body;
+
+    if (!credential) {
+      return res.status(400).json({ message: "No credential provided" });
+    }
+
+    // Verify the Google token
+    const ticket = await googleClient.verifyIdToken({
+      idToken: credential,
+      audience: GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, sub: googleId } = payload;
+
+    console.log("Google user:", { email, name, googleId });
+
+    // ============ INSTITUTE EMAIL VALIDATION ============
+    // Only allow @iiitm.ac.in emails
+    if (!email || !email.endsWith("@iiitm.ac.in")) {
+      return res.status(403).json({
+        message: "Only IIITM Gwalior college emails (@iiitm.ac.in) are allowed",
+        success: false,
+      });
+    }
+
+    // Check if user already exists with this email
+    let user = await Users.findOne({ email: email });
+
+    if (!user) {
+      // Create new user with Google data
+      user = new Users({
+        username: name || email.split("@")[0],
+        email: email,
+        password: `google_${googleId}`, // Placeholder - user can't login with password
+        mobile: "", // Can be updated later by user
+        googleId: googleId,
+      });
+      await user.save();
+      console.log("New Google user created:", user._id);
+    }
+
+    // Generate JWT token
+    const token = jwt.sign(
+      { data: user },
+      process.env.JWT_SECRET || "MY_SECRET_KEY",
+      { expiresIn: "7d" } // Longer expiry for Google users
+    );
+
+    return res.json({
+      message: "Google login successful",
+      success: true,
+      token: token,
+      userId: user._id,
+    });
+  } catch (error) {
+    console.error("Google login error:", error);
+    return res.status(500).json({
+      message: "Error verifying Google token",
+      success: false,
+    });
+  }
+});
+
+// ============ UPDATE USER MOBILE NUMBER ============
+app.put("/update-mobile/:userId", (req, res) => {
+  const userId = req.params.userId;
+  const { mobile } = req.body;
+
+  // Validate mobile number
+  if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
+    return res.status(400).json({
+      message: "Please provide a valid 10-digit mobile number",
+    });
+  }
+
+  Users.updateOne({ _id: userId }, { mobile: mobile })
+    .then(() => {
+      res.json({ message: "Mobile number updated successfully" });
+    })
+    .catch((err) => {
+      console.error("Error updating mobile:", err);
+      res.status(500).json({ message: "Error updating mobile number" });
     });
 });
 

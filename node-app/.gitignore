@@ -3,6 +3,9 @@
 .env.local
 .env.production
 
+# Google OAuth credentials - NEVER COMMIT!
+client_secret_*.json
+
 # Dependencies
 node_modules/
 
