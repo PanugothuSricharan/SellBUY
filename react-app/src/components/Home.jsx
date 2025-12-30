@@ -307,15 +307,6 @@ function Home() {
           >
             <FaHeart />
           </button>
-          {/* Stacked badges at bottom left of image - hidden in list view */}
-          <div className="product-badges-overlay">
-            <span className="product-location-badge">
-              <FaMapMarkerAlt /> {item.location}
-            </span>
-            {item.condition && (
-              <span className="product-condition-badge">{item.condition}</span>
-            )}
-          </div>
       </div>
       <div className="product-info">
         <div className="product-price-row">
@@ -329,13 +320,13 @@ function Home() {
         <p className="product-title">{item.pname}</p>
         <div className="product-category-row">
           <span className="product-category">{item.category}</span>
-          {/* Badges shown inline in list view */}
-          <div className="product-inline-badges">
-            <span className="inline-location-badge">
+          {/* Location and condition badges */}
+          <div className="product-info-badges">
+            <span className="info-location-badge">
               <FaMapMarkerAlt /> {item.location}
             </span>
             {item.condition && (
-              <span className="inline-condition-badge">{item.condition}</span>
+              <span className="info-condition-badge">{item.condition}</span>
             )}
           </div>
         </div>

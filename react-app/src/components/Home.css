@@ -410,16 +410,6 @@
     aspect-ratio: 1/1 !important;
   }
 
-  /* Hide overlay badges in list view */
-  .products-grid.list .product-badges-overlay {
-    display: none !important;
-  }
-
-  /* Show inline badges in list view */
-  .products-grid.list .product-inline-badges {
-    display: flex !important;
-  }
-
   .products-grid.list .product-info {
     padding: var(--space-sm) !important;
     display: flex;
@@ -695,30 +685,31 @@
   margin: 0 0 var(--space-xs);
 }
 
-/* Inline badges - hidden by default, shown in list view */
-.product-inline-badges {
-  display: none;
+/* Info badges - shown in all views */
+.product-info-badges {
+  display: flex;
   align-items: center;
   gap: 6px;
+  flex-wrap: wrap;
 }
 
-.inline-location-badge,
-.inline-condition-badge {
+.info-location-badge,
+.info-condition-badge {
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  padding: 2px 6px;
+  padding: 3px 8px;
   border-radius: var(--radius-sm);
   font-size: 10px;
   font-weight: 600;
 }
 
-.inline-location-badge {
+.info-location-badge {
   background: rgba(0, 47, 52, 0.9);
   color: white;
 }
 
-.inline-condition-badge {
+.info-condition-badge {
   background: var(--accent-orange);
   color: white;
 }
@@ -1269,12 +1260,12 @@
   box-shadow: 0 0 10px var(--accent-orange-glow);
 }
 
-[data-theme="dark"] .inline-location-badge {
+[data-theme="dark"] .info-location-badge {
   background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: #1a1a1a;
 }
 
-[data-theme="dark"] .inline-condition-badge {
+[data-theme="dark"] .info-condition-badge {
   background: linear-gradient(135deg, var(--accent-orange), #93c5fd);
   color: #1a1a1a;
 }
