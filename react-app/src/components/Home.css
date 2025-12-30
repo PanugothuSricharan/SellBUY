@@ -1632,6 +1632,107 @@
     font-weight: 500;
   }
 
+  /* Mobile Location Picker */
+  .mobile-location-picker {
+    position: relative;
+  }
+
+  .mobile-location-btn {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: none;
+    border: 1px solid var(--gray-300);
+    border-radius: var(--radius-md);
+    padding: 6px 10px;
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    color: var(--primary-dark);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mobile-location-btn:hover,
+  .mobile-location-btn:focus {
+    border-color: var(--accent-orange);
+    background: rgba(255, 107, 53, 0.05);
+  }
+
+  .mobile-location-btn svg:last-child {
+    font-size: 10px;
+    transition: transform 0.2s ease;
+  }
+
+  .mobile-location-btn svg:last-child.rotate {
+    transform: rotate(180deg);
+  }
+
+  [data-theme="dark"] .mobile-location-btn {
+    border-color: #444;
+    color: var(--text-primary);
+  }
+
+  [data-theme="dark"] .mobile-location-btn:hover,
+  [data-theme="dark"] .mobile-location-btn:focus {
+    border-color: var(--accent-orange);
+    background: rgba(255, 107, 53, 0.1);
+  }
+
+  .mobile-location-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    min-width: 180px;
+    background: var(--white);
+    border: 1px solid var(--gray-200);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 200;
+    margin-top: 4px;
+    max-height: 250px;
+    overflow-y: auto;
+  }
+
+  [data-theme="dark"] .mobile-location-dropdown {
+    background: #252525;
+    border-color: #444;
+  }
+
+  .mobile-location-option {
+    padding: 10px 12px;
+    font-size: var(--font-size-sm);
+    cursor: pointer;
+    transition: background 0.15s ease;
+    border-bottom: 1px solid var(--gray-100);
+  }
+
+  .mobile-location-option:last-child {
+    border-bottom: none;
+  }
+
+  .mobile-location-option:hover {
+    background: var(--gray-50);
+  }
+
+  .mobile-location-option.active {
+    background: rgba(255, 107, 53, 0.1);
+    color: var(--accent-orange);
+    font-weight: 600;
+  }
+
+  [data-theme="dark"] .mobile-location-option {
+    border-bottom-color: #333;
+  }
+
+  [data-theme="dark"] .mobile-location-option:hover {
+    background: #333;
+  }
+
+  [data-theme="dark"] .mobile-location-option.active {
+    background: rgba(255, 107, 53, 0.15);
+  }
+
   .mobile-filter-toggle {
     display: flex;
     align-items: center;
@@ -2164,5 +2265,60 @@
 
   [data-theme="dark"] .empty-state p {
     color: #999;
+  }
+}
+
+/* ============================================
+   MOBILE FLOATING SELL BUTTON
+   ============================================ */
+
+/* Hidden on desktop */
+.mobile-floating-sell-btn {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-floating-sell-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, var(--accent-orange) 0%, #ff8c5a 100%);
+    color: white;
+    padding: 14px 28px;
+    border-radius: var(--radius-full);
+    font-weight: 700;
+    font-size: var(--font-size-sm);
+    text-decoration: none;
+    box-shadow: 0 6px 24px rgba(255, 107, 53, 0.4), 0 2px 8px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .mobile-floating-sell-btn:hover {
+    transform: translateX(-50%) translateY(-2px);
+    box-shadow: 0 8px 32px rgba(255, 107, 53, 0.5), 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .mobile-floating-sell-btn:active {
+    transform: translateX(-50%) scale(0.95);
+  }
+
+  .mobile-floating-sell-btn svg {
+    font-size: 14px;
+  }
+
+  [data-theme="dark"] .mobile-floating-sell-btn {
+    box-shadow: 0 6px 24px rgba(255, 107, 53, 0.5), 0 2px 8px rgba(0, 0, 0, 0.3);
+  }
+
+  [data-theme="dark"] .mobile-floating-sell-btn:hover {
+    box-shadow: 0 8px 32px rgba(255, 107, 53, 0.6), 0 4px 12px rgba(0, 0, 0, 0.4);
   }
 }

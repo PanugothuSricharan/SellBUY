@@ -17,7 +17,7 @@ import {
   FaChevronDown,
 } from "react-icons/fa";
 import "./Home.css";
-import { LOCATIONS } from "./LocationList";
+import { LOCATIONS, BROWSE_LOCATIONS } from "./LocationList";
 import categories from "./CategoriesList";
 import API_URL, { getImageUrl } from "../constants";
 
@@ -50,6 +50,7 @@ function Home() {
     localStorage.getItem("productViewMode") || VIEW_MODES.GRID
   );
   const [filtersExpanded, setFiltersExpanded] = useState(false);
+  const [showMobileLocationDropdown, setShowMobileLocationDropdown] = useState(false);
 
   // Check for search query from URL (from ProductDetail page)
   useEffect(() => {
@@ -404,7 +405,30 @@ function Home() {
           <div className="mobile-sticky-bar">
             <div className="mobile-results-row">
               <span className="results-count">{filteredProducts.length} items</span>
-              <span className="location-info"><FaMapMarkerAlt /> {selectedLocation}</span>
+              <div className="mobile-location-picker">
+                <button 
+                  className="mobile-location-btn"
+                  onClick={() => setShowMobileLocationDropdown(!showMobileLocationDropdown)}
+                >
+                  <FaMapMarkerAlt /> {selectedLocation} <FaChevronDown className={showMobileLocationDropdown ? 'rotate' : ''} />
+                </button>
+                {showMobileLocationDropdown && (
+                  <div className="mobile-location-dropdown">
+                    {BROWSE_LOCATIONS.map((loc) => (
+                      <div 
+                        key={loc} 
+                        className={`mobile-location-option ${selectedLocation === loc ? 'active' : ''}`}
+                        onClick={() => {
+                          setSelectedLocation(loc);
+                          setShowMobileLocationDropdown(false);
+                        }}
+                      >
+                        {loc}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="view-mode-toggle">
                 <button
                   className={`view-btn ${viewMode === VIEW_MODES.GRID ? "active" : ""}`}
@@ -753,6 +777,13 @@ function Home() {
           </div>
         </div>
       </footer>
+
+      {/* Mobile Floating Sell Button */}
+      {localStorage.getItem("token") && (
+        <Link to="/add-product" className="mobile-floating-sell-btn">
+          <FaPlus /> SELL
+        </Link>
+      )}
     </div>
   );
 }

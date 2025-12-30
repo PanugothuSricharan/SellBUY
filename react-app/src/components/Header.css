@@ -758,11 +758,18 @@
   .header-container {
     flex-wrap: wrap;
     gap: var(--space-sm);
+    padding: var(--space-sm) var(--space-md);
   }
 
   .header-left {
-    width: 100%;
-    justify-content: space-between;
+    width: auto;
+    flex: 1;
+    justify-content: flex-start;
+  }
+
+  /* Hide location picker on mobile - moved to results bar */
+  .location-picker {
+    display: none;
   }
 
   .header-center {
@@ -775,14 +782,9 @@
     gap: var(--space-sm);
   }
 
-  .location-btn {
-    padding: var(--space-xs) var(--space-sm);
-  }
-
-  .location-dropdown {
-    left: auto;
-    right: 0;
-    min-width: 160px;
+  /* Hide +SELL button on mobile - using floating button instead */
+  .sell-btn {
+    display: none !important;
   }
 
   /* Fix user dropdown on mobile - center it on screen */
