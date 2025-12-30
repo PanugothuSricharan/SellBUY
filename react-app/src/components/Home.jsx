@@ -655,48 +655,28 @@ function Home() {
       <footer className="footer">
         <div className="container">
           <div className="footer-content">
-            <div className="footer-brand">
-              <span className="footer-logo">🛒 SellBUY</span>
-              <p>Your trusted IIITM campus marketplace</p>
-              <span className="developer-tagline">
-                🚁 Always FlyHigh 
-              </span>
+            <div className="footer-left">
+              <span className="footer-logo">SellBUY</span>
+              <span className="footer-divider">•</span>
+              <span className="footer-tagline">Campus Marketplace</span>
             </div>
             
-            {/* Open Source & Developer Section */}
-            <div className="footer-developer">
-              {/* <div className="open-source-banner">
-                <span className="open-source-icon">🚀</span>
-                <div className="open-source-text">
-                  <strong>Open Source Project</strong>
-                  <p>Hey juniors! This is an open-source platform. Grab the opportunity to build with me!</p>
-                </div>
-              </div> */}
+            <div className="footer-center">
               <a 
                 href="https://youtu.be/Ph_beNQsIp0?si=cpiAN9HihHm1-yg1" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="developer-profile-btn"
+                className="footer-dev-link"
               >
-                <span className="btn-icon">🚁</span>
-                <span className="btn-text">
-                  <strong>Wana know about me!!</strong>
-                  <small>Just a Glimpse what i like</small>
-                </span>
-                <FaExternalLinkAlt className="external-icon" />
+                Built with ☕ by a drone enthusiast
               </a>
             </div>
 
-            <div className="footer-links">
-              <span>© 2025 SellBUY.Every coin counts</span>
+            <div className="footer-right">
+              <span>© 2025</span>
             </div>
           </div>
         </div>
-        
-        {/* Flying Drone Animation */}
-        {/* <div className="drone-animation">
-          <span className="flying-drone">🚁</span>
-        </div> */}
       </footer>
     </div>
   );
