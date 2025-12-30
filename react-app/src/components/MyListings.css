@@ -88,6 +88,45 @@
   color: var(--accent-orange);
 }
 
+.stat-value.hidden {
+  color: #dc3545;
+}
+
+/* Blocked Banner */
+.blocked-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-md);
+  background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+  color: white;
+  padding: var(--space-lg);
+  border-radius: var(--radius-lg);
+  margin-bottom: var(--space-xl);
+  box-shadow: 0 4px 15px rgba(220, 53, 69, 0.3);
+}
+
+.blocked-banner svg {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.blocked-banner strong {
+  display: block;
+  font-size: 1.1rem;
+  margin-bottom: var(--space-xs);
+}
+
+.blocked-banner p {
+  margin: 0 0 var(--space-xs);
+  opacity: 0.95;
+}
+
+.blocked-banner small {
+  opacity: 0.8;
+  font-size: 0.85rem;
+}
+
 .stat-label {
   color: var(--text-muted);
   font-size: var(--font-size-sm);
@@ -217,7 +256,8 @@
   color: white;
 }
 
-.approval-badge.rejected {
+.approval-badge.rejected,
+.approval-badge.hidden {
   background: #dc3545;
   color: white;
 }

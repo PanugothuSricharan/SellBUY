@@ -15,6 +15,7 @@ import {
   FaShoppingCart,
   FaChevronDown,
   FaShieldAlt,
+  FaPhone,
 } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import { BROWSE_LOCATIONS, LOCATIONS } from "./LocationList";
@@ -32,6 +33,10 @@ function Header(props) {
   const [userName, setUserName] = useState("");
   const [userEmail, setUserEmail] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
+  const [showMobileModal, setShowMobileModal] = useState(false);
+  const [mobileNumber, setMobileNumber] = useState("");
+  const [mobileError, setMobileError] = useState("");
+  const [mobileSuccess, setMobileSuccess] = useState(false);
   const userMenuRef = useRef(null);
   const locationRef = useRef(null);
 
@@ -97,6 +102,44 @@ function Header(props) {
     }
   };
 
+  const handleEditMobile = () => {
+    setShowUserMenu(false);
+    setShowMobileModal(true);
+    setMobileError("");
+    setMobileSuccess(false);
+  };
+
+  const handleMobileSubmit = async () => {
+    // Validate mobile number
+    if (!mobileNumber.trim()) {
+      setMobileError("Please enter your mobile number");
+      return;
+    }
+    if (!/^[0-9]{10}$/.test(mobileNumber)) {
+      setMobileError("Please enter a valid 10-digit mobile number");
+      return;
+    }
+
+    const userId = localStorage.getItem("userId");
+    try {
+      const res = await axios.put(`${API_URL}/update-mobile/${userId}`, {
+        mobile: mobileNumber,
+      });
+      if (res.data.message.includes("success")) {
+        setMobileSuccess(true);
+        setTimeout(() => {
+          setShowMobileModal(false);
+          setMobileNumber("");
+          setMobileSuccess(false);
+        }, 1500);
+      } else {
+        setMobileError(res.data.message || "Failed to update mobile number");
+      }
+    } catch (err) {
+      setMobileError("Error updating mobile number. Please try again.");
+    }
+  };
+
   const toggleDarkMode = () => {
     const newMode = !isDarkMode;
     setIsDarkMode(newMode);
@@ -139,6 +182,7 @@ function Header(props) {
   };
 
   return (
+    <>
     <header className="header">
       <div className="header-container">
         {/* Left Section - Logo & Location */}
@@ -250,6 +294,13 @@ function Header(props) {
                       <FaHeart />
                       <span>Wishlist</span>
                     </Link>
+                    <button
+                      className="dropdown-item"
+                      onClick={handleEditMobile}
+                    >
+                      <FaPhone />
+                      <span>Edit Phone Number</span>
+                    </button>
                     {isAdmin && (
                       <>
                         <div className="dropdown-divider"></div>
@@ -313,6 +364,40 @@ function Header(props) {
         </div>
       </div>
     </header>
+
+    {/* Edit Phone Number Modal */}
+    {showMobileModal && (
+      <div className="mobile-modal-overlay" onClick={() => setShowMobileModal(false)}>
+        <div className="mobile-modal" onClick={(e) => e.stopPropagation()}>
+          <button className="modal-close" onClick={() => setShowMobileModal(false)}>×</button>
+          <h2>📱 {mobileSuccess ? "Updated!" : "Edit Phone Number"}</h2>
+          {mobileSuccess ? (
+            <p style={{ color: "var(--success-color)", textAlign: "center" }}>
+              ✓ Mobile number updated successfully!
+            </p>
+          ) : (
+            <>
+              <p>Update your phone number for buyers to contact you.</p>
+              <input
+                type="tel"
+                placeholder="Enter 10-digit mobile number"
+                value={mobileNumber}
+                onChange={(e) => {
+                  setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 10));
+                  setMobileError("");
+                }}
+                className="mobile-input"
+              />
+              {mobileError && <p className="mobile-error">{mobileError}</p>}
+              <button className="mobile-submit-btn" onClick={handleMobileSubmit}>
+                Update Number
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    )}
+    </>
   );
 }
 

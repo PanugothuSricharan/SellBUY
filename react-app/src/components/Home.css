@@ -88,6 +88,19 @@
   margin-bottom: var(--space-lg);
 }
 
+.hero-disclaimer {
+  background: rgba(255, 255, 255, 0.15);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 0.9rem;
+  margin-top: var(--space-md);
+  backdrop-filter: blur(4px);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
 /* Main Content */
 .main-content {
   flex: 1;

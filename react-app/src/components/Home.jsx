@@ -364,6 +364,11 @@ function Home() {
             </Link>
           )}
         </div>
+        {/* Disclaimer */}
+        <p className="hero-disclaimer">
+          🎓 This platform is built to help students buy and sell responsibly. 
+          Misuse of this service may lead to account suspension.
+        </p>
       </section>
 
       {/* Main Content */}

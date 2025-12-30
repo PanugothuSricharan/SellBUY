@@ -24,6 +24,8 @@ function MyListings() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
   const [actionLoading, setActionLoading] = useState(null);
+  const [isBlocked, setIsBlocked] = useState(false);
+  const [blockedReason, setBlockedReason] = useState("");
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -32,7 +34,23 @@ function MyListings() {
       return;
     }
     fetchMyProducts();
+    checkBlockedStatus();
   }, [navigate]);
+
+  const checkBlockedStatus = async () => {
+    const userId = localStorage.getItem("userId");
+    if (!userId) return;
+    
+    try {
+      const res = await axios.get(`${API_URL}/get-user/${userId}`);
+      if (res.data.user) {
+        setIsBlocked(res.data.user.isBlocked || false);
+        setBlockedReason(res.data.user.blockedReason || "");
+      }
+    } catch (err) {
+      console.error("Error checking blocked status:", err);
+    }
+  };
 
   const fetchMyProducts = () => {
     const userId = localStorage.getItem("userId");
@@ -143,9 +161,8 @@ function MyListings() {
         {/* Approval Status Badge */}
         {item.approvalStatus && (
           <span className={`approval-badge ${item.approvalStatus.toLowerCase()}`}>
-            {item.approvalStatus === "PENDING" && <><FaClock /> Pending Approval</>}
-            {item.approvalStatus === "APPROVED" && <><FaCheckCircle /> Approved</>}
-            {item.approvalStatus === "REJECTED" && <><FaTimesCircle /> Rejected</>}
+            {item.approvalStatus === "APPROVED" && <><FaCheckCircle /> Live</>}
+            {item.approvalStatus === "HIDDEN" && <><FaTimesCircle /> Hidden by Admin</>}
           </span>
         )}
       </div>
@@ -233,6 +250,20 @@ function MyListings() {
 
       <main className="listings-content">
         <div className="container">
+          {/* Account Blocked Banner */}
+          {isBlocked && (
+            <div className="blocked-banner">
+              <FaExclamationTriangle />
+              <div>
+                <strong>🚫 Your account has been suspended</strong>
+                <p>Your products are not visible on the marketplace. 
+                   {blockedReason && ` Reason: ${blockedReason}`}
+                </p>
+                <small>If you believe this is a mistake, please contact the admin.</small>
+              </div>
+            </div>
+          )}
+
           <div className="listings-header">
             <div>
               <h1>My Listings</h1>
@@ -252,9 +283,9 @@ function MyListings() {
               </div>
               <div className="stat-card">
                 <span className="stat-value available">
-                  {products.filter((p) => p.status !== "Sold").length}
+                  {products.filter((p) => p.status !== "Sold" && p.approvalStatus === "APPROVED").length}
                 </span>
-                <span className="stat-label">Available</span>
+                <span className="stat-label">Live</span>
               </div>
               <div className="stat-card">
                 <span className="stat-value sold">
@@ -262,6 +293,14 @@ function MyListings() {
                 </span>
                 <span className="stat-label">Sold</span>
               </div>
+              {products.filter((p) => p.approvalStatus === "HIDDEN").length > 0 && (
+                <div className="stat-card">
+                  <span className="stat-value hidden">
+                    {products.filter((p) => p.approvalStatus === "HIDDEN").length}
+                  </span>
+                  <span className="stat-label">Hidden</span>
+                </div>
+              )}
             </div>
           )}
 

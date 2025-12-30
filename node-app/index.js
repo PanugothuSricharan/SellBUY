@@ -77,16 +77,23 @@ const Users = mongoose.model("User", {
   mobile: String,
   googleId: String, // For Google OAuth users
   likedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
+  isBlocked: { type: Boolean, default: false }, // Admin can block sellers
+  blockedReason: String, // Reason for blocking
+  blockedAt: Date,
 });
 
 // ============ PRODUCT CONDITION ENUM ============
 const VALID_CONDITIONS = ["New", "Sealed", "Mint", "Used"];
 const VALID_STATUS = ["Available", "Sold"];
 const VALID_CONTACT_PREFERENCES = ["WhatsApp", "Phone Call", "Both"];
-const VALID_APPROVAL_STATUS = ["PENDING", "APPROVED", "REJECTED"];
+const VALID_APPROVAL_STATUS = ["APPROVED", "HIDDEN"]; // Products go live immediately, admin can hide
 
 // ============ ADMIN CONFIGURATION ============
 const ADMIN_EMAIL = "imt_2021072@iiitm.ac.in";
+
+// ============ RATE LIMIT CONFIGURATION ============
+const PRODUCTS_PER_DAY_LIMIT = 5;
+const RATE_LIMIT_HOURS = 24;
 
 // ============ PRODUCT SCHEMA WITH INDEXES ============
 const ProductSchema = new mongoose.Schema({
@@ -106,7 +113,8 @@ const ProductSchema = new mongoose.Schema({
     default: "Both",
   },
   status: { type: String, enum: VALID_STATUS, default: "Available", index: true },
-  approvalStatus: { type: String, enum: VALID_APPROVAL_STATUS, default: "PENDING", index: true },
+  approvalStatus: { type: String, enum: VALID_APPROVAL_STATUS, default: "APPROVED", index: true },
+  hiddenReason: String, // Why admin hid the product
   addedBy: { type: mongoose.Schema.Types.ObjectId, index: true },
   createdAt: { type: Date, default: Date.now, index: true },
 });
@@ -123,7 +131,7 @@ app.get("/", (req, res) => {
   res.send("Hello World!");
 });
 
-app.get("/search", (req, res) => {
+app.get("/search", async (req, res) => {
   let search = req.query.search;
   let location = req.query.location;
 
@@ -134,6 +142,7 @@ app.get("/search", (req, res) => {
       { category: { $regex: search, $options: "i" } },
       { pdesc: { $regex: search, $options: "i" } },
     ],
+    approvalStatus: "APPROVED", // Only show approved products
   };
 
   // Apply location filter if not "Entire Campus"
@@ -141,13 +150,21 @@ app.get("/search", (req, res) => {
     query.location = location;
   }
 
-  Products.find(query)
-    .then((results) => {
-      res.send({ message: "success", products: results });
-    })
-    .catch((err) => {
-      res.send({ message: "server err" });
-    });
+  try {
+    // Exclude products from blocked users
+    const blockedUsers = await Users.find({ isBlocked: true }).select('_id');
+    const blockedUserIds = blockedUsers.map(u => u._id);
+    
+    if (blockedUserIds.length > 0) {
+      query.addedBy = { $nin: blockedUserIds };
+    }
+
+    const results = await Products.find(query).sort({ createdAt: -1 });
+    res.send({ message: "success", products: results });
+  } catch (err) {
+    console.error("Search error:", err);
+    res.send({ message: "server err" });
+  }
 });
 
 app.post("/like-product", (req, res) => {
@@ -199,23 +216,38 @@ app.get("/get-product/:productId", (req, res) => {
     });
 });
 
-app.get("/get-user/:userId", (req, res) => {
-  Users.findOne({ _id: req.params.userId })
-    .then((result) => {
-      console.log(result, "user data");
-      res.send({
-        message: "success",
-        user: {
-          username: result.username,
-          email: result.email,
-          mobile: result.mobile,
-        },
-      });
-    })
-    .catch((err) => {
-      console.log(err);
-      res.send({ message: "server err" });
+app.get("/get-user/:userId", async (req, res) => {
+  try {
+    const result = await Users.findOne({ _id: req.params.userId });
+    if (!result) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    // Get remaining product uploads (5 per 24 hours)
+    const twentyFourHoursAgo = new Date(Date.now() - RATE_LIMIT_HOURS * 60 * 60 * 1000);
+    const recentProductCount = await Products.countDocuments({
+      addedBy: req.params.userId,
+      createdAt: { $gte: twentyFourHoursAgo }
     });
+    const remainingUploads = Math.max(0, PRODUCTS_PER_DAY_LIMIT - recentProductCount);
+
+    console.log(result, "user data");
+    res.send({
+      message: "success",
+      user: {
+        username: result.username,
+        email: result.email,
+        mobile: result.mobile,
+        isBlocked: result.isBlocked || false,
+        blockedReason: result.blockedReason || "",
+      },
+      remainingUploads: remainingUploads,
+      maxUploadsPerDay: PRODUCTS_PER_DAY_LIMIT,
+    });
+  } catch (err) {
+    console.log(err);
+    res.send({ message: "server err" });
+  }
 });
 
 app.post("/liked-products", (req, res) => {
@@ -399,7 +431,7 @@ app.put("/update-mobile/:userId", (req, res) => {
 app.post(
   "/add-product",
   upload.fields([{ name: "pimage" }, { name: "pimage2" }]),
-  (req, res) => {
+  async (req, res) => {
     console.log(req.body);
     console.log(req.files);
 
@@ -416,6 +448,26 @@ app.post(
     const pimage = req.files?.pimage?.[0]?.path;
     const pimage2 = req.files?.pimage2?.[0]?.path || null;
     const addedBy = req.body.userId;
+
+    // ============ RATE LIMIT CHECK ============
+    // Users can only add 5 products per 24 hours
+    try {
+      const twentyFourHoursAgo = new Date(Date.now() - RATE_LIMIT_HOURS * 60 * 60 * 1000);
+      const recentProductCount = await Products.countDocuments({
+        addedBy: addedBy,
+        createdAt: { $gte: twentyFourHoursAgo }
+      });
+
+      if (recentProductCount >= PRODUCTS_PER_DAY_LIMIT) {
+        return res.status(429).send({
+          message: `You can only add ${PRODUCTS_PER_DAY_LIMIT} products per ${RATE_LIMIT_HOURS} hours. Please try again later.`,
+          limitReached: true
+        });
+      }
+    } catch (err) {
+      console.error("Rate limit check error:", err);
+      // Continue anyway - don't block on rate limit check failure
+    }
 
     // ============ VALIDATION ============
     // Location is mandatory and must be a valid enum value
@@ -494,7 +546,7 @@ app.post(
   }
 );
 
-app.get("/get-products", (req, res) => {
+app.get("/get-products", async (req, res) => {
   const catName = req.query.catName;
   const location = req.query.location;
   let filter = {};
@@ -516,18 +568,21 @@ app.get("/get-products", (req, res) => {
 
   console.log("Filter:", filter);
 
-  // TODO: Add index on 'location' field for O(log n) query performance
-  // db.products.createIndex({ location: 1 })
-  // Consider compound index: { location: 1, category: 1 } for common queries
+  try {
+    // Get list of blocked user IDs to exclude their products
+    const blockedUsers = await Users.find({ isBlocked: true }).select('_id');
+    const blockedUserIds = blockedUsers.map(u => u._id);
+    
+    if (blockedUserIds.length > 0) {
+      filter.addedBy = { $nin: blockedUserIds };
+    }
 
-  Products.find(filter)
-    .then((result) => {
-      res.send({ message: "success", products: result });
-    })
-    .catch((err) => {
-      console.error("Error fetching products:", err);
-      res.status(500).send({ message: "server err" });
-    });
+    const result = await Products.find(filter).sort({ createdAt: -1 });
+    res.send({ message: "success", products: result });
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    res.status(500).send({ message: "server err" });
+  }
 });
 
 // ============ MY LISTINGS ============
@@ -772,7 +827,7 @@ app.get("/check-admin/:userId", async (req, res) => {
   }
 });
 
-// Get all pending products (admin only)
+// Get all pending products (admin only) - for moderation dashboard
 app.get("/admin/pending-products/:userId", async (req, res) => {
   try {
     const user = await Users.findById(req.params.userId);
@@ -780,18 +835,19 @@ app.get("/admin/pending-products/:userId", async (req, res) => {
       return res.status(403).json({ message: "Unauthorized: Admin access required" });
     }
 
-    const pendingProducts = await Products.find({ approvalStatus: "PENDING" })
-      .populate("addedBy", "username email mobile")
+    // Get all products for moderation (both approved and hidden)
+    const allProducts = await Products.find({})
+      .populate("addedBy", "username email mobile isBlocked")
       .sort({ createdAt: -1 });
 
-    res.json({ message: "success", products: pendingProducts });
+    res.json({ message: "success", products: allProducts });
   } catch (error) {
-    console.error("Error fetching pending products:", error);
+    console.error("Error fetching products for moderation:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// Get all products for admin (including pending and rejected)
+// Get all products for admin (all products visible)
 app.get("/admin/all-products/:userId", async (req, res) => {
   try {
     const user = await Users.findById(req.params.userId);
@@ -800,7 +856,7 @@ app.get("/admin/all-products/:userId", async (req, res) => {
     }
 
     const allProducts = await Products.find({})
-      .populate("addedBy", "username email mobile")
+      .populate("addedBy", "username email mobile isBlocked")
       .sort({ createdAt: -1 });
 
     res.json({ message: "success", products: allProducts });
@@ -810,8 +866,37 @@ app.get("/admin/all-products/:userId", async (req, res) => {
   }
 });
 
-// Approve a product (admin only)
-app.put("/admin/approve-product/:productId", async (req, res) => {
+// Hide a product from homepage (admin only) - "Remove from Home"
+app.put("/admin/hide-product/:productId", async (req, res) => {
+  try {
+    const { userId, reason } = req.body;
+    const user = await Users.findById(userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized: Admin access required" });
+    }
+
+    const product = await Products.findByIdAndUpdate(
+      req.params.productId,
+      { 
+        approvalStatus: "HIDDEN",
+        hiddenReason: reason || "Hidden by admin"
+      },
+      { new: true }
+    );
+
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+
+    res.json({ message: "Product hidden from homepage", product });
+  } catch (error) {
+    console.error("Error hiding product:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Unhide a product (restore to homepage)
+app.put("/admin/unhide-product/:productId", async (req, res) => {
   try {
     const { userId } = req.body;
     const user = await Users.findById(userId);
@@ -821,7 +906,10 @@ app.put("/admin/approve-product/:productId", async (req, res) => {
 
     const product = await Products.findByIdAndUpdate(
       req.params.productId,
-      { approvalStatus: "APPROVED" },
+      { 
+        approvalStatus: "APPROVED",
+        hiddenReason: null
+      },
       { new: true }
     );
 
@@ -829,35 +917,129 @@ app.put("/admin/approve-product/:productId", async (req, res) => {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json({ message: "Product approved successfully", product });
+    res.json({ message: "Product restored to homepage", product });
   } catch (error) {
-    console.error("Error approving product:", error);
+    console.error("Error unhiding product:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// Reject a product (admin only)
-app.put("/admin/reject-product/:productId", async (req, res) => {
+// Delete a product permanently (admin only)
+app.delete("/admin/delete-product/:productId", async (req, res) => {
   try {
-    const { userId, rejectionReason } = req.body;
+    const { userId } = req.body;
     const user = await Users.findById(userId);
     if (!user || user.email !== ADMIN_EMAIL) {
       return res.status(403).json({ message: "Unauthorized: Admin access required" });
     }
 
-    const product = await Products.findByIdAndUpdate(
-      req.params.productId,
-      { approvalStatus: "REJECTED" },
-      { new: true }
-    );
+    const product = await Products.findByIdAndDelete(req.params.productId);
 
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
-    res.json({ message: "Product rejected", product, reason: rejectionReason });
+    res.json({ message: "Product deleted permanently" });
   } catch (error) {
-    console.error("Error rejecting product:", error);
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Block a seller (admin only) - hides all their products
+app.put("/admin/block-seller/:sellerId", async (req, res) => {
+  try {
+    const { userId, reason } = req.body;
+    const user = await Users.findById(userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized: Admin access required" });
+    }
+
+    const seller = await Users.findByIdAndUpdate(
+      req.params.sellerId,
+      { 
+        isBlocked: true,
+        blockedReason: reason || "Blocked by admin",
+        blockedAt: new Date()
+      },
+      { new: true }
+    );
+
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    // Count how many products are affected
+    const productCount = await Products.countDocuments({ addedBy: req.params.sellerId });
+
+    res.json({ 
+      message: "Seller blocked successfully", 
+      seller: { username: seller.username, email: seller.email },
+      productsHidden: productCount
+    });
+  } catch (error) {
+    console.error("Error blocking seller:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Unblock a seller (admin only)
+app.put("/admin/unblock-seller/:sellerId", async (req, res) => {
+  try {
+    const { userId } = req.body;
+    const user = await Users.findById(userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized: Admin access required" });
+    }
+
+    const seller = await Users.findByIdAndUpdate(
+      req.params.sellerId,
+      { 
+        isBlocked: false,
+        blockedReason: null,
+        blockedAt: null
+      },
+      { new: true }
+    );
+
+    if (!seller) {
+      return res.status(404).json({ message: "Seller not found" });
+    }
+
+    res.json({ 
+      message: "Seller unblocked successfully", 
+      seller: { username: seller.username, email: seller.email }
+    });
+  } catch (error) {
+    console.error("Error unblocking seller:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Get all sellers (admin only)
+app.get("/admin/all-sellers/:userId", async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized: Admin access required" });
+    }
+
+    const sellers = await Users.find({}).select("username email isBlocked blockedReason blockedAt createdAt");
+    
+    // Get product count for each seller
+    const sellersWithProductCount = await Promise.all(
+      sellers.map(async (seller) => {
+        const productCount = await Products.countDocuments({ addedBy: seller._id });
+        return {
+          ...seller.toObject(),
+          productCount
+        };
+      })
+    );
+
+    res.json({ message: "success", sellers: sellersWithProductCount });
+  } catch (error) {
+    console.error("Error fetching sellers:", error);
     res.status(500).json({ message: "Server error" });
   }
 });

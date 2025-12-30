@@ -57,6 +57,9 @@ function AddProduct() {
   const [mobileNumber, setMobileNumber] = useState("");
   const [mobileError, setMobileError] = useState("");
   const [checkingMobile, setCheckingMobile] = useState(true);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const [remainingUploads, setRemainingUploads] = useState(5);
+  const [showLimitModal, setShowLimitModal] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -80,6 +83,10 @@ function AddProduct() {
         if (!userMobile || userMobile.trim() === "") {
           // No mobile number - show modal
           setShowMobileModal(true);
+        }
+        // Set remaining uploads
+        if (res.data.remainingUploads !== undefined) {
+          setRemainingUploads(res.data.remainingUploads);
         }
       }
     } catch (err) {
@@ -175,7 +182,25 @@ function AddProduct() {
   const handleApi = () => {
     if (!validateForm()) return;
 
+    // Check rate limit before submitting
+    if (remainingUploads <= 0) {
+      setShowLimitModal(true);
+      return;
+    }
+
+    // Validate image file sizes (max 5MB each)
+    const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+    if (pimage && pimage.size > MAX_FILE_SIZE) {
+      alert("Primary image is too large. Please use an image under 5MB.");
+      return;
+    }
+    if (pimage2 && pimage2.size > MAX_FILE_SIZE) {
+      alert("Secondary image is too large. Please use an image under 5MB.");
+      return;
+    }
+
     setIsSubmitting(true);
+    setUploadProgress(0);
     const url = API_URL + "/add-product";
 
     const formData = new FormData();
@@ -195,22 +220,45 @@ function AddProduct() {
     formData.append("userId", localStorage.getItem("userId"));
 
     axios
-      .post(url, formData)
+      .post(url, formData, {
+        timeout: 120000, // 2 minutes timeout for image uploads
+        onUploadProgress: (progressEvent) => {
+          const percentCompleted = Math.round(
+            (progressEvent.loaded * 100) / progressEvent.total
+          );
+          setUploadProgress(percentCompleted);
+        },
+      })
       .then((res) => {
         setIsSubmitting(false);
+        setUploadProgress(0);
         if (res.data.message && res.data.message.includes("success")) {
           setShowSuccess(true);
           setTimeout(() => {
             navigate("/");
           }, 2000);
+        } else if (res.data.limitReached) {
+          // Rate limit reached
+          setShowLimitModal(true);
         } else {
           alert(res.data.message || "Product added!");
         }
       })
       .catch((err) => {
         setIsSubmitting(false);
+        setUploadProgress(0);
         console.log(err);
-        alert(err.response?.data?.message || "Error Adding Product");
+        
+        // Handle specific error cases
+        if (err.code === "ECONNABORTED" || err.message?.includes("timeout")) {
+          alert("Upload timed out. Please check your internet connection and try again with smaller images.");
+        } else if (err.response?.status === 429) {
+          setShowLimitModal(true);
+        } else if (err.response?.status === 413) {
+          alert("Images are too large. Please use smaller images (under 5MB each).");
+        } else {
+          alert(err.response?.data?.message || "Error adding product. Please try again.");
+        }
       });
   };
 
@@ -548,15 +596,30 @@ function AddProduct() {
 
           {/* Submit */}
           <div className="submit-section">
+            {/* Remaining uploads info */}
+            <p className="uploads-remaining" style={{ 
+              fontSize: '0.9rem', 
+              color: remainingUploads <= 2 ? '#e53935' : '#666',
+              marginBottom: '1rem'
+            }}>
+              📦 You can post {remainingUploads} more product{remainingUploads !== 1 ? 's' : ''} today
+            </p>
+            
             <button
               className="submit-btn"
               onClick={handleApi}
-              disabled={isSubmitting}
+              disabled={isSubmitting || remainingUploads <= 0}
             >
               {isSubmitting ? (
                 <>
                   <span className="loading-spinner"></span>
-                  Posting...
+                  {uploadProgress > 0 && uploadProgress < 100 
+                    ? `Uploading... ${uploadProgress}%` 
+                    : 'Processing...'}
+                </>
+              ) : remainingUploads <= 0 ? (
+                <>
+                  ⏳ Daily Limit Reached
                 </>
               ) : (
                 <>
@@ -579,9 +642,9 @@ function AddProduct() {
             <div className="success-icon">
               <FaCheckCircle />
             </div>
-            <h2>Product Submitted!</h2>
+            <h2>Product Listed! 🎉</h2>
             <p>
-              Your product has been submitted for review. Admin will approve it shortly and it will be visible on the marketplace.
+              Your product is now live on the marketplace. Buyers can see it immediately!
             </p>
             <p style={{ fontSize: '14px', color: '#888', marginTop: '10px' }}>
               Redirecting to home...
@@ -633,6 +696,31 @@ function AddProduct() {
             <div className="mobile-modal-footer">
               <button className="btn-primary" onClick={handleMobileSubmit}>
                 Save & Continue
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Rate Limit Modal */}
+      {showLimitModal && (
+        <div className="modal-overlay">
+          <div className="mobile-modal">
+            <div className="mobile-modal-header">
+              <span style={{ fontSize: '3rem' }}>⏳</span>
+              <h2>Daily Limit Reached</h2>
+              <p>You can only post 5 products every 24 hours to ensure quality listings.</p>
+            </div>
+            
+            <div className="mobile-modal-body" style={{ textAlign: 'center' }}>
+              <p style={{ color: '#666', marginBottom: '1rem' }}>
+                Please come back later to post more products. Thank you for your understanding!
+              </p>
+            </div>
+
+            <div className="mobile-modal-footer">
+              <button className="btn-primary" onClick={() => navigate("/")}>
+                Back to Home
               </button>
             </div>
           </div>

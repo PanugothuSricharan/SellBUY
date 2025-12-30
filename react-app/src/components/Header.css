@@ -910,3 +910,125 @@
   background: rgba(255, 122, 77, 0.1);
   color: var(--accent-orange);
 }
+
+/* ============================================
+   MOBILE NUMBER EDIT MODAL
+   ============================================ */
+
+.mobile-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  backdrop-filter: blur(4px);
+}
+
+.mobile-modal {
+  background: white;
+  padding: 2rem;
+  border-radius: 16px;
+  width: 90%;
+  max-width: 400px;
+  text-align: center;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  animation: modalSlideIn 0.3s ease;
+}
+
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+[data-theme="dark"] .mobile-modal {
+  background: #1a1a1a;
+  color: #fff;
+}
+
+.mobile-modal .modal-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  color: #666;
+}
+
+[data-theme="dark"] .mobile-modal .modal-close {
+  color: #aaa;
+}
+
+.mobile-modal h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.5rem;
+}
+
+.mobile-modal p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+[data-theme="dark"] .mobile-modal p {
+  color: #aaa;
+}
+
+.mobile-modal .mobile-input {
+  width: 100%;
+  padding: 14px 18px;
+  border: 2px solid #e0e0e0;
+  border-radius: 10px;
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
+}
+
+.mobile-modal .mobile-input:focus {
+  border-color: var(--accent-orange);
+  box-shadow: 0 0 0 3px rgba(255, 122, 77, 0.1);
+}
+
+[data-theme="dark"] .mobile-modal .mobile-input {
+  background: #2a2a2a;
+  border-color: #444;
+  color: #fff;
+}
+
+.mobile-modal .mobile-error {
+  color: #e53935;
+  font-size: 0.9rem;
+  margin-top: 0.5rem;
+}
+
+.mobile-modal .mobile-submit-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #ff7a4d 0%, #ff5722 100%);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 1rem;
+  transition: all 0.3s ease;
+}
+
+.mobile-modal .mobile-submit-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(255, 87, 34, 0.4);
+}
