@@ -183,21 +183,9 @@
 
 /* Responsive */
 @media (max-width: 768px) {
+  /* Hide the categories bar on mobile - categories are shown in the filters sidebar instead */
   .categories-bar {
-    position: fixed;
-    top: 60px; /* Below mobile header */
-    left: 0;
-    right: 0;
-    z-index: 199; /* Just below header z-index (200) */
-  }
-
-  .categories-container {
-    padding: var(--space-xs) var(--space-sm);
-  }
-
-  .category-chip {
-    padding: var(--space-xs) var(--space-sm);
-    font-size: var(--font-size-xs);
+    display: none;
   }
 }
 

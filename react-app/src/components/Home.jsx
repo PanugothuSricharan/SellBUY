@@ -400,9 +400,84 @@ function Home() {
       {/* Main Content */}
       <main className="main-content">
         <div className="container">
+          {/* Mobile Sticky Bar - Results + Filters Toggle */}
+          <div className="mobile-sticky-bar">
+            <div className="mobile-results-row">
+              <span className="results-count">{filteredProducts.length} items</span>
+              <span className="location-info"><FaMapMarkerAlt /> {selectedLocation}</span>
+              <div className="view-mode-toggle">
+                <button
+                  className={`view-btn ${viewMode === VIEW_MODES.GRID ? "active" : ""}`}
+                  onClick={() => handleViewModeChange(VIEW_MODES.GRID)}
+                  title="Grid View"
+                >
+                  <FaThLarge />
+                </button>
+                <button
+                  className={`view-btn ${viewMode === VIEW_MODES.COMPACT ? "active" : ""}`}
+                  onClick={() => handleViewModeChange(VIEW_MODES.COMPACT)}
+                  title="Compact View"
+                >
+                  <FaTh />
+                </button>
+                <button
+                  className={`view-btn ${viewMode === VIEW_MODES.LIST ? "active" : ""}`}
+                  onClick={() => handleViewModeChange(VIEW_MODES.LIST)}
+                  title="List View"
+                >
+                  <FaList />
+                </button>
+              </div>
+            </div>
+            <div className="mobile-filter-toggle" onClick={() => setFiltersExpanded(!filtersExpanded)}>
+              <span><FaFilter /> Filters {hasActiveFilters() && <span className="filter-count">{selectedCategories.length + selectedConditions.length + (priceRange.min > 0 || priceRange.max < maxPriceLimit ? 1 : 0)}</span>}</span>
+              <span className={`expand-arrow ${filtersExpanded ? 'open' : ''}`}><FaChevronDown /></span>
+            </div>
+            {filtersExpanded && (
+              <div className="mobile-filter-content">
+                {/* Price Range */}
+                <div className="filter-group">
+                  <h4 className="filter-title">Price Range</h4>
+                  <div className="price-inputs-compact">
+                    <div className="price-input-compact">
+                      <span>₹</span>
+                      <input type="number" value={priceRange.min} onChange={(e) => setPriceRange({...priceRange, min: Math.max(0, parseInt(e.target.value) || 0)})} min="0" max={priceRange.max} />
+                    </div>
+                    <span className="price-dash">-</span>
+                    <div className="price-input-compact">
+                      <span>₹</span>
+                      <input type="number" value={priceRange.max} onChange={(e) => setPriceRange({...priceRange, max: Math.min(maxPriceLimit, parseInt(e.target.value) || maxPriceLimit)})} min={priceRange.min} max={maxPriceLimit} />
+                    </div>
+                  </div>
+                </div>
+                {/* Condition */}
+                <div className="filter-group">
+                  <h4 className="filter-title">Condition</h4>
+                  <div className="filter-chips-compact">
+                    {PRODUCT_CONDITIONS.map((cond) => (
+                      <button key={cond} className={`filter-chip-compact ${selectedConditions.includes(cond) ? "active" : ""}`} onClick={() => toggleCondition(cond)}>{cond}</button>
+                    ))}
+                  </div>
+                </div>
+                {/* Categories */}
+                <div className="filter-group">
+                  <h4 className="filter-title">Categories</h4>
+                  <div className="filter-chips-compact category-list">
+                    {categories.map((cat) => (
+                      <button key={cat} className={`filter-chip-compact ${selectedCategories.includes(cat) ? "active" : ""}`} onClick={() => handleCategory(cat)}>{cat}</button>
+                    ))}
+                  </div>
+                </div>
+                {hasActiveFilters() && (
+                  <button className="clear-all-btn" onClick={clearAllFilters}><FaTimes /> Clear All Filters</button>
+                )}
+              </div>
+            )}
+          </div>
+
           {/* Layout with Sidebar Filters */}
           <div className="home-layout">
-            {/* Filters Sidebar */}
+            {/* Filters Sidebar - Desktop Only */}
             <aside className={`filters-sidebar ${filtersExpanded ? 'expanded' : 'collapsed'}`}>
               <div className="sidebar-header" onClick={() => setFiltersExpanded(!filtersExpanded)}>
                 <h3 className="sidebar-title">
