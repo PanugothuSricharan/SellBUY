@@ -379,6 +379,18 @@ function Home() {
 
       {/* Hero Banner */}
       <section className="hero-section">
+        {/* Floating Cartoon Shapes */}
+        <div className="floating-shapes">
+          <span className="shape circle shape-1"></span>
+          <span className="shape square shape-2"></span>
+          <span className="shape triangle shape-3"></span>
+          <span className="shape circle shape-4"></span>
+          <span className="shape square shape-5"></span>
+          <span className="shape circle shape-6"></span>
+          <span className="shape triangle shape-7"></span>
+          <span className="shape donut shape-8"></span>
+        </div>
+        
         <div className="hero-content">
           <h1 className="hero-title">Buy & Sell Within Your Campus</h1>
           <p className="hero-subtitle">

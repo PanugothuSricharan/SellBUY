@@ -38,6 +38,128 @@
   }
 }
 
+/* Floating Cartoon Shapes */
+.floating-shapes {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.shape {
+  position: absolute;
+  opacity: 0.6;
+}
+
+.circle {
+  border-radius: 50%;
+}
+
+.square {
+  border-radius: 8px;
+  transform: rotate(15deg);
+}
+
+.triangle {
+  width: 0 !important;
+  height: 0 !important;
+  background: transparent !important;
+  border-left: 20px solid transparent;
+  border-right: 20px solid transparent;
+  border-bottom: 35px solid rgba(255, 193, 7, 0.5);
+}
+
+.donut {
+  border-radius: 50%;
+  background: transparent !important;
+  border: 8px solid rgba(233, 30, 99, 0.5);
+}
+
+/* Individual Shape Positions and Animations */
+.shape-1 {
+  width: 60px;
+  height: 60px;
+  background: rgba(255, 107, 53, 0.4);
+  top: 10%;
+  left: 5%;
+  animation: floatBounce 6s ease-in-out infinite;
+}
+
+.shape-2 {
+  width: 40px;
+  height: 40px;
+  background: rgba(35, 229, 219, 0.4);
+  top: 20%;
+  right: 10%;
+  animation: floatBounce 8s ease-in-out infinite 1s;
+}
+
+.shape-3 {
+  top: 60%;
+  left: 8%;
+  animation: floatBounce 7s ease-in-out infinite 0.5s;
+}
+
+.shape-4 {
+  width: 30px;
+  height: 30px;
+  background: rgba(156, 39, 176, 0.4);
+  top: 70%;
+  right: 15%;
+  animation: floatBounce 5s ease-in-out infinite 2s;
+}
+
+.shape-5 {
+  width: 50px;
+  height: 50px;
+  background: rgba(76, 175, 80, 0.4);
+  bottom: 15%;
+  left: 15%;
+  animation: floatBounce 9s ease-in-out infinite 1.5s;
+}
+
+.shape-6 {
+  width: 25px;
+  height: 25px;
+  background: rgba(255, 87, 34, 0.4);
+  top: 40%;
+  right: 5%;
+  animation: floatBounce 6s ease-in-out infinite 3s;
+}
+
+.shape-7 {
+  top: 15%;
+  left: 20%;
+  animation: floatBounce 7s ease-in-out infinite 2.5s;
+}
+
+.shape-8 {
+  width: 45px;
+  height: 45px;
+  bottom: 25%;
+  right: 8%;
+  animation: floatBounce 8s ease-in-out infinite 0.8s;
+}
+
+@keyframes floatBounce {
+  0%, 100% {
+    transform: translateY(0) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-15px) rotate(5deg);
+  }
+  50% {
+    transform: translateY(-25px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-10px) rotate(-5deg);
+  }
+}
+
 .hero-section::before {
   content: "";
   position: absolute;
@@ -921,6 +1043,18 @@
     font-size: var(--font-size-base);
   }
 
+  /* Hide some shapes on mobile for performance */
+  .floating-shapes .shape-3,
+  .floating-shapes .shape-5,
+  .floating-shapes .shape-7 {
+    display: none;
+  }
+
+  .floating-shapes .shape {
+    opacity: 0.4;
+    transform: scale(0.7);
+  }
+
   .section-header {
     flex-direction: column;
     align-items: flex-start;
@@ -1081,6 +1215,35 @@
 
 [data-theme="dark"] .hero-subtitle {
   color: var(--text-secondary);
+}
+
+/* Dark Theme Floating Shapes */
+[data-theme="dark"] .shape-1 {
+  background: rgba(255, 107, 53, 0.3);
+}
+
+[data-theme="dark"] .shape-2 {
+  background: rgba(255, 183, 77, 0.3);
+}
+
+[data-theme="dark"] .shape-4 {
+  background: rgba(255, 138, 101, 0.3);
+}
+
+[data-theme="dark"] .shape-5 {
+  background: rgba(255, 167, 38, 0.3);
+}
+
+[data-theme="dark"] .shape-6 {
+  background: rgba(255, 112, 67, 0.3);
+}
+
+[data-theme="dark"] .triangle {
+  border-bottom-color: rgba(255, 193, 7, 0.3);
+}
+
+[data-theme="dark"] .donut {
+  border-color: rgba(255, 138, 101, 0.3);
 }
 
 /* Dark Product Cards */
