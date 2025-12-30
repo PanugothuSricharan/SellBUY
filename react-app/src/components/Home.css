@@ -893,8 +893,10 @@
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
+  /* Add padding for fixed categories bar */
   .hero-section {
     padding: var(--space-xl) var(--space-md);
+    margin-top: 45px; /* Space for fixed categories bar */
   }
 
   .hero-title {
@@ -1511,22 +1513,41 @@
 @media (max-width: 768px) {
   .home-layout {
     grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  /* Mobile sticky section - results bar with view toggles */
+  .results-bar {
+    position: sticky;
+    top: 105px; /* Below fixed header (60px) + fixed categories (45px) */
+    z-index: 49;
+    margin: 0 calc(-1 * var(--space-md));
+    border-radius: 0;
+    padding: var(--space-sm) var(--space-md);
+    background: var(--white);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  [data-theme="dark"] .results-bar {
+    background: #1a1a1a;
   }
 
   .filters-sidebar {
     position: sticky;
-    top: 110px; /* Below header (~60px) + categories (~50px) */
+    top: 150px; /* Below header + categories + results bar (~45px) */
     max-height: none;
     padding: var(--space-sm) var(--space-md);
     margin: 0 calc(-1 * var(--space-md));
     border-radius: 0;
-    z-index: 50;
+    z-index: 48;
     background: var(--white);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    border-top: 1px solid var(--gray-200);
   }
 
   [data-theme="dark"] .filters-sidebar {
     background: #1a1a1a;
+    border-top-color: #333;
   }
 
   /* Show expand arrow on mobile */
