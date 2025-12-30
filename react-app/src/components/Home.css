@@ -284,16 +284,26 @@
   .products-grid.compact {
     grid-template-columns: repeat(3, 1fr);
   }
+  
+  /* List view on tablets */
+  .products-grid.list .product-image-container {
+    width: 180px;
+    min-width: 180px;
+  }
 }
 
-@media (max-width: 576px) {
+@media (max-width: 768px) {
   .products-grid,
-  .products-grid.grid,
-  .products-grid.compact {
-    grid-template-columns: 1fr;
+  .products-grid.grid {
+    grid-template-columns: repeat(2, 1fr);
     gap: var(--space-md);
   }
   
+  .products-grid.compact {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  /* List view on small tablets */
   .products-grid.list .product-card {
     flex-direction: column;
     max-height: none;
@@ -304,69 +314,124 @@
     min-width: unset;
   }
 
-  .view-mode-toggle {
-    display: none;
-  }
-
-  /* Mobile Product Card Improvements */
-  .product-card {
-    border-radius: var(--radius-lg);
-    margin: 0;
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
-  }
-
-  .product-image-container {
-    aspect-ratio: 16/10;
-  }
-
   .product-info {
-    padding: var(--space-sm) var(--space-md);
+    padding: var(--space-sm);
   }
 
   .product-price {
-    font-size: var(--font-size-lg);
-    margin-bottom: 4px;
+    font-size: var(--font-size-base);
   }
 
   .product-title {
     font-size: var(--font-size-sm);
-    margin-bottom: 4px;
+  }
+}
+
+@media (max-width: 576px) {
+  /* Force single column on all view modes */
+  .products-grid,
+  .products-grid.grid,
+  .products-grid.compact,
+  .products-grid.list {
+    grid-template-columns: 1fr !important;
+    gap: var(--space-md);
+  }
+  
+  /* List view on mobile - stack vertically */
+  .products-grid.list .product-card {
+    flex-direction: column !important;
+    max-height: none !important;
+  }
+  
+  .products-grid.list .product-image-container {
+    width: 100% !important;
+    min-width: unset !important;
+    aspect-ratio: 16/10 !important;
+  }
+
+  .products-grid.list .product-info {
+    padding: var(--space-sm) var(--space-md) !important;
+  }
+
+  /* Compact view on mobile - show description */
+  .products-grid.compact .product-desc {
+    display: block;
+  }
+
+  .products-grid.compact .product-info {
+    padding: var(--space-sm) var(--space-md);
+  }
+
+  /* Hide view mode toggle on mobile */
+  .view-mode-toggle {
+    display: none !important;
+  }
+
+  /* Mobile Product Card Improvements */
+  .product-card {
+    border-radius: var(--radius-lg) !important;
+    margin: 0 !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  .product-image-container {
+    aspect-ratio: 16/10 !important;
+    width: 100% !important;
+  }
+
+  .product-info {
+    padding: var(--space-sm) var(--space-md) !important;
+  }
+
+  .product-price {
+    font-size: var(--font-size-lg) !important;
+    margin-bottom: 4px !important;
+  }
+
+  .product-title {
+    font-size: var(--font-size-sm) !important;
+    margin-bottom: 4px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 
   .product-category {
-    font-size: var(--font-size-xs);
-    margin-bottom: 4px;
+    font-size: var(--font-size-xs) !important;
+    margin-bottom: 4px !important;
   }
 
   .product-desc {
-    font-size: var(--font-size-xs);
-    -webkit-line-clamp: 1;
+    font-size: var(--font-size-xs) !important;
+    -webkit-line-clamp: 1 !important;
+    line-clamp: 1 !important;
   }
 
   .product-age {
-    font-size: 11px;
-    margin-bottom: 2px;
+    font-size: 11px !important;
+    margin-bottom: 2px !important;
   }
 
   .product-location-badge {
-    font-size: 10px;
-    padding: 4px 8px;
+    font-size: 10px !important;
+    padding: 4px 8px !important;
   }
 
   .product-condition-badge {
-    font-size: 10px;
-    padding: 3px 6px;
+    font-size: 10px !important;
+    padding: 3px 6px !important;
   }
 
   .like-btn {
-    width: 36px;
-    height: 36px;
+    width: 36px !important;
+    height: 36px !important;
   }
 
   .like-btn svg {
-    font-size: 14px;
+    font-size: 14px !important;
   }
 }
 
