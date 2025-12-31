@@ -342,6 +342,7 @@
 
   .product-info {
     padding: var(--space-sm);
+    padding-bottom: calc(var(--space-sm) + 34px);
   }
 
   .product-price {
@@ -376,6 +377,7 @@
 
   .products-grid.compact .product-info {
     padding: var(--space-xs);
+    padding-bottom: calc(var(--space-xs) + 30px);
   }
 
   .products-grid.compact .product-title {
@@ -411,7 +413,9 @@
   }
 
   .products-grid.list .product-info {
+    position: relative;
     padding: var(--space-sm) !important;
+    padding-bottom: var(--space-sm) !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -419,6 +423,7 @@
 
   /* In list view, badges should be inline */
   .products-grid.list .product-info-badges {
+    position: static;
     flex-direction: row;
     align-items: center;
     gap: 6px;
@@ -651,7 +656,9 @@
 }
 
 .product-info {
+  position: relative;
   padding: var(--space-md);
+  padding-bottom: calc(var(--space-md) + 40px);
 }
 
 .product-price {
@@ -692,11 +699,14 @@
   margin: 0 0 var(--space-xs);
 }
 
-/* Info badges - stacked by default, inline in list view */
+/* Info badges - stacked bottom-right by default, inline in list view */
 .product-info-badges {
+  position: absolute;
+  right: var(--space-md);
+  bottom: var(--space-md);
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: flex-end;
   gap: 4px;
 }
 
