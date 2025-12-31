@@ -214,10 +214,6 @@
   font-size: var(--font-size-sm);
 }
 
-.products-grid.compact .product-desc {
-  display: none;
-}
-
 /* List View Mode */
 .products-grid.list {
   grid-template-columns: 1fr;
