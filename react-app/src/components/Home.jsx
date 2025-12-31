@@ -51,6 +51,24 @@ function Home() {
   const [filtersExpanded, setFiltersExpanded] = useState(false);
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileLocationOpen, setMobileLocationOpen] = useState(false);
+  const [showLocationTip, setShowLocationTip] = useState(false);
+
+  // Show location tip for first-time users
+  useEffect(() => {
+    const hasSeenLocationTip = localStorage.getItem("hasSeenLocationTip");
+    if (!hasSeenLocationTip) {
+      // Show tip after a short delay
+      const timer = setTimeout(() => {
+        setShowLocationTip(true);
+      }, 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
+
+  const dismissLocationTip = () => {
+    setShowLocationTip(false);
+    localStorage.setItem("hasSeenLocationTip", "true");
+  };
 
   // Check for search query from URL (from ProductDetail page)
   useEffect(() => {
@@ -430,7 +448,17 @@ function Home() {
           {/* Mobile Results Row - Simple count display */}
           <div className="mobile-results-info">
             <span className="results-count">{filteredProducts.length} items</span>
-            <span className="location-badge"><FaMapMarkerAlt /> {selectedLocation}</span>
+            <div className="location-badge-wrapper">
+              <span className="location-badge" onClick={() => setMobileLocationOpen(true)}>
+                <FaMapMarkerAlt /> {selectedLocation}
+              </span>
+              {showLocationTip && (
+                <div className="location-tooltip">
+                  <button className="tooltip-close" onClick={dismissLocationTip}>×</button>
+                  <p>💡 <strong>Pro tip:</strong> Filter products by your hostel or block to find items nearby!</p>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Layout with Sidebar Filters */}
@@ -592,9 +620,17 @@ function Home() {
                   <span className="results-count">
                     {filteredProducts.length} items
                   </span>
-                  <span className="location-info">
-                    <FaMapMarkerAlt /> {selectedLocation}
-                  </span>
+                  <div className="location-info-wrapper">
+                    <span className="location-info">
+                      <FaMapMarkerAlt /> {selectedLocation}
+                    </span>
+                    {showLocationTip && (
+                      <div className="location-tooltip desktop-tooltip">
+                        <button className="tooltip-close" onClick={dismissLocationTip}>×</button>
+                        <p>💡 <strong>Pro tip:</strong> Use the location filter in the header to find products in your hostel or block!</p>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 <div className="view-mode-toggle">
                   <button
@@ -807,11 +843,18 @@ function Home() {
 
       {/* Mobile Floating Location FAB */}
       <div className={`mobile-fab-location ${mobileLocationOpen ? 'open' : ''}`}>
+        {showLocationTip && (
+          <div className="fab-tooltip">
+            <span>Filter by your hostel</span>
+            <button onClick={dismissLocationTip}>×</button>
+          </div>
+        )}
         <button 
-          className="fab-trigger location-fab"
+          className={`fab-trigger location-fab ${showLocationTip ? 'pulse' : ''}`}
           onClick={() => {
             setMobileLocationOpen(!mobileLocationOpen);
             setMobileFilterOpen(false);
+            dismissLocationTip();
           }}
         >
           <FaMapMarkerAlt />
@@ -819,9 +862,10 @@ function Home() {
         
         <div className="fab-panel location-panel">
           <div className="fab-panel-header">
-            <h3><FaMapMarkerAlt /> Location</h3>
+            <h3><FaMapMarkerAlt /> Select Location</h3>
             <button className="close-fab" onClick={() => setMobileLocationOpen(false)}><FaTimes /></button>
           </div>
+          <p className="location-hint">Find products closer to you by selecting your hostel or block</p>
           
           <div className="location-options">
             {BROWSE_LOCATIONS.map((loc) => (

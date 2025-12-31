@@ -2649,4 +2649,200 @@
     max-height: 200px;
     overflow-y: auto;
   }
+
+  /* Mobile FAB Tooltip */
+  .fab-tooltip {
+    position: absolute;
+    right: 60px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--primary-dark);
+    color: white;
+    padding: 8px 12px;
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-xs);
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    animation: slideInRight 0.3s ease;
+  }
+
+  .fab-tooltip::after {
+    content: '';
+    position: absolute;
+    right: -6px;
+    top: 50%;
+    transform: translateY(-50%);
+    border-left: 6px solid var(--primary-dark);
+    border-top: 6px solid transparent;
+    border-bottom: 6px solid transparent;
+  }
+
+  .fab-tooltip button {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateY(-50%) translateX(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(-50%) translateX(0);
+    }
+  }
+
+  /* Pulse animation for FAB */
+  .fab-trigger.pulse {
+    animation: fabPulse 2s infinite;
+  }
+
+  @keyframes fabPulse {
+    0%, 100% {
+      box-shadow: -4px 4px 16px rgba(0, 0, 0, 0.2);
+    }
+    50% {
+      box-shadow: -4px 4px 16px rgba(0, 0, 0, 0.2), 0 0 0 8px rgba(96, 165, 250, 0.3);
+    }
+  }
+
+  /* Location hint in panel */
+  .location-hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-secondary);
+    margin: 0 0 var(--space-md) 0;
+    padding: 0 var(--space-sm);
+  }
+}
+
+/* ============================================
+   LOCATION TOOLTIP STYLES
+   ============================================ */
+
+/* Desktop tooltip - appears near location info */
+.location-info-wrapper,
+.location-badge-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.location-tooltip {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  background: linear-gradient(135deg, var(--primary-dark) 0%, #004a52 100%);
+  color: white;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  box-shadow: 0 8px 24px rgba(0, 47, 52, 0.25);
+  z-index: 100;
+  min-width: 280px;
+  animation: tooltipFadeIn 0.3s ease;
+}
+
+.location-tooltip::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  right: 20px;
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-bottom: 6px solid var(--primary-dark);
+}
+
+.location-tooltip p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.location-tooltip strong {
+  color: #93c5fd;
+}
+
+.tooltip-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.2);
+  border: none;
+  color: white;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.tooltip-close:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@keyframes tooltipFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Desktop specific tooltip position */
+.desktop-tooltip {
+  left: 0;
+  right: auto;
+}
+
+.desktop-tooltip::before {
+  left: 20px;
+  right: auto;
+}
+
+/* Dark mode tooltip */
+[data-theme="dark"] .location-tooltip {
+  background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+  border: 1px solid rgba(96, 165, 250, 0.3);
+}
+
+[data-theme="dark"] .location-tooltip::before {
+  border-bottom-color: #1e3a5f;
+}
+
+/* Mobile tooltip - hide desktop version */
+@media (max-width: 768px) {
+  .desktop-tooltip {
+    display: none;
+  }
+  
+  .location-badge {
+    cursor: pointer;
+  }
+}
+
+/* Hide mobile tooltip on desktop */
+@media (min-width: 769px) {
+  .fab-tooltip {
+    display: none;
+  }
 }
