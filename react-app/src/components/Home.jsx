@@ -78,22 +78,52 @@ function Home() {
     }
   }, [searchParams]);
 
-  // Auto-trigger search when products load and there's a URL search query
+  // Apply search from URL when products are loaded
   useEffect(() => {
     const searchQuery = searchParams.get('search');
     if (searchQuery && products.length > 0 && !isLoading) {
-      // Apply the search filter
-      const searchFiltered = products.filter((item) => {
-        const searchLower = searchQuery.toLowerCase();
-        return (
+      // Force apply filters with the URL search query
+      applyFiltersWithSearch(searchQuery);
+    }
+  }, [products, isLoading, searchParams]);
+
+  // Helper function to apply filters with a specific search value
+  const applyFiltersWithSearch = useCallback((searchValue) => {
+    let result = [...products];
+    
+    const currentSearch = (searchValue || '').trim();
+    if (currentSearch) {
+      const searchLower = currentSearch.toLowerCase();
+      result = result.filter(
+        (item) =>
           item.pname?.toLowerCase().includes(searchLower) ||
           item.pdesc?.toLowerCase().includes(searchLower) ||
           item.category?.toLowerCase().includes(searchLower)
-        );
-      });
-      setFilteredProducts(searchFiltered);
+      );
     }
-  }, [products, isLoading, searchParams]);
+
+    // Category filter
+    if (selectedCategories.length > 0) {
+      result = result.filter((item) =>
+        selectedCategories.includes(item.category)
+      );
+    }
+
+    // Condition filter
+    if (selectedConditions.length > 0) {
+      result = result.filter((item) =>
+        selectedConditions.includes(item.condition)
+      );
+    }
+
+    // Price range filter
+    result = result.filter((item) => {
+      const price = parseFloat(item.price) || 0;
+      return price >= priceRange.min && price <= priceRange.max;
+    });
+
+    setFilteredProducts(result);
+  }, [products, selectedCategories, selectedConditions, priceRange]);
 
   // Fetch all products
   const fetchProducts = useCallback((location) => {
@@ -220,10 +250,60 @@ function Home() {
 
   const handlesearch = (value) => {
     setsearch(value);
-    // If search is cleared, reset to show all products with current filters
+    // If search is cleared, immediately show all products (apply other filters only)
     if (!value.trim()) {
-      applyFilters();
+      // Clear URL search param if present
+      if (searchParams.get('search')) {
+        navigate('/', { replace: true });
+      }
+      // Show all products with current category/condition/price filters
+      let result = [...products];
+      
+      if (selectedCategories.length > 0) {
+        result = result.filter((item) =>
+          selectedCategories.includes(item.category)
+        );
+      }
+      if (selectedConditions.length > 0) {
+        result = result.filter((item) =>
+          selectedConditions.includes(item.condition)
+        );
+      }
+      result = result.filter((item) => {
+        const price = parseFloat(item.price) || 0;
+        return price >= priceRange.min && price <= priceRange.max;
+      });
+      
+      setFilteredProducts(result);
     }
+  };
+
+  // Clear search and show all products
+  const clearSearch = () => {
+    setsearch("");
+    // Clear URL search param if present
+    if (searchParams.get('search')) {
+      navigate('/', { replace: true });
+    }
+    // Apply filters without search
+    let result = [...products];
+    
+    if (selectedCategories.length > 0) {
+      result = result.filter((item) =>
+        selectedCategories.includes(item.category)
+      );
+    }
+    if (selectedConditions.length > 0) {
+      result = result.filter((item) =>
+        selectedConditions.includes(item.condition)
+      );
+    }
+    result = result.filter((item) => {
+      const price = parseFloat(item.price) || 0;
+      return price >= priceRange.min && price <= priceRange.max;
+    });
+    
+    setFilteredProducts(result);
   };
 
   const handleClick = () => {
@@ -252,6 +332,12 @@ function Home() {
     setSelectedConditions([]);
     setPriceRange({ min: 0, max: maxPriceLimit });
     setsearch("");
+    // Clear URL search param if present
+    if (searchParams.get('search')) {
+      navigate('/', { replace: true });
+    }
+    // Reset to show all products
+    setFilteredProducts(products);
   };
 
   const hasActiveFilters = () => {
@@ -455,7 +541,7 @@ function Home() {
               {showLocationTip && (
                 <div className="location-tooltip">
                   <button className="tooltip-close" onClick={dismissLocationTip}>×</button>
-                  <p>💡 <strong>Pro tip:</strong> Filter products by your hostel or block to find items nearby!</p>
+                  <p>💡 <strong>Pro tip:</strong > Filter products by your hostel or block to find items nearby!</p>
                 </div>
               )}
             </div>
@@ -663,7 +749,7 @@ function Home() {
                   {search && (
                     <span className="filter-pill">
                       Search: "{search}"
-                      <button onClick={() => setsearch("")}>
+                      <button onClick={clearSearch}>
                         <FaTimes />
                       </button>
                     </span>
