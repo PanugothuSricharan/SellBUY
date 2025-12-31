@@ -342,7 +342,6 @@
 
   .product-info {
     padding: var(--space-sm);
-    padding-bottom: calc(var(--space-sm) + 34px);
   }
 
   .product-price {
@@ -377,7 +376,6 @@
 
   .products-grid.compact .product-info {
     padding: var(--space-xs);
-    padding-bottom: calc(var(--space-xs) + 30px);
   }
 
   .products-grid.compact .product-title {
@@ -413,23 +411,17 @@
   }
 
   .products-grid.list .product-info {
-    position: relative;
     padding: var(--space-sm) !important;
-    padding-bottom: var(--space-sm) !important;
     display: flex;
     flex-direction: column;
     justify-content: center;
   }
 
-  /* In list view, badges should be inline */
-  .products-grid.list .product-info-badges {
-    position: static;
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
+  .products-grid.list .product-desc {
+    display: none;
   }
 
-  .products-grid.list .product-desc {
+  .products-grid.list .product-desc-row {
     display: none;
   }
 
@@ -656,9 +648,7 @@
 }
 
 .product-info {
-  position: relative;
   padding: var(--space-md);
-  padding-bottom: calc(var(--space-md) + 40px);
 }
 
 .product-price {
@@ -680,34 +670,42 @@
   -webkit-box-orient: vertical;
 }
 
-/* Category row with inline badges for list view */
-.product-category-row {
-  display: flex;
-  align-items: flex-start;
-  gap: var(--space-sm);
-  flex-wrap: wrap;
-  margin: 0 0 var(--space-xs);
-}
-
-.product-category-row .product-category {
-  margin: 0;
-}
-
 .product-category {
   font-size: var(--font-size-sm);
   color: var(--gray-500);
   margin: 0 0 var(--space-xs);
 }
 
-/* Info badges - stacked bottom-right by default, inline in list view */
-.product-info-badges {
-  position: absolute;
-  right: var(--space-md);
-  bottom: var(--space-md);
+/* Age and Location row - 50/50 split */
+.product-meta-row {
   display: flex;
-  flex-direction: column;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-sm);
+  margin-bottom: var(--space-xs);
+}
+
+.product-meta-row .product-age {
+  flex: 1;
+  margin: 0;
+  font-size: 11px;
+  color: var(--gray-600);
+  display: flex;
+  align-items: center;
   gap: 4px;
+}
+
+/* Description and Condition row */
+.product-desc-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-sm);
+}
+
+.product-desc-row .product-desc {
+  flex: 1;
+  margin: 0;
 }
 
 .info-location-badge,
@@ -719,6 +717,7 @@
   border-radius: var(--radius-sm);
   font-size: 10px;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .info-location-badge {

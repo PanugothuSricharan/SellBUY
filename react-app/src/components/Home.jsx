@@ -318,24 +318,25 @@ function Home() {
           )}
         </div>
         <p className="product-title">{item.pname}</p>
-        <div className="product-category-row">
-          <span className="product-category">{item.category}</span>
-          {/* Location and condition badges */}
-          <div className="product-info-badges">
-            <span className="info-location-badge">
-              <FaMapMarkerAlt /> {item.location}
+        <p className="product-category">{item.category}</p>
+        {/* Age and Location row - 50/50 */}
+        <div className="product-meta-row">
+          {item.productAge && (
+            <span className="product-age">
+              <FaBoxOpen /> {item.productAge}
             </span>
-            {item.condition && (
-              <span className="info-condition-badge">{item.condition}</span>
-            )}
-          </div>
+          )}
+          <span className="info-location-badge">
+            <FaMapMarkerAlt /> {item.location}
+          </span>
         </div>
-        {item.productAge && (
-          <p className="product-age">
-            <FaBoxOpen /> {item.productAge} old
-          </p>
-        )}
-        <p className="product-desc">{item.pdesc}</p>
+        {/* Description and Condition row */}
+        <div className="product-desc-row">
+          <p className="product-desc">{item.pdesc}</p>
+          {item.condition && (
+            <span className="info-condition-badge">{item.condition}</span>
+          )}
+        </div>
       </div>
     </div>
   );
