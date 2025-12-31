@@ -597,7 +597,9 @@ app.get("/get-products", async (req, res) => {
       filter.addedBy = { $nin: blockedUserIds };
     }
 
-    const result = await Products.find(filter).sort({ createdAt: -1 });
+    const result = await Products.find(filter).sort({ createdAt: -1 }).lean();
+    // Cache for 30 seconds to reduce DB calls
+    res.set('Cache-Control', 'public, max-age=30');
     res.send({ message: "success", products: result });
   } catch (err) {
     console.error("Error fetching products:", err);
@@ -1195,6 +1197,11 @@ app.delete("/admin/message/:messageId", async (req, res) => {
     console.error("Error deleting message:", error);
     res.status(500).json({ message: "Server error" });
   }
+});
+
+// ============ HEALTH CHECK ENDPOINT (Keep Render awake) ============
+app.get("/health", (req, res) => {
+  res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
 
 // Start Server

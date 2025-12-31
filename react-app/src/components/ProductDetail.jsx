@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Header from "./Header";
 import "./ProductDetail.css";
-import API_URL, { getImageUrl } from "../constants";
+import API_URL, { getImageUrl, getFullImageUrl } from "../constants";
 import {
   FaMapMarkerAlt,
   FaTag,
@@ -187,7 +187,7 @@ function ProductDetail() {
                 <div className="main-image-container">
                   <img
                     className="main-image"
-                    src={getImageUrl(images[activeImage])}
+                    src={getFullImageUrl(images[activeImage])}
                     alt={product.pname}
                   />
                 </div>
