@@ -794,7 +794,7 @@ function Home() {
                 // rel="noopener noreferrer"
                 // className="footer-dev-link"
               >
-                😊See you Tomorrow With New Products!!,  
+                😊 See you Tomorrow With New Products!!
               </a>
             </div>
 
