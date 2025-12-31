@@ -70,6 +70,42 @@ function Home() {
     localStorage.setItem("hasSeenLocationTip", "true");
   };
 
+  // Core search/filter function - used everywhere
+  const filterProducts = useCallback((productsToFilter, searchValue, categories, conditions, price) => {
+    let result = [...productsToFilter];
+    
+    // Search filter - check title, description, AND category (case-insensitive)
+    const currentSearch = (searchValue || '').trim().toLowerCase();
+    if (currentSearch) {
+      result = result.filter((item) => {
+        const titleMatch = item.pname?.toLowerCase().includes(currentSearch);
+        const descMatch = item.pdesc?.toLowerCase().includes(currentSearch);
+        const categoryMatch = item.category?.toLowerCase().includes(currentSearch);
+        return titleMatch || descMatch || categoryMatch;
+      });
+    }
+
+    // Category filter
+    if (categories && categories.length > 0) {
+      result = result.filter((item) => categories.includes(item.category));
+    }
+
+    // Condition filter
+    if (conditions && conditions.length > 0) {
+      result = result.filter((item) => conditions.includes(item.condition));
+    }
+
+    // Price range filter
+    if (price) {
+      result = result.filter((item) => {
+        const itemPrice = parseFloat(item.price) || 0;
+        return itemPrice >= price.min && itemPrice <= price.max;
+      });
+    }
+
+    return result;
+  }, []);
+
   // Check for search query from URL (from ProductDetail page)
   useEffect(() => {
     const searchQuery = searchParams.get('search');
@@ -78,52 +114,21 @@ function Home() {
     }
   }, [searchParams]);
 
-  // Apply search from URL when products are loaded
+  // Apply search from URL when products are loaded - this is the KEY fix
   useEffect(() => {
     const searchQuery = searchParams.get('search');
     if (searchQuery && products.length > 0 && !isLoading) {
-      // Force apply filters with the URL search query
-      applyFiltersWithSearch(searchQuery);
-    }
-  }, [products, isLoading, searchParams]);
-
-  // Helper function to apply filters with a specific search value
-  const applyFiltersWithSearch = useCallback((searchValue) => {
-    let result = [...products];
-    
-    const currentSearch = (searchValue || '').trim();
-    if (currentSearch) {
-      const searchLower = currentSearch.toLowerCase();
-      result = result.filter(
-        (item) =>
-          item.pname?.toLowerCase().includes(searchLower) ||
-          item.pdesc?.toLowerCase().includes(searchLower) ||
-          item.category?.toLowerCase().includes(searchLower)
+      // Apply filter with the URL search query
+      const filtered = filterProducts(
+        products,
+        searchQuery,
+        selectedCategories,
+        selectedConditions,
+        priceRange
       );
+      setFilteredProducts(filtered);
     }
-
-    // Category filter
-    if (selectedCategories.length > 0) {
-      result = result.filter((item) =>
-        selectedCategories.includes(item.category)
-      );
-    }
-
-    // Condition filter
-    if (selectedConditions.length > 0) {
-      result = result.filter((item) =>
-        selectedConditions.includes(item.condition)
-      );
-    }
-
-    // Price range filter
-    result = result.filter((item) => {
-      const price = parseFloat(item.price) || 0;
-      return price >= priceRange.min && price <= priceRange.max;
-    });
-
-    setFilteredProducts(result);
-  }, [products, selectedCategories, selectedConditions, priceRange]);
+  }, [products, isLoading, searchParams, filterProducts, selectedCategories, selectedConditions, priceRange]);
 
   // Fetch all products
   const fetchProducts = useCallback((location) => {
@@ -205,43 +210,17 @@ function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedCategories, selectedConditions, priceRange, products]);
 
+  // Main filter function - uses the core filterProducts function
   const applyFilters = useCallback(() => {
-    let result = [...products];
-
-    // Search filter - use the current search value
-    const currentSearch = search.trim();
-    if (currentSearch) {
-      const searchLower = currentSearch.toLowerCase();
-      result = result.filter(
-        (item) =>
-          item.pname.toLowerCase().includes(searchLower) ||
-          item.pdesc?.toLowerCase().includes(searchLower) ||
-          item.category?.toLowerCase().includes(searchLower)
-      );
-    }
-
-    // Category filter
-    if (selectedCategories.length > 0) {
-      result = result.filter((item) =>
-        selectedCategories.includes(item.category)
-      );
-    }
-
-    // Condition filter
-    if (selectedConditions.length > 0) {
-      result = result.filter((item) =>
-        selectedConditions.includes(item.condition)
-      );
-    }
-
-    // Price range filter
-    result = result.filter((item) => {
-      const price = parseFloat(item.price) || 0;
-      return price >= priceRange.min && price <= priceRange.max;
-    });
-
+    const result = filterProducts(
+      products,
+      search,
+      selectedCategories,
+      selectedConditions,
+      priceRange
+    );
     setFilteredProducts(result);
-  }, [products, search, selectedCategories, selectedConditions, priceRange]);
+  }, [products, search, selectedCategories, selectedConditions, priceRange, filterProducts]);
 
   const handleLocationChange = (newLocation) => {
     setSelectedLocation(newLocation);
@@ -256,24 +235,8 @@ function Home() {
       if (searchParams.get('search')) {
         navigate('/', { replace: true });
       }
-      // Show all products with current category/condition/price filters
-      let result = [...products];
-      
-      if (selectedCategories.length > 0) {
-        result = result.filter((item) =>
-          selectedCategories.includes(item.category)
-        );
-      }
-      if (selectedConditions.length > 0) {
-        result = result.filter((item) =>
-          selectedConditions.includes(item.condition)
-        );
-      }
-      result = result.filter((item) => {
-        const price = parseFloat(item.price) || 0;
-        return price >= priceRange.min && price <= priceRange.max;
-      });
-      
+      // Show all products with current filters (no search)
+      const result = filterProducts(products, '', selectedCategories, selectedConditions, priceRange);
       setFilteredProducts(result);
     }
   };
@@ -286,23 +249,7 @@ function Home() {
       navigate('/', { replace: true });
     }
     // Apply filters without search
-    let result = [...products];
-    
-    if (selectedCategories.length > 0) {
-      result = result.filter((item) =>
-        selectedCategories.includes(item.category)
-      );
-    }
-    if (selectedConditions.length > 0) {
-      result = result.filter((item) =>
-        selectedConditions.includes(item.condition)
-      );
-    }
-    result = result.filter((item) => {
-      const price = parseFloat(item.price) || 0;
-      return price >= priceRange.min && price <= priceRange.max;
-    });
-    
+    const result = filterProducts(products, '', selectedCategories, selectedConditions, priceRange);
     setFilteredProducts(result);
   };
 
