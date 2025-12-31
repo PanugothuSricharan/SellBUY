@@ -228,7 +228,7 @@ function Header(props) {
         </div>
 
         {/* Center Section - Search */}
-        <div className="header-center">
+        <div className={`header-center ${props.hideSearch ? 'header-center-home-only' : ''}`}>
           <button 
             className={`home-btn ${props.hideSearch ? 'home-btn-highlight' : ''}`}
             title="Go to Home"
@@ -245,6 +245,7 @@ function Header(props) {
             }}
           >
             <FaHome />
+            {props.hideSearch && <span className="home-btn-text">Return to Home to Search</span>}
           </button>
           {!props.hideSearch && (
             <div className="search-container">

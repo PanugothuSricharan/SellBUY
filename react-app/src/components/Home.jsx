@@ -60,19 +60,19 @@ function Home() {
       // Show tip after a short delay
       const timer = setTimeout(() => {
         setShowLocationTip(true);
-        // Mark as seen immediately so it won't show again on next visit
-        localStorage.setItem("hasSeenLocationTip", "true");
-        // Auto-dismiss after 8 seconds
+        // Auto-dismiss after 10 seconds and mark as seen
         setTimeout(() => {
           setShowLocationTip(false);
-        }, 8000);
-      }, 1500);
+          localStorage.setItem("hasSeenLocationTip", "true");
+        }, 10000);
+      }, 1000);
       return () => clearTimeout(timer);
     }
   }, []);
 
   const dismissLocationTip = () => {
     setShowLocationTip(false);
+    localStorage.setItem("hasSeenLocationTip", "true");
   };
 
   // Core search/filter function - used everywhere
