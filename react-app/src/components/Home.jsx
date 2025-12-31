@@ -131,7 +131,7 @@ function Home() {
   }, [products, isLoading, searchParams, filterProducts, selectedCategories, selectedConditions, priceRange]);
 
   // Fetch all products
-  const fetchProducts = useCallback((location) => {
+  const fetchProducts = useCallback((location, searchQuery = null) => {
     setIsLoading(true);
     let url = `${API_URL}/get-products`;
     if (location && location !== LOCATIONS.ENTIRE_CAMPUS) {
@@ -147,18 +147,32 @@ function Home() {
             (p) => p.status !== "Sold"
           );
           setproducts(availableProducts);
-          setFilteredProducts(availableProducts);
 
           // Calculate max price for slider
+          let newMaxPrice = 100000;
+          let newPriceRange = { min: 0, max: 100000 };
           if (availableProducts.length > 0) {
             const maxPrice = Math.max(
               ...availableProducts.map((p) => parseFloat(p.price) || 0)
             );
-            setMaxPriceLimit(Math.ceil(maxPrice / 1000) * 1000 || 100000);
-            setPriceRange({
-              min: 0,
-              max: Math.ceil(maxPrice / 1000) * 1000 || 100000,
-            });
+            newMaxPrice = Math.ceil(maxPrice / 1000) * 1000 || 100000;
+            newPriceRange = { min: 0, max: newMaxPrice };
+            setMaxPriceLimit(newMaxPrice);
+            setPriceRange(newPriceRange);
+          }
+
+          // If there's a search query (from URL), apply it immediately after loading products
+          if (searchQuery && searchQuery.trim()) {
+            const filtered = filterProducts(
+              availableProducts,
+              searchQuery,
+              selectedCategories,
+              selectedConditions,
+              newPriceRange
+            );
+            setFilteredProducts(filtered);
+          } else {
+            setFilteredProducts(availableProducts);
           }
         }
       })
@@ -168,12 +182,14 @@ function Home() {
       .finally(() => {
         setIsLoading(false);
       });
-  }, []);
+  }, [filterProducts, selectedCategories, selectedConditions]);
 
   useEffect(() => {
-    fetchProducts(selectedLocation);
+    // Pass the search query from URL to fetchProducts so it applies immediately
+    const searchQuery = searchParams.get('search');
+    fetchProducts(selectedLocation, searchQuery);
     fetchLikedProducts();
-  }, [selectedLocation, fetchProducts]);
+  }, [selectedLocation, fetchProducts, searchParams]);
 
   // Fetch liked products on mount
   const fetchLikedProducts = () => {
