@@ -53,13 +53,19 @@ function Home() {
   const [mobileLocationOpen, setMobileLocationOpen] = useState(false);
   const [showLocationTip, setShowLocationTip] = useState(false);
 
-  // Show location tip for first-time users
+  // Show location tip for first-time users - only once ever
   useEffect(() => {
     const hasSeenLocationTip = localStorage.getItem("hasSeenLocationTip");
     if (!hasSeenLocationTip) {
       // Show tip after a short delay
       const timer = setTimeout(() => {
         setShowLocationTip(true);
+        // Mark as seen immediately so it won't show again on next visit
+        localStorage.setItem("hasSeenLocationTip", "true");
+        // Auto-dismiss after 8 seconds
+        setTimeout(() => {
+          setShowLocationTip(false);
+        }, 8000);
       }, 1500);
       return () => clearTimeout(timer);
     }
@@ -67,7 +73,6 @@ function Home() {
 
   const dismissLocationTip = () => {
     setShowLocationTip(false);
-    localStorage.setItem("hasSeenLocationTip", "true");
   };
 
   // Core search/filter function - used everywhere

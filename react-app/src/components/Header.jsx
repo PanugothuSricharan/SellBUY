@@ -230,7 +230,7 @@ function Header(props) {
         {/* Center Section - Search */}
         <div className="header-center">
           <button 
-            className="home-btn" 
+            className={`home-btn ${props.hideSearch ? 'home-btn-highlight' : ''}`}
             title="Go to Home"
             onClick={() => {
               // Clear search and navigate to home
@@ -246,25 +246,27 @@ function Header(props) {
           >
             <FaHome />
           </button>
-          <div className="search-container">
-            <input
-              className="search-input"
-              type="text"
-              value={props?.search || ""}
-              onChange={(e) =>
-                props.handlesearch && props.handlesearch(e.target.value)
-              }
-              onKeyPress={handleSearchKeyPress}
-              placeholder="Search for laptops, books, furniture..."
-            />
-            <button
-              className="search-btn"
-              onClick={() => props.handleClick && props.handleClick()}
-              aria-label="Search"
-            >
-              <FaSearch />
-            </button>
-          </div>
+          {!props.hideSearch && (
+            <div className="search-container">
+              <input
+                className="search-input"
+                type="text"
+                value={props?.search || ""}
+                onChange={(e) =>
+                  props.handlesearch && props.handlesearch(e.target.value)
+                }
+                onKeyPress={handleSearchKeyPress}
+                placeholder="Search for laptops, books, furniture..."
+              />
+              <button
+                className="search-btn"
+                onClick={() => props.handleClick && props.handleClick()}
+                aria-label="Search"
+              >
+                <FaSearch />
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Right Section - Actions */}

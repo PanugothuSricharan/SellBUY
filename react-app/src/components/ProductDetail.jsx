@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import Header from "./Header";
@@ -21,14 +21,12 @@ import {
 } from "react-icons/fa";
 
 function ProductDetail() {
-  const navigate = useNavigate();
   const [product, setProduct] = useState(null);
   const [user, setUser] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
   const [contactLoading, setContactLoading] = useState(false);
-  const [search, setSearch] = useState("");
   const { productId } = useParams();
 
   const images = [];
@@ -134,19 +132,10 @@ function ProductDetail() {
     return name.charAt(0).toUpperCase();
   };
 
-  // Handle search - navigate to home with search query
-  const handleSearch = () => {
-    if (search.trim()) {
-      navigate(`/?search=${encodeURIComponent(search.trim())}`);
-    }
-  };
-
   return (
     <div className="product-detail-page">
       <Header 
-        search={search}
-        handlesearch={setSearch}
-        handleClick={handleSearch}
+        hideSearch={true}
       />
 
       <div className="product-detail-container">

@@ -328,6 +328,36 @@
   color: white;
 }
 
+/* Home Button Highlight - For ProductDetail page */
+.home-btn-highlight {
+  background: linear-gradient(135deg, var(--accent-orange) 0%, #ff8f4c 100%);
+  border-color: var(--accent-orange);
+  color: white;
+  box-shadow: 0 4px 15px rgba(255, 107, 53, 0.4);
+  animation: homeButtonBounce 2s ease-in-out infinite;
+}
+
+.home-btn-highlight:hover {
+  background: linear-gradient(135deg, #ff8f4c 0%, var(--accent-orange) 100%);
+  transform: scale(1.05);
+}
+
+[data-theme="dark"] .home-btn-highlight {
+  background: linear-gradient(135deg, var(--accent-orange) 0%, #ff8f4c 100%);
+  border-color: var(--accent-orange);
+  color: white;
+  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.5);
+}
+
+@keyframes homeButtonBounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-4px);
+  }
+}
+
 .search-container {
   display: flex;
   align-items: stretch;
