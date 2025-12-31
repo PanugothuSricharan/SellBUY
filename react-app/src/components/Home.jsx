@@ -18,7 +18,7 @@ import {
 import "./Home.css";
 import { LOCATIONS, BROWSE_LOCATIONS } from "./LocationList";
 import categories from "./CategoriesList";
-import API_URL, { getImageUrl } from "../constants";
+import API_URL, { getImageUrl, getImageSrcSet } from "../constants";
 
 // Product conditions for filter
 const PRODUCT_CONDITIONS = ["New", "Sealed", "Like New", "Used"];
@@ -376,7 +376,9 @@ function Home() {
       <div className="product-card" onClick={() => handleProduct(item._id)}>
         <div className="product-image-container">
           <img
-            src={getImageUrl(item.pimage)}
+            src={getImageUrl(item.pimage, { width: 400 })}
+            srcSet={getImageSrcSet(item.pimage)}
+            sizes="(max-width: 576px) 160px, (max-width: 768px) 240px, (max-width: 1200px) 280px, 300px"
             alt={item.pname}
             className="product-image"
             loading="lazy"

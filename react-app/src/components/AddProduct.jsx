@@ -5,6 +5,7 @@ import axios from "axios";
 import categories from "./CategoriesList";
 import { PRODUCT_LOCATIONS } from "./LocationList";
 import "./AddProduct.css";
+import { compressImageToSize } from "../utils/imageCompression";
 import {
   FaCamera,
   FaTimes,
@@ -133,15 +134,39 @@ function AddProduct() {
     }
   };
 
-  const handleImageChange = (e, imageNumber) => {
+  const handleImageChange = async (e, imageNumber) => {
     const file = e.target.files[0];
     if (file) {
+      // Show preview immediately with original file
+      const previewUrl = URL.createObjectURL(file);
       if (imageNumber === 1) {
-        setPimage(file);
-        setPreviewImage1(URL.createObjectURL(file));
+        setPreviewImage1(previewUrl);
       } else {
-        setPimage2(file);
-        setPreviewImage2(URL.createObjectURL(file));
+        setPreviewImage2(previewUrl);
+      }
+
+      try {
+        // Compress image if larger than 2MB
+        let processedFile = file;
+        if (file.size > 2 * 1024 * 1024) {
+          console.log(`Compressing image: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+          processedFile = await compressImageToSize(file, 2);
+          console.log(`Compressed to: ${(processedFile.size / 1024 / 1024).toFixed(2)}MB`);
+        }
+
+        if (imageNumber === 1) {
+          setPimage(processedFile);
+        } else {
+          setPimage2(processedFile);
+        }
+      } catch (error) {
+        console.error('Image compression failed:', error);
+        // Use original file if compression fails
+        if (imageNumber === 1) {
+          setPimage(file);
+        } else {
+          setPimage2(file);
+        }
       }
     }
   };
@@ -753,6 +778,11 @@ function AddProduct() {
                 </>
               )}
             </button>
+            {!agreedToTerms && !isSubmitting && (
+              <p className="submit-hint-terms">
+                ☝️ Please agree to the terms above to post your ad
+              </p>
+            )}
             <p className="submit-hint">
               🛡️ Your listing will go live immediately after posting
             </p>

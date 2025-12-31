@@ -506,6 +506,23 @@
   cursor: not-allowed;
 }
 
+/* Hint when terms not agreed */
+.submit-hint-terms {
+  text-align: center;
+  font-size: var(--font-size-sm);
+  color: #e53935;
+  margin-top: var(--space-sm);
+  padding: var(--space-sm);
+  background: rgba(229, 57, 53, 0.1);
+  border-radius: var(--radius-md);
+  animation: pulseText 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseText {
+  0%, 100% { opacity: 0.7; }
+  50% { opacity: 1; }
+}
+
 .submit-hint {
   text-align: center;
   font-size: var(--font-size-sm);
@@ -1455,4 +1472,233 @@
 
 [data-theme="dark"] .terms-modal-footer {
   border-top-color: var(--border-color);
+}
+
+/* ============================================
+   MOBILE RESPONSIVE STYLES
+   ============================================ */
+
+@media (max-width: 768px) {
+  .add-product-container {
+    padding: var(--space-sm);
+  }
+
+  .add-product-form {
+    padding: var(--space-md);
+  }
+
+  .add-product-header h1 {
+    font-size: var(--font-size-xl);
+  }
+
+  .add-product-header p {
+    font-size: var(--font-size-sm);
+  }
+
+  .form-section-title {
+    font-size: var(--font-size-base);
+  }
+
+  .form-group label {
+    font-size: var(--font-size-sm);
+  }
+
+  .form-input,
+  .form-textarea,
+  .form-select {
+    font-size: 16px; /* Prevent iOS zoom */
+    padding: var(--space-sm);
+  }
+
+  .category-options,
+  .condition-options,
+  .age-options,
+  .location-options {
+    gap: var(--space-xs);
+  }
+
+  .category-option,
+  .condition-option,
+  .age-option,
+  .location-option {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .price-input-container {
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  .price-input-wrapper {
+    width: 100%;
+  }
+
+  .price-type-options {
+    flex-direction: row;
+    width: 100%;
+  }
+
+  .price-type-option {
+    flex: 1;
+  }
+
+  .price-type-box {
+    padding: var(--space-sm);
+    font-size: var(--font-size-sm);
+  }
+
+  .image-upload-box {
+    padding: var(--space-lg);
+  }
+
+  .image-upload-icon {
+    font-size: 2rem;
+  }
+
+  .submit-btn {
+    padding: var(--space-md);
+    font-size: var(--font-size-base);
+  }
+
+  .contact-preference-options {
+    flex-direction: column;
+  }
+
+  .contact-option {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Success Modal Mobile */
+  .success-modal {
+    width: 95%;
+    max-width: none;
+    margin: var(--space-sm);
+    padding: var(--space-md);
+  }
+
+  .success-modal h2 {
+    font-size: var(--font-size-lg);
+  }
+
+  .product-link-container {
+    flex-direction: column;
+  }
+
+  .product-link-container input {
+    font-size: var(--font-size-xs);
+  }
+
+  .share-buttons {
+    flex-direction: column;
+  }
+
+  .share-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .go-home-btn {
+    width: 100%;
+  }
+
+  /* Mobile Modal */
+  .mobile-modal {
+    width: 95%;
+    max-width: none;
+    margin: var(--space-sm);
+    padding: var(--space-md);
+  }
+
+  /* Terms Modal Mobile */
+  .terms-modal {
+    width: 95%;
+    max-height: 85vh;
+  }
+
+  .terms-modal-header {
+    padding: var(--space-md);
+  }
+
+  .terms-modal-body {
+    padding: var(--space-md);
+  }
+
+  .terms-modal-footer {
+    padding: var(--space-md);
+  }
+
+  /* Upload Progress Mobile */
+  .upload-progress-container {
+    padding: var(--space-md);
+  }
+
+  .upload-progress-info {
+    flex-direction: column;
+    gap: var(--space-xs);
+    text-align: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .add-product-container {
+    padding: var(--space-xs);
+  }
+
+  .add-product-form {
+    padding: var(--space-sm);
+    border-radius: var(--radius-md);
+  }
+
+  .add-product-header {
+    margin-bottom: var(--space-md);
+  }
+
+  .add-product-header h1 {
+    font-size: var(--font-size-lg);
+  }
+
+  .form-section {
+    margin-bottom: var(--space-md);
+  }
+
+  .form-section-title {
+    font-size: var(--font-size-sm);
+    gap: var(--space-xs);
+  }
+
+  .form-group {
+    margin-bottom: var(--space-sm);
+  }
+
+  .image-upload-grid {
+    gap: var(--space-sm);
+  }
+
+  .image-upload-box {
+    padding: var(--space-md);
+  }
+
+  .image-upload-text {
+    font-size: var(--font-size-xs);
+  }
+
+  .back-btn {
+    padding: var(--space-xs) var(--space-sm);
+    font-size: var(--font-size-xs);
+  }
+
+  .submit-section {
+    margin-top: var(--space-md);
+    padding-top: var(--space-md);
+  }
+
+  .category-option,
+  .condition-option,
+  .age-option,
+  .location-option {
+    padding: 6px 10px;
+    font-size: 11px;
+  }
 }

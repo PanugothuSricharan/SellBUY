@@ -31,4 +31,17 @@ export const getFullImageUrl = (imagePath) => {
   return getImageUrl(imagePath, { width: 800, quality: "auto" });
 };
 
+// Generate srcSet for responsive images
+export const getImageSrcSet = (imagePath) => {
+  if (!imagePath || !imagePath.includes("cloudinary.com")) return null;
+  
+  // Define widths for responsive loading (mobile, tablet, desktop)
+  const widths = [300, 600, 900];
+  
+  return widths.map(width => {
+    const url = getImageUrl(imagePath, { width, quality: "auto", format: "auto" });
+    return `${url} ${width}w`;
+  }).join(", ");
+};
+
 export default API_URL;

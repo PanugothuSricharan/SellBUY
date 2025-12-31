@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import axios from "axios";
 import Header from "./Header";
 import "./ProductDetail.css";
-import API_URL, { getImageUrl, getFullImageUrl } from "../constants";
+import API_URL, { getImageUrl, getFullImageUrl, getImageSrcSet } from "../constants";
 import {
   FaMapMarkerAlt,
   FaTag,
@@ -177,6 +177,8 @@ function ProductDetail() {
                   <img
                     className="main-image"
                     src={getFullImageUrl(images[activeImage])}
+                    srcSet={getImageSrcSet(images[activeImage])}
+                    sizes="(max-width: 768px) 100vw, 600px"
                     alt={product.pname}
                   />
                 </div>
@@ -191,7 +193,7 @@ function ProductDetail() {
                         onClick={() => setActiveImage(index)}
                       >
                         <img
-                          src={getImageUrl(img)}
+                          src={getImageUrl(img, { width: 150 })}
                           alt={`${product.pname} ${index + 1}`}
                         />
                       </div>
