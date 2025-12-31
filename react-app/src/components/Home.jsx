@@ -485,10 +485,11 @@ function Home() {
               <span className="location-badge" onClick={() => setMobileLocationOpen(true)}>
                 <FaMapMarkerAlt /> {selectedLocation}
               </span>
-              {showLocationTip && (
+              {/* Show the Pro tip tooltip only on desktop */}
+              {showLocationTip && window.innerWidth > 768 && (
                 <div className="location-tooltip">
                   <button className="tooltip-close" onClick={dismissLocationTip}>×</button>
-                  <p>💡 <strong>Pro tip:</strong > Filter products by your hostel or block to find items nearby!</p>
+                  <p>💡 <strong>Pro tip:</strong > Filter products by your hostel to find items nearby!</p>
                 </div>
               )}
             </div>
@@ -660,7 +661,7 @@ function Home() {
                     {showLocationTip && (
                       <div className="location-tooltip desktop-tooltip">
                         <button className="tooltip-close" onClick={dismissLocationTip}>×</button>
-                        <p>💡 <strong>Pro tip:</strong> Use the location filter in the header to find products in your hostel or block!</p>
+                        <p>💡 <strong>Pro tip:</strong> Use the location filter in the header to find products in your hostel</p>
                       </div>
                     )}
                   </div>
