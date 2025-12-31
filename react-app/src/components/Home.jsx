@@ -789,10 +789,10 @@ function Home() {
             
             <div className="footer-center">
               <a 
-                href="https://youtu.be/Ph_beNQsIp0?si=cpiAN9HihHm1-yg1" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="footer-dev-link"
+                // href="https://youtu.be/Ph_beNQsIp0?si=cpiAN9HihHm1-yg1" 
+                // target="_blank" 
+                // rel="noopener noreferrer"
+                // className="footer-dev-link"
               >
                 😊See you Tomorrow With New Products!!,  
               </a>
