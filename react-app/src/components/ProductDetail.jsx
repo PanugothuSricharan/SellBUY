@@ -308,9 +308,7 @@ function ProductDetail() {
                               href={`https://wa.me/91${user.mobile?.replace(
                                 /\D/g,
                                 ""
-                              )}?text=Hi, I'm interested in your product "${
-                                product.pname
-                              }" listed on SellBUY for ₹${product.price}`}
+                              )}?text=${encodeURIComponent(`Hi, I'm interested in your product "${product.pname}" listed on SellBUY for Rs.${product.price}`)}`}
                               target="_blank"
                               rel="noopener noreferrer"
                               className="contact-action-btn whatsapp-btn"
@@ -399,9 +397,7 @@ function ProductDetail() {
                         href={`https://wa.me/91${user.mobile?.replace(
                           /\D/g,
                           ""
-                        )}?text=Hi, I'm interested in your product "${
-                          product.pname
-                        }" listed on SellBUY`}
+                        )}?text=${encodeURIComponent(`Hi, I'm interested in your product "${product.pname}" listed on SellBUY for Rs.${product.price}`)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="action-btn whatsapp-btn-mobile"
