@@ -569,6 +569,8 @@ app.post(
 app.get("/get-products", async (req, res) => {
   const catName = req.query.catName;
   const location = req.query.location;
+  const limit = parseInt(req.query.limit) || 50; // Default 50 products
+  const skip = parseInt(req.query.skip) || 0;
   let filter = {};
 
   // Category filter
@@ -586,18 +588,22 @@ app.get("/get-products", async (req, res) => {
   // Only show APPROVED products to public
   filter.approvalStatus = "APPROVED";
 
-  console.log("Filter:", filter);
-
   try {
     // Get list of blocked user IDs to exclude their products
-    const blockedUsers = await Users.find({ isBlocked: true }).select('_id');
+    const blockedUsers = await Users.find({ isBlocked: true }).select('_id').lean();
     const blockedUserIds = blockedUsers.map(u => u._id);
     
     if (blockedUserIds.length > 0) {
       filter.addedBy = { $nin: blockedUserIds };
     }
 
-    const result = await Products.find(filter).sort({ createdAt: -1 }).lean();
+    // Select only needed fields for listing (projection)
+    const result = await Products.find(filter)
+      .select('pname price pimage category location condition productAge pdesc isNegotiable status createdAt')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .lean();
     // Cache for 30 seconds to reduce DB calls
     res.set('Cache-Control', 'public, max-age=30');
     res.send({ message: "success", products: result });

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useMemo, memo } from "react";
 import Header from "./Header";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
@@ -140,7 +140,18 @@ function Home() {
       });
   };
 
-  // Apply filters whenever filter states change (except search - that's on button click only)
+  // Debounced search - applies filter 300ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (search.trim()) {
+        applyFilters();
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [search]);
+
+  // Apply filters whenever filter states change (except search - that's debounced above)
   useEffect(() => {
     applyFilters();
     // eslint-disable-next-line react-hooks/exhaustive-deps
