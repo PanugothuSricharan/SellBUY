@@ -36,6 +36,7 @@ function Home() {
   const [selectedLocation, setSelectedLocation] = useState(
     localStorage.getItem("selectedLocation") || LOCATIONS.ENTIRE_CAMPUS
   );
+  const [loadingTip, setLoadingTip] = useState("");
 
   // Track liked products
   const [likedProducts, setLikedProducts] = useState(new Set());
@@ -52,6 +53,34 @@ function Home() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileLocationOpen, setMobileLocationOpen] = useState(false);
   const [showLocationTip, setShowLocationTip] = useState(false);
+
+  // Engaging loading tips that cycle every 3 seconds
+  useEffect(() => {
+    const loadingTips = [
+      "💡 Pro tip: Use filters to find exactly what you need!",
+      "🎯 Did you know? You can filter products by your hostel location!",
+      "⚡ Quick tip: Negotiable prices mean you can chat with the seller!",
+      "🌟 New products are added daily by students like you!",
+      "📸 Tip: Products with multiple images sell faster!",
+      "🔔 Bookmark products you like using the heart icon!",
+      "💰 Great deals are waiting - keep exploring!",
+      "🤝 Connect with sellers via WhatsApp or phone call!",
+      "📱 Mobile-friendly: Browse, buy, and sell on the go!",
+      "🎓 Built by students, for students - happy shopping!"
+    ];
+    
+    if (isLoading) {
+      // Set initial tip
+      setLoadingTip(loadingTips[Math.floor(Math.random() * loadingTips.length)]);
+      
+      // Cycle through tips every 3 seconds while loading
+      const interval = setInterval(() => {
+        setLoadingTip(loadingTips[Math.floor(Math.random() * loadingTips.length)]);
+      }, 3000);
+      
+      return () => clearInterval(interval);
+    }
+  }, [isLoading]);
 
   // Show location tip for first-time users - only once ever
   useEffect(() => {
@@ -144,7 +173,7 @@ function Home() {
     }
 
     axios
-      .get(url)
+      .get(url, { timeout: 30000 })
       .then((res) => {
         if (res.data.products) {
           // Filter out sold products
@@ -758,10 +787,24 @@ function Home() {
 
               {/* Products Grid */}
               {isLoading ? (
-                <div className={`products-grid ${viewMode}`}>
-                  {[...Array(8)].map((_, i) => (
-                    <SkeletonCard key={i} />
-                  ))}
+                <div className="loading-container">
+                  <div className="loading-content">
+                    <div className="loading-spinner">
+                      <div className="spinner"></div>
+                    </div>
+                    <h3 className="loading-title">Loading amazing deals for you...</h3>
+                    <p className="loading-tip">{loadingTip}</p>
+                    <div className="loading-dots">
+                      <span></span>
+                      <span></span>
+                      <span></span>
+                    </div>
+                  </div>
+                  <div className={`products-grid ${viewMode}`} style={{ opacity: 0.3 }}>
+                    {[...Array(6)].map((_, i) => (
+                      <SkeletonCard key={i} />
+                    ))}
+                  </div>
                 </div>
               ) : filteredProducts.length > 0 ? (
                 <div className={`products-grid ${viewMode}`}>

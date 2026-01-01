@@ -639,7 +639,6 @@ function AddProduct() {
                       type="file"
                       className="image-upload-input"
                       accept="image/*"
-                      capture="environment"
                       onChange={(e) => handleImageChange(e, 1)}
                     />
                   </>
@@ -680,7 +679,6 @@ function AddProduct() {
                       type="file"
                       className="image-upload-input"
                       accept="image/*"
-                      capture="environment"
                       onChange={(e) => handleImageChange(e, 2)}
                     />
                   </>
