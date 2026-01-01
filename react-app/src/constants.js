@@ -1,5 +1,5 @@
 // API URL - Uses environment variable in production, localhost in development
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:4000";
+const API_URL = process.env.REACT_APP_API_URL || "https://sellbuy-ik7l.onrender.com";
 
 // Helper function to get image URL with optional Cloudinary transformations
 // Handles both Cloudinary URLs (full URLs) and legacy local uploads
