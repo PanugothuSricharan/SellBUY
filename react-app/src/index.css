@@ -752,10 +752,10 @@ code {
 
 @keyframes shimmer {
   0% {
-    transform: translateX(-100%);
+    background-position: 200% center;
   }
   100% {
-    transform: translateX(100%);
+    background-position: -200% center;
   }
 }
 
@@ -964,11 +964,11 @@ code {
     #93c5fd,
     var(--accent-orange)
   );
-  background-size: 200% 200%;
+  background-size: 100% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 3s ease-in-out infinite;
+  /* Static gradient - no animation to prevent layout shift */
 }
 
 /* Neon Border Effect */

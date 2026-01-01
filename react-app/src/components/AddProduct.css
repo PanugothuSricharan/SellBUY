@@ -759,11 +759,11 @@
 
 [data-theme="dark"] .add-product-header h1 {
   background: linear-gradient(135deg, #ffffff, var(--accent-orange), #93c5fd);
-  background-size: 200% 200%;
+  background-size: 100% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 4s ease-in-out infinite;
+  /* Static gradient - no animation */
 }
 
 [data-theme="dark"] .add-product-header p {
@@ -862,6 +862,14 @@
 [data-theme="dark"] .image-upload-box.has-image {
   border-color: var(--success);
   box-shadow: 0 0 15px rgba(74, 222, 128, 0.3);
+  overflow: hidden;
+}
+
+/* Dark mode image preview responsive fix */
+[data-theme="dark"] .image-preview {
+  max-width: 100%;
+  height: auto;
+  display: block;
 }
 
 [data-theme="dark"] .image-upload-icon {

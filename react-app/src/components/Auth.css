@@ -570,11 +570,11 @@
 
 [data-theme="dark"] .branding-title {
   background: linear-gradient(135deg, #ffffff, var(--accent-orange), #93c5fd);
-  background-size: 200% 200%;
+  background-size: 100% 100%;
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: shimmer 4s ease-in-out infinite;
+  /* Static gradient - no animation */
 }
 
 [data-theme="dark"] .branding-feature {

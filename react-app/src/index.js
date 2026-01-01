@@ -44,19 +44,6 @@ const PageLoader = () => (
   </div>
 );
 
-const style = document.createElement("style");
-style.innerHTML = `
-@font-face {
-  font-family: 'Lemon Jelly';
-  src: url('/fonts/LemonJellyPersonalUse-dEqR.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-`;
-document.head.appendChild(style);
-
-
 const router = createBrowserRouter([
   {
     path: "/",
