@@ -12,14 +12,18 @@ import {
   FaExclamationTriangle,
   FaTimes,
   FaEdit,
-  FaClock,
   FaTimesCircle,
+  FaHome,
+  FaChevronRight,
+  FaSearch,
 } from "react-icons/fa";
 import "./MyListings.css";
 
 function MyListings() {
   const navigate = useNavigate();
   const [products, setProducts] = useState([]);
+  const [filteredProducts, setFilteredProducts] = useState([]);
+  const [searchQuery, setSearchQuery] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [productToDelete, setProductToDelete] = useState(null);
@@ -62,6 +66,7 @@ function MyListings() {
       .then((res) => {
         if (res.data.products) {
           setProducts(res.data.products);
+          setFilteredProducts(res.data.products);
         }
       })
       .catch((err) => {
@@ -70,6 +75,33 @@ function MyListings() {
       .finally(() => {
         setIsLoading(false);
       });
+  };
+
+  // Search functionality
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setFilteredProducts(products);
+      return;
+    }
+
+    const query = searchQuery.toLowerCase();
+    const filtered = products.filter((product) => {
+      return (
+        product.pname?.toLowerCase().includes(query) ||
+        product.pdesc?.toLowerCase().includes(query) ||
+        product.category?.toLowerCase().includes(query) ||
+        product.location?.toLowerCase().includes(query)
+      );
+    });
+    setFilteredProducts(filtered);
+  }, [searchQuery, products]);
+
+  const handleSearchChange = (e) => {
+    setSearchQuery(e.target.value);
+  };
+
+  const clearSearch = () => {
+    setSearchQuery("");
   };
 
   const handleDelete = (product) => {
@@ -246,10 +278,19 @@ function MyListings() {
 
   return (
     <div className="my-listings-page">
-      <Header />
+      <Header hideSearch={true} />
 
       <main className="listings-content">
         <div className="container">
+          {/* Breadcrumb */}
+          <nav className="breadcrumb">
+            <Link to="/" aria-label="Go to home page">
+              <FaHome /> Home
+            </Link>
+            <FaChevronRight />
+            <span>Your Products</span>
+          </nav>
+
           {/* Account Blocked Banner */}
           {isBlocked && (
             <div className="blocked-banner">
@@ -273,6 +314,37 @@ function MyListings() {
               <FaPlus /> Add New Product
             </Link>
           </div>
+
+          {/* Search Bar */}
+          {!isLoading && products.length > 0 && (
+            <div className="listings-search-bar">
+              <div className="search-input-wrapper">
+                <FaSearch className="search-icon" />
+                <input
+                  type="text"
+                  placeholder="Search your products by name, category, or location..."
+                  value={searchQuery}
+                  onChange={handleSearchChange}
+                  className="search-input"
+                  aria-label="Search your products"
+                />
+                {searchQuery && (
+                  <button 
+                    className="clear-search-btn" 
+                    onClick={clearSearch}
+                    aria-label="Clear search"
+                  >
+                    <FaTimes />
+                  </button>
+                )}
+              </div>
+              {searchQuery && (
+                <p className="search-results-text">
+                  Found {filteredProducts.length} {filteredProducts.length === 1 ? 'product' : 'products'}
+                </p>
+              )}
+            </div>
+          )}
 
           {/* Stats */}
           {!isLoading && products.length > 0 && (
@@ -311,11 +383,20 @@ function MyListings() {
                 <SkeletonCard key={i} />
               ))}
             </div>
-          ) : products.length > 0 ? (
+          ) : filteredProducts.length > 0 ? (
             <div className="listings-grid">
-              {products.map((item) => (
+              {filteredProducts.map((item) => (
                 <ProductCard key={item._id} item={item} />
               ))}
+            </div>
+          ) : searchQuery ? (
+            <div className="empty-state">
+              <div className="empty-state-icon">🔍</div>
+              <h3>No products found</h3>
+              <p>No products match "{searchQuery}". Try a different search term.</p>
+              <button className="btn btn-secondary" onClick={clearSearch}>
+                Clear Search
+              </button>
             </div>
           ) : (
             <EmptyState />
