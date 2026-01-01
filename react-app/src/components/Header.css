@@ -109,7 +109,7 @@
 /* Dark Mode Logo - Fixed U Visibility */
 [data-theme="dark"] .logo-icon {
   color: var(--accent-orange);
-  /* Removed drop-shadow to prevent shifting */
+  filter: drop-shadow(0 0 8px var(--accent-orange-glow));
 }
 
 [data-theme="dark"] .logo-sell {
@@ -117,23 +117,18 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  /* Removed drop-shadow to prevent shifting */
+  filter: drop-shadow(0 0 10px var(--accent-orange-glow));
 }
 
 [data-theme="dark"] .logo-buy {
   color: var(--accent-orange);
-  /* Removed text-shadow to prevent shifting */
+  text-shadow: 0 0 10px var(--accent-orange-glow);
 }
 
 
 
 [data-theme="dark"] .logo:hover .logo-icon {
-  /* Removed drop-shadow to prevent shifting */
-}
-
-[data-theme="dark"] .logo:hover .logo-sell,
-[data-theme="dark"] .logo:hover .logo-buy {
-  /* Removed drop-shadow to prevent shifting */
+  filter: drop-shadow(0 0 15px var(--accent-orange-glow));
 }
 
 /* Styled Location Picker - Minimal Box */
