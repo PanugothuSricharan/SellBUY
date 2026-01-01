@@ -92,7 +92,7 @@
 }
 
 .logo-buy {
-  color: #d84315;
+  color: var(--accent-orange);
   transition: all var(--transition-base);
 }
 
@@ -121,8 +121,8 @@
 }
 
 [data-theme="dark"] .logo-buy {
-  color: #ffffff;
-  text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+  color: var(--accent-orange);
+  text-shadow: 0 0 10px var(--accent-orange-glow);
 }
 
 
