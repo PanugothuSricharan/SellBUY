@@ -100,7 +100,6 @@
   display: inline-block;
   transition: transform 0.6s ease-in-out;
   transform-style: preserve-3d;
-  color: var(--accent-orange);
 }
 
 .logo:hover .flip-letter {
@@ -126,10 +125,7 @@
   text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
-[data-theme="dark"] .flip-letter {
-  color: #ffffff !important;
-  text-shadow: 0 0 15px rgba(255, 255, 255, 0.8);
-}
+
 
 [data-theme="dark"] .logo:hover .logo-icon {
   filter: drop-shadow(0 0 15px var(--accent-orange-glow));
