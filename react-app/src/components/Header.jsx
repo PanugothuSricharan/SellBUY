@@ -248,7 +248,7 @@ function Header(props) {
             }}
           >
             <FaHome />
-            {props.hideSearch && <span className="home-btn-text">Return to Home to Search</span>}
+            {props.hideSearch && <span className="home-btn-text">Search your product at Home</span>}
           </button>
           {!props.hideSearch && (
             <div className="search-container">

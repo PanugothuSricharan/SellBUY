@@ -3,7 +3,7 @@ import Header from "./Header";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 import Categories from "./Categories";
-import { FaHeart, FaMapMarkerAlt, FaSearch, FaBoxOpen } from "react-icons/fa";
+import { FaHeart, FaMapMarkerAlt, FaBoxOpen } from "react-icons/fa";
 import "./Home.css";
 import { LOCATIONS } from "./LocationList";
 import API_URL, { getImageUrl } from "../constants";
@@ -65,12 +65,12 @@ function EmptyState({ category, location }) {
   return (
     <div className="empty-state">
       <FaBoxOpen className="empty-state-icon" />
-      <h3 className="empty-state-title">No {category} products found</h3>
+      <h3 className="empty-state-title">No {category} items right now</h3>
       <p className="empty-state-text">
-        There are no products in this category at {location}
+        🔍 No one's selling {category.toLowerCase()} at {location} yet. Check back soon or explore other categories!
       </p>
       <Link to="/" className="btn btn-primary">
-        Browse All Products
+        Explore All Products
       </Link>
     </div>
   );
@@ -169,7 +169,7 @@ function CategoryPage() {
 
   return (
     <div className="home-page">
-      <Header onLocationChange={handleLocationChange} />
+      <Header hideSearch={true} onLocationChange={handleLocationChange} />
 
       <Categories />
 

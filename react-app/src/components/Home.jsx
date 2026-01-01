@@ -494,21 +494,21 @@ function Home() {
   // Empty State Component
   const EmptyState = () => (
     <div className="empty-state">
-      <div className="empty-state-icon">📦</div>
-      <h2>No products found</h2>
+      <div className="empty-state-icon">�</div>
+      <h2>Nothing here yet!</h2>
       <p>
         {hasActiveFilters()
-          ? "Try different filters or clear all filters"
-          : `No products available in ${selectedLocation}`}
+          ? "No matches for your filters — try tweaking them or start fresh!"
+          : `Looks like ${selectedLocation} is quiet right now. Be the first to list something amazing!`}
       </p>
       {hasActiveFilters() && (
         <button className="btn btn-secondary" onClick={clearAllFilters}>
-          <FaTimes /> Clear All Filters
+          <FaTimes /> Clear Filters
         </button>
       )}
       {localStorage.getItem("token") && !hasActiveFilters() && (
         <Link to="/add-product" className="btn btn-accent">
-          <FaPlus /> Sell Something
+          <FaPlus /> List Your First Item
         </Link>
       )}
     </div>

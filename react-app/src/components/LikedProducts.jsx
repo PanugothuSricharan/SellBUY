@@ -55,12 +55,12 @@ function EmptyWishlist() {
   return (
     <div className="empty-state">
       <FaHeartBroken className="empty-state-icon" />
-      <h3 className="empty-state-title">Your wishlist is empty</h3>
+      <h3 className="empty-state-title">No saved items yet!</h3>
       <p className="empty-state-text">
-        Save items you like by tapping the heart icon on any product
+        ❤️ Tap the heart on any product to save it here for later. Your future finds are waiting!
       </p>
       <Link to="/" className="btn btn-primary">
-        <FaArrowLeft /> Browse Products
+        <FaArrowLeft /> Discover Products
       </Link>
     </div>
   );
@@ -144,7 +144,7 @@ function LikedProducts() {
 
   return (
     <div className="home-page">
-      <Header />
+      <Header hideSearch={true} />
 
       <div className="home-container">
         {/* Page Header */}

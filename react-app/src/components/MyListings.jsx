@@ -267,11 +267,11 @@ function MyListings() {
   // Empty State
   const EmptyState = () => (
     <div className="empty-state">
-      <div className="empty-state-icon">📦</div>
-      <h3>No listings yet</h3>
-      <p>Start selling by adding your first product!</p>
+      <div className="empty-state-icon">�</div>
+      <h3>Ready to start selling?</h3>
+      <p>Your shop is empty! List your first item and turn your unused stuff into cash.</p>
       <Link to="/add-product" className="btn btn-accent">
-        <FaPlus /> Sell Something
+        <FaPlus /> Create Your First Listing
       </Link>
     </div>
   );

@@ -589,6 +589,16 @@
   box-shadow: 0 0 20px var(--accent-orange-glow);
 }
 
+/* Fix contrast for branding text on dark background */
+[data-theme="dark"] .branding-subtitle {
+  color: rgba(255, 255, 255, 0.9);
+  opacity: 1;
+}
+
+[data-theme="dark"] .branding-feature-text {
+  color: rgba(255, 255, 255, 0.85);
+}
+
 [data-theme="dark"] .auth-form-section {
   background: var(--bg-primary);
 }

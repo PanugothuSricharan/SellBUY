@@ -241,7 +241,7 @@ function EditProduct() {
   if (isLoading) {
     return (
       <div className="add-product-page">
-        <Header />
+        <Header hideSearch={true} />
         <div className="add-product-container">
           <div className="loading-state">
             <div className="loading-spinner"></div>
@@ -254,7 +254,7 @@ function EditProduct() {
 
   return (
     <div className="add-product-page">
-      <Header />
+      <Header hideSearch={true} />
 
       <div className="add-product-container">
         <div className="add-product-header">

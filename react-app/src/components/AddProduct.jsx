@@ -364,7 +364,7 @@ function AddProduct() {
 
   return (
     <div className="add-product-page">
-      <Header />
+      <Header hideSearch={true} />
 
       <div className="add-product-container">
         <button 
