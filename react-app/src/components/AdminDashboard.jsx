@@ -79,9 +79,19 @@ function AdminDashboard() {
     const userId = localStorage.getItem('userId');
     try {
       const response = await axios.get(`${API_URL}/admin/exit-feedback-stats/${userId}?days=${analyticsPeriod}`);
-      setExitFeedbackStats(response.data);
+      console.log('Exit feedback stats response:', response.data);
+      if (response.data && response.data.stats) {
+        setExitFeedbackStats(response.data);
+      } else {
+        // Handle case where stats might be at root level
+        setExitFeedbackStats({
+          stats: response.data.stats || response.data,
+          recentComments: response.data.recentComments || []
+        });
+      }
     } catch (error) {
       console.error('Error fetching exit feedback stats:', error);
+      setExitFeedbackStats(null);
     }
   }, [analyticsPeriod]);
 

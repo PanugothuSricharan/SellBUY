@@ -3,6 +3,7 @@
   margin: 0 auto;
   padding: 20px;
   min-height: calc(100vh - 80px);
+  background: var(--bg-primary, #f8fafc);
 }
 
 .admin-header {
@@ -607,6 +608,10 @@
 }
 
 /* Dark Mode Support */
+[data-theme="dark"] .admin-dashboard {
+  background: var(--bg-primary, #121212);
+}
+
 [data-theme="dark"] .admin-product-card,
 [data-theme="dark"] .stat-card,
 [data-theme="dark"] .unauthorized-content {

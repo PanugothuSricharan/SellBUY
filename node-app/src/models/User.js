@@ -26,6 +26,10 @@ const UserSchema = new mongoose.Schema({
     type: String,
     trim: true,
   },
+  mobileVerified: {
+    type: Boolean,
+    default: false,
+  },
   googleId: {
     type: String,
     sparse: true, // Allow null values, only index non-null

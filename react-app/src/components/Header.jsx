@@ -17,6 +17,7 @@ import {
   FaShieldAlt,
   FaPhone,
   FaHome,
+  FaRedo,
 } from "react-icons/fa";
 import { useState, useEffect, useRef } from "react";
 import { BROWSE_LOCATIONS, LOCATIONS } from "./LocationList";
@@ -39,9 +40,16 @@ function Header(props) {
   const [mobileError, setMobileError] = useState("");
   const [mobileSuccess, setMobileSuccess] = useState(false);
   const [isSubmittingMobile, setIsSubmittingMobile] = useState(false);
+  // OTP states
+  const [otpStep, setOtpStep] = useState('phone'); // 'phone' or 'otp'
+  const [otp, setOtp] = useState('');
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpTimer, setOtpTimer] = useState(0);
+  const [devOtp, setDevOtp] = useState(''); // For development only
   const userMenuRef = useRef(null);
   const locationRef = useRef(null);
   const mobileInputRef = useRef(null);
+  const otpInputRef = useRef(null);
 
   useEffect(() => {
     // Check login status
@@ -110,11 +118,22 @@ function Header(props) {
     setShowMobileModal(true);
     setMobileError("");
     setMobileSuccess(false);
+    setOtpStep('phone');
+    setOtp('');
+    setDevOtp('');
     // Focus the input after modal opens
     setTimeout(() => mobileInputRef.current?.focus(), 100);
   };
 
-  const handleMobileSubmit = async () => {
+  // OTP timer countdown
+  useEffect(() => {
+    if (otpTimer > 0) {
+      const timer = setTimeout(() => setOtpTimer(otpTimer - 1), 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [otpTimer]);
+
+  const handleSendOtp = async () => {
     // Validate mobile number
     if (!mobileNumber.trim()) {
       setMobileError("Please enter your mobile number");
@@ -125,26 +144,101 @@ function Header(props) {
       return;
     }
 
-    setIsSubmittingMobile(true);
+    setOtpSending(true);
+    setMobileError("");
     const userId = localStorage.getItem("userId");
+
     try {
-      const res = await axios.put(`${API_URL}/update-mobile/${userId}`, {
+      const res = await axios.post(`${API_URL}/send-otp`, {
         mobile: mobileNumber,
+        userId,
       });
+      
       if (res.data.message.includes("success")) {
-        setMobileSuccess(true);
-        setTimeout(() => {
-          setShowMobileModal(false);
-          setMobileNumber("");
-          setMobileSuccess(false);
-        }, 1500);
+        setOtpStep('otp');
+        setOtpTimer(60); // 60 second cooldown for resend
+        // For development - show the OTP
+        if (res.data.devOtp) {
+          setDevOtp(res.data.devOtp);
+        }
+        setTimeout(() => otpInputRef.current?.focus(), 100);
       } else {
-        setMobileError(res.data.message || "Failed to update mobile number");
+        setMobileError(res.data.message || "Failed to send OTP");
       }
     } catch (err) {
-      setMobileError("Error updating mobile number. Please try again.");
+      setMobileError(err.response?.data?.message || "Error sending OTP. Please try again.");
     } finally {
-      setIsSubmittingMobile(false);
+      setOtpSending(false);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (otpTimer > 0) return;
+    
+    setOtpSending(true);
+    setMobileError("");
+    const userId = localStorage.getItem("userId");
+
+    try {
+      const res = await axios.post(`${API_URL}/resend-otp`, {
+        mobile: mobileNumber,
+        userId,
+      });
+      
+      if (res.data.message.includes("success")) {
+        setOtpTimer(60);
+        setOtp('');
+        if (res.data.devOtp) {
+          setDevOtp(res.data.devOtp);
+        }
+      } else {
+        setMobileError(res.data.message || "Failed to resend OTP");
+      }
+    } catch (err) {
+      setMobileError(err.response?.data?.message || "Error resending OTP");
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleMobileSubmit = async () => {
+    // For OTP step, verify OTP and update mobile
+    if (otpStep === 'otp') {
+      if (!otp.trim() || otp.length !== 6) {
+        setMobileError("Please enter the 6-digit OTP");
+        return;
+      }
+
+      setIsSubmittingMobile(true);
+      const userId = localStorage.getItem("userId");
+      
+      try {
+        const res = await axios.put(`${API_URL}/update-mobile/${userId}`, {
+          mobile: mobileNumber,
+          otp: otp,
+        });
+        
+        if (res.data.message.includes("success") || res.data.message.includes("verified")) {
+          setMobileSuccess(true);
+          setTimeout(() => {
+            setShowMobileModal(false);
+            setMobileNumber("");
+            setMobileSuccess(false);
+            setOtp('');
+            setOtpStep('phone');
+            setDevOtp('');
+          }, 1500);
+        } else {
+          setMobileError(res.data.message || "Failed to verify OTP");
+        }
+      } catch (err) {
+        setMobileError(err.response?.data?.message || "Error verifying OTP. Please try again.");
+      } finally {
+        setIsSubmittingMobile(false);
+      }
+    } else {
+      // Phone step - send OTP
+      handleSendOtp();
     }
   };
 
@@ -412,19 +506,26 @@ function Header(props) {
         <div className="mobile-modal" onClick={(e) => e.stopPropagation()}>
           <button 
             className="modal-close" 
-            onClick={() => setShowMobileModal(false)}
+            onClick={() => {
+              setShowMobileModal(false);
+              setOtpStep('phone');
+              setOtp('');
+              setDevOtp('');
+            }}
             aria-label="Close modal"
           >
             ×
           </button>
-          <h2 id="mobile-modal-title">📱 {mobileSuccess ? "Updated!" : "Edit Phone Number"}</h2>
+          <h2 id="mobile-modal-title">
+            📱 {mobileSuccess ? "Verified!" : otpStep === 'otp' ? "Enter OTP" : "Verify Phone Number"}
+          </h2>
           {mobileSuccess ? (
             <p style={{ color: "var(--success-color)", textAlign: "center" }} role="status" aria-live="polite">
-              ✓ Mobile number updated successfully!
+              ✓ Mobile number verified and updated!
             </p>
-          ) : (
+          ) : otpStep === 'phone' ? (
             <>
-              <p id="mobile-modal-desc">Update your phone number for buyers to contact you.</p>
+              <p id="mobile-modal-desc">We'll send an OTP to verify your number.</p>
               <input
                 ref={mobileInputRef}
                 type="tel"
@@ -445,12 +546,80 @@ function Header(props) {
               )}
               <button 
                 className="mobile-submit-btn" 
+                onClick={handleSendOtp}
+                disabled={otpSending}
+                aria-busy={otpSending}
+              >
+                {otpSending ? "Sending OTP..." : "Send OTP"}
+              </button>
+            </>
+          ) : (
+            <>
+              <p id="mobile-modal-desc">
+                Enter the 6-digit OTP sent to <strong>+91 {mobileNumber}</strong>
+              </p>
+              {/* Dev OTP display - REMOVE IN PRODUCTION */}
+              {devOtp && (
+                <p style={{ 
+                  background: '#fef3c7', 
+                  padding: '8px 12px', 
+                  borderRadius: '6px', 
+                  fontSize: '0.85rem',
+                  marginBottom: '12px',
+                  color: '#92400e'
+                }}>
+                  🔧 Dev Mode OTP: <strong>{devOtp}</strong>
+                </p>
+              )}
+              <input
+                ref={otpInputRef}
+                type="text"
+                inputMode="numeric"
+                placeholder="Enter 6-digit OTP"
+                value={otp}
+                onChange={(e) => {
+                  setOtp(e.target.value.replace(/\D/g, "").slice(0, 6));
+                  setMobileError("");
+                }}
+                className="mobile-input otp-input"
+                maxLength={6}
+                aria-describedby="mobile-modal-desc mobile-error"
+                aria-invalid={!!mobileError}
+                style={{ letterSpacing: '0.5em', textAlign: 'center', fontSize: '1.25rem' }}
+              />
+              {mobileError && (
+                <p id="mobile-error" className="mobile-error" role="alert" aria-live="assertive">
+                  {mobileError}
+                </p>
+              )}
+              <button 
+                className="mobile-submit-btn" 
                 onClick={handleMobileSubmit}
-                disabled={isSubmittingMobile}
+                disabled={isSubmittingMobile || otp.length !== 6}
                 aria-busy={isSubmittingMobile}
               >
-                {isSubmittingMobile ? "Updating..." : "Update Number"}
+                {isSubmittingMobile ? "Verifying..." : "Verify & Update"}
               </button>
+              <div className="otp-actions">
+                <button 
+                  className="otp-back-btn"
+                  onClick={() => {
+                    setOtpStep('phone');
+                    setOtp('');
+                    setMobileError('');
+                  }}
+                >
+                  ← Change Number
+                </button>
+                <button 
+                  className="otp-resend-btn"
+                  onClick={handleResendOtp}
+                  disabled={otpTimer > 0 || otpSending}
+                >
+                  <FaRedo style={{ marginRight: '4px' }} />
+                  {otpTimer > 0 ? `Resend in ${otpTimer}s` : 'Resend OTP'}
+                </button>
+              </div>
             </>
           )}
         </div>
