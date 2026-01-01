@@ -5,6 +5,7 @@ import { Suspense, lazy } from "react";
 import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import { Analytics } from "@vercel/analytics/react";
 
 // Lazy load components for code splitting
 const Home = lazy(() => import("./components/Home"));
@@ -104,6 +105,7 @@ root.render(
     <Suspense fallback={null}>
       <ContactAdmin />
     </Suspense>
+    <Analytics />
   </GoogleOAuthProvider>
 );
 
