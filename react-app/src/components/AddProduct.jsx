@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Header from "./Header";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
@@ -70,6 +70,16 @@ function AddProduct() {
   const [agreedToTerms, setAgreedToTerms] = useState(false);
   const [createdProductId, setCreatedProductId] = useState(null);
   const [linkCopied, setLinkCopied] = useState(false);
+  
+  // Image picker modal state
+  const [showImagePicker, setShowImagePicker] = useState(false);
+  const [activeImageSlot, setActiveImageSlot] = useState(null); // 1 or 2
+  
+  // Refs for hidden file inputs
+  const cameraInput1Ref = useRef(null);
+  const galleryInput1Ref = useRef(null);
+  const cameraInput2Ref = useRef(null);
+  const galleryInput2Ref = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -169,6 +179,38 @@ function AddProduct() {
         }
       }
     }
+  };
+
+  // Open image picker modal
+  const openImagePicker = (imageNumber) => {
+    setActiveImageSlot(imageNumber);
+    setShowImagePicker(true);
+  };
+
+  // Handle camera selection
+  const handleCameraSelect = () => {
+    setShowImagePicker(false);
+    // Small delay to ensure modal closes first
+    setTimeout(() => {
+      if (activeImageSlot === 1) {
+        cameraInput1Ref.current?.click();
+      } else {
+        cameraInput2Ref.current?.click();
+      }
+    }, 100);
+  };
+
+  // Handle gallery selection
+  const handleGallerySelect = () => {
+    setShowImagePicker(false);
+    // Small delay to ensure modal closes first
+    setTimeout(() => {
+      if (activeImageSlot === 1) {
+        galleryInput1Ref.current?.click();
+      } else {
+        galleryInput2Ref.current?.click();
+      }
+    }, 100);
   };
 
   const removeImage = (imageNumber) => {
@@ -610,6 +652,7 @@ function AddProduct() {
                 className={`image-upload-box ${
                   previewImage1 ? "has-image" : ""
                 }`}
+                onClick={() => !previewImage1 && openImagePicker(1)}
               >
                 {previewImage1 ? (
                   <>
@@ -621,7 +664,7 @@ function AddProduct() {
                     <button
                       type="button"
                       className="remove-image-btn"
-                      onClick={() => removeImage(1)}
+                      onClick={(e) => { e.stopPropagation(); removeImage(1); }}
                     >
                       <FaTimes />
                     </button>
@@ -633,14 +676,7 @@ function AddProduct() {
                       Primary Image{" "}
                       <span style={{ color: "var(--error)" }}>*</span>
                     </p>
-                    <p className="image-upload-hint">Tap to choose from gallery or take a photo</p>
-                    {/* Allow both gallery and camera selection */}
-                    <input
-                      type="file"
-                      className="image-upload-input"
-                      accept="image/*"
-                      onChange={(e) => handleImageChange(e, 1)}
-                    />
+                    <p className="image-upload-hint">Tap to take photo or choose from gallery</p>
                   </>
                 )}
               </div>
@@ -650,6 +686,7 @@ function AddProduct() {
                 className={`image-upload-box ${
                   previewImage2 ? "has-image" : ""
                 }`}
+                onClick={() => !previewImage2 && openImagePicker(2)}
               >
                 {previewImage2 ? (
                   <>
@@ -661,7 +698,7 @@ function AddProduct() {
                     <button
                       type="button"
                       className="remove-image-btn"
-                      onClick={() => removeImage(2)}
+                      onClick={(e) => { e.stopPropagation(); removeImage(2); }}
                     >
                       <FaTimes />
                     </button>
@@ -673,18 +710,44 @@ function AddProduct() {
                       Secondary Image{" "}
                       <span className="optional">(Optional)</span>
                     </p>
-                    <p className="image-upload-hint">Tap to choose from gallery or take a photo</p>
-                    {/* Allow both gallery and camera selection */}
-                    <input
-                      type="file"
-                      className="image-upload-input"
-                      accept="image/*"
-                      onChange={(e) => handleImageChange(e, 2)}
-                    />
+                    <p className="image-upload-hint">Tap to take photo or choose from gallery</p>
                   </>
                 )}
               </div>
             </div>
+            
+            {/* Hidden file inputs for camera and gallery */}
+            <input
+              ref={cameraInput1Ref}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={(e) => handleImageChange(e, 1)}
+              style={{ display: 'none' }}
+            />
+            <input
+              ref={galleryInput1Ref}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageChange(e, 1)}
+              style={{ display: 'none' }}
+            />
+            <input
+              ref={cameraInput2Ref}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              onChange={(e) => handleImageChange(e, 2)}
+              style={{ display: 'none' }}
+            />
+            <input
+              ref={galleryInput2Ref}
+              type="file"
+              accept="image/*"
+              onChange={(e) => handleImageChange(e, 2)}
+              style={{ display: 'none' }}
+            />
+            
             {errors.pimage && (
               <p
                 className="error-message"
@@ -840,6 +903,45 @@ function AddProduct() {
               onClick={() => navigate("/")}
             >
               <FaHome /> Go to Home
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Image Picker Modal */}
+      {showImagePicker && (
+        <div className="modal-overlay" onClick={() => setShowImagePicker(false)}>
+          <div className="image-picker-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="image-picker-header">
+              <h3>Add Photo</h3>
+              <button 
+                className="close-picker-btn"
+                onClick={() => setShowImagePicker(false)}
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="image-picker-options">
+              <button 
+                className="picker-option"
+                onClick={handleCameraSelect}
+              >
+                <FaCamera className="picker-icon" />
+                <span>Take a Photo</span>
+              </button>
+              <button 
+                className="picker-option"
+                onClick={handleGallerySelect}
+              >
+                <FaImage className="picker-icon" />
+                <span>Choose from Gallery</span>
+              </button>
+            </div>
+            <button 
+              className="picker-cancel-btn"
+              onClick={() => setShowImagePicker(false)}
+            >
+              Cancel
             </button>
           </div>
         </div>

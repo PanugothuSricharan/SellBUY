@@ -1244,6 +1244,158 @@
 }
 
 /* ============================================
+   IMAGE PICKER MODAL
+   ============================================ */
+.image-picker-modal {
+  background: var(--white);
+  border-radius: var(--radius-lg);
+  max-width: 320px;
+  width: 100%;
+  box-shadow: var(--shadow-xl);
+  animation: modalSlideIn 0.3s ease-out;
+  overflow: hidden;
+}
+
+.image-picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.image-picker-header h3 {
+  margin: 0;
+  font-size: var(--font-size-lg);
+  color: var(--gray-900);
+  font-weight: 600;
+}
+
+.close-picker-btn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  color: var(--gray-500);
+  cursor: pointer;
+  padding: var(--space-xs);
+  border-radius: var(--radius-full);
+  transition: all 0.2s ease;
+}
+
+.close-picker-btn:hover {
+  background: var(--gray-100);
+  color: var(--gray-700);
+}
+
+.image-picker-options {
+  padding: var(--space-sm);
+}
+
+.picker-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-md);
+  width: 100%;
+  padding: var(--space-md) var(--space-lg);
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  color: var(--gray-800);
+  border-radius: var(--radius-md);
+  transition: all 0.2s ease;
+}
+
+.picker-option:hover {
+  background: var(--gray-100);
+}
+
+.picker-option:active {
+  background: var(--gray-200);
+}
+
+.picker-icon {
+  font-size: 1.5rem;
+  color: var(--primary-dark);
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 77, 64, 0.1);
+  border-radius: var(--radius-full);
+  padding: 8px;
+}
+
+.picker-option span {
+  font-weight: 500;
+}
+
+.picker-cancel-btn {
+  width: 100%;
+  padding: var(--space-md);
+  background: none;
+  border: none;
+  border-top: 1px solid var(--gray-200);
+  cursor: pointer;
+  font-size: var(--font-size-base);
+  color: var(--gray-600);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.picker-cancel-btn:hover {
+  background: var(--gray-50);
+  color: var(--gray-800);
+}
+
+/* Dark Theme - Image Picker */
+[data-theme="dark"] .image-picker-modal {
+  background: var(--bg-elevated);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .image-picker-header {
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .image-picker-header h3 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .close-picker-btn {
+  color: var(--text-muted);
+}
+
+[data-theme="dark"] .close-picker-btn:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .picker-option {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .picker-option:hover {
+  background: var(--bg-card);
+}
+
+[data-theme="dark"] .picker-icon {
+  color: var(--accent-orange);
+  background: rgba(251, 146, 60, 0.15);
+}
+
+[data-theme="dark"] .picker-cancel-btn {
+  border-top-color: var(--border-color);
+  color: var(--text-secondary);
+}
+
+[data-theme="dark"] .picker-cancel-btn:hover {
+  background: var(--bg-card);
+  color: var(--text-primary);
+}
+
+/* ============================================
    TERMS AGREEMENT CHECKBOX
    ============================================ */
 
