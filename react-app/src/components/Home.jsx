@@ -494,7 +494,7 @@ function Home() {
   // Empty State Component
   const EmptyState = () => (
     <div className="empty-state">
-      <div className="empty-state-icon">�</div>
+      <div className="empty-state-icon">📦</div>
       <h2>Nothing here yet!</h2>
       <p>
         {hasActiveFilters()
