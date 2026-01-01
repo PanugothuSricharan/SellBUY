@@ -575,10 +575,10 @@ function Home() {
             {/* Filters Sidebar - Desktop Only */}
             <aside className={`filters-sidebar ${filtersExpanded ? 'expanded' : 'collapsed'}`}>
               <div className="sidebar-header" onClick={() => setFiltersExpanded(!filtersExpanded)}>
-                <h3 className="sidebar-title">
+                <h2 className="sidebar-title">
                   <FaFilter /> Filters
                   {hasActiveFilters() && <span className="filter-count">{selectedCategories.length + selectedConditions.length + (priceRange.min > 0 || priceRange.max < maxPriceLimit ? 1 : 0)}</span>}
-                </h3>
+                </h2>
                 <div className="sidebar-header-right">
                   {hasActiveFilters() && (
                     <button
