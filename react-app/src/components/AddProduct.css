@@ -1349,6 +1349,105 @@
   color: var(--gray-800);
 }
 
+/* Webcam Capture Modal */
+.webcam-modal {
+  background: white;
+  border-radius: var(--radius-lg);
+  width: 90%;
+  max-width: 700px;
+  max-height: 90vh;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+}
+
+.webcam-header {
+  padding: var(--space-lg);
+  border-bottom: 1px solid var(--gray-200);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.webcam-header h3 {
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  color: var(--primary-dark);
+  margin: 0;
+}
+
+.webcam-container {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #000;
+  overflow: hidden;
+  min-height: 400px;
+}
+
+.webcam-video {
+  width: 100%;
+  height: auto;
+  max-height: 500px;
+  object-fit: contain;
+}
+
+.webcam-controls {
+  padding: var(--space-lg);
+  display: flex;
+  gap: var(--space-md);
+  border-top: 1px solid var(--gray-200);
+  background: var(--gray-50);
+}
+
+.capture-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  padding: var(--space-md);
+  background: var(--accent-orange);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.capture-btn:hover {
+  background: var(--accent-orange-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+}
+
+.capture-btn:active {
+  transform: translateY(0);
+}
+
+/* Dark Theme - Webcam Modal */
+[data-theme="dark"] .webcam-modal {
+  background: var(--bg-elevated);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .webcam-header {
+  border-bottom-color: var(--border-color);
+}
+
+[data-theme="dark"] .webcam-header h3 {
+  color: var(--text-primary);
+}
+
+[data-theme="dark"] .webcam-controls {
+  background: var(--bg-secondary);
+  border-top-color: var(--border-color);
+}
+
 /* Dark Theme - Image Picker */
 [data-theme="dark"] .image-picker-modal {
   background: var(--bg-elevated);
@@ -1790,6 +1889,24 @@
     flex-direction: column;
     gap: var(--space-xs);
     text-align: center;
+  }
+  
+  /* Webcam Modal Mobile */
+  .webcam-modal {
+    width: 95%;
+    max-width: none;
+  }
+  
+  .webcam-container {
+    min-height: 300px;
+  }
+  
+  .webcam-controls {
+    flex-direction: column;
+  }
+  
+  .capture-btn {
+    width: 100%;
   }
 }
 

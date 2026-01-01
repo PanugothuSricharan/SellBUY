@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Header from "./Header";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import Webcam from "react-webcam";
 import categories from "./CategoriesList";
 import { PRODUCT_LOCATIONS } from "./LocationList";
 import "./AddProduct.css";
@@ -74,12 +75,15 @@ function AddProduct() {
   // Image picker modal state
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [activeImageSlot, setActiveImageSlot] = useState(null); // 1 or 2
+  const [showWebcam, setShowWebcam] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   
   // Refs for hidden file inputs
   const cameraInput1Ref = useRef(null);
   const galleryInput1Ref = useRef(null);
   const cameraInput2Ref = useRef(null);
   const galleryInput2Ref = useRef(null);
+  const webcamRef = useRef(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -88,8 +92,20 @@ function AddProduct() {
       return;
     }
     
+    // Detect if device is desktop (screen width > 768px and not a touch device)
+    const checkIsDesktop = () => {
+      const hasTouch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const isWideScreen = window.innerWidth > 768;
+      setIsDesktop(isWideScreen && !hasTouch);
+    };
+    
+    checkIsDesktop();
+    window.addEventListener('resize', checkIsDesktop);
+    
     // Check if user has mobile number
     checkUserMobile();
+    
+    return () => window.removeEventListener('resize', checkIsDesktop);
   }, []);
 
   const checkUserMobile = async () => {
@@ -190,7 +206,16 @@ function AddProduct() {
   // Handle camera selection
   const handleCameraSelect = () => {
     setShowImagePicker(false);
-    // Small delay to ensure modal closes first
+    
+    // On desktop, show webcam capture modal
+    if (isDesktop) {
+      setTimeout(() => {
+        setShowWebcam(true);
+      }, 100);
+      return;
+    }
+    
+    // On mobile, use camera input
     setTimeout(() => {
       if (activeImageSlot === 1) {
         cameraInput1Ref.current?.click();
@@ -211,6 +236,50 @@ function AddProduct() {
         galleryInput2Ref.current?.click();
       }
     }, 100);
+  };
+  
+  // Capture photo from webcam
+  const captureWebcamPhoto = async () => {
+    if (webcamRef.current) {
+      const imageSrc = webcamRef.current.getScreenshot();
+      if (imageSrc) {
+        // Convert base64 to blob
+        const response = await fetch(imageSrc);
+        const blob = await response.blob();
+        const file = new File([blob], `webcam-${Date.now()}.jpg`, { type: 'image/jpeg' });
+        
+        // Process the image
+        const previewUrl = imageSrc;
+        if (activeImageSlot === 1) {
+          setPreviewImage1(previewUrl);
+        } else {
+          setPreviewImage2(previewUrl);
+        }
+        
+        try {
+          // Compress image if larger than 2MB
+          let processedFile = file;
+          if (file.size > 2 * 1024 * 1024) {
+            processedFile = await compressImageToSize(file, 2);
+          }
+          
+          if (activeImageSlot === 1) {
+            setPimage(processedFile);
+          } else {
+            setPimage2(processedFile);
+          }
+        } catch (error) {
+          console.error('Image compression failed:', error);
+          if (activeImageSlot === 1) {
+            setPimage(file);
+          } else {
+            setPimage2(file);
+          }
+        }
+        
+        setShowWebcam(false);
+      }
+    }
   };
 
   const removeImage = (imageNumber) => {
@@ -676,7 +745,9 @@ function AddProduct() {
                       Primary Image{" "}
                       <span style={{ color: "var(--error)" }}>*</span>
                     </p>
-                    <p className="image-upload-hint">Tap to take photo or choose from gallery</p>
+                    <p className="image-upload-hint">
+                      {isDesktop ? 'Click to use webcam or choose from files' : 'Tap to take photo or choose from gallery'}
+                    </p>
                   </>
                 )}
               </div>
@@ -710,7 +781,9 @@ function AddProduct() {
                       Secondary Image{" "}
                       <span className="optional">(Optional)</span>
                     </p>
-                    <p className="image-upload-hint">Tap to take photo or choose from gallery</p>
+                    <p className="image-upload-hint">
+                      {isDesktop ? 'Click to use webcam or choose from files' : 'Tap to take photo or choose from gallery'}
+                    </p>
                   </>
                 )}
               </div>
@@ -927,7 +1000,7 @@ function AddProduct() {
                 onClick={handleCameraSelect}
               >
                 <FaCamera className="picker-icon" />
-                <span>Take a Photo</span>
+                <span>{isDesktop ? 'Use Webcam' : 'Take a Photo'}</span>
               </button>
               <button 
                 className="picker-option"
@@ -943,6 +1016,50 @@ function AddProduct() {
             >
               Cancel
             </button>
+          </div>
+        </div>
+      )}
+      
+      {/* Webcam Capture Modal */}
+      {showWebcam && (
+        <div className="modal-overlay" onClick={() => setShowWebcam(false)}>
+          <div className="webcam-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="webcam-header">
+              <h3>Capture Photo</h3>
+              <button 
+                className="close-picker-btn"
+                onClick={() => setShowWebcam(false)}
+              >
+                <FaTimes />
+              </button>
+            </div>
+            <div className="webcam-container">
+              <Webcam
+                audio={false}
+                ref={webcamRef}
+                screenshotFormat="image/jpeg"
+                videoConstraints={{
+                  width: 1280,
+                  height: 720,
+                  facingMode: "user"
+                }}
+                className="webcam-video"
+              />
+            </div>
+            <div className="webcam-controls">
+              <button 
+                className="capture-btn"
+                onClick={captureWebcamPhoto}
+              >
+                <FaCamera /> Capture Photo
+              </button>
+              <button 
+                className="picker-cancel-btn"
+                onClick={() => setShowWebcam(false)}
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
       )}
