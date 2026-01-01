@@ -537,7 +537,9 @@ function Home() {
               Find great deals from students in {selectedLocation}
             </p>
             {!localStorage.getItem("token") && (
-            <Link to="/signup" className="btn btn-accent btn-lg" style={{ fontFamily: "'Dancing Script', cursive" }}>Buy – It's Free</Link>
+            <Link to="/signup" className="btn btn-accent btn-lg" style={{ fontFamily: "'Lemon Jelly', cursive", fontSize: '1.5rem' }}>
+              Buy & Sell – It's Free
+            </Link>
 
             )}
           </div>
