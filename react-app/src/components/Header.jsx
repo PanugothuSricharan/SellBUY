@@ -204,10 +204,13 @@ function Header(props) {
             <button 
               className="location-btn"
               onClick={() => setShowLocationDropdown(!showLocationDropdown)}
+              aria-label={`Current location: ${selectedLocation}. Click to change location`}
+              aria-expanded={showLocationDropdown}
+              aria-haspopup="listbox"
             >
-              <FaMapMarkerAlt className="location-icon" />
+              <FaMapMarkerAlt className="location-icon" aria-hidden="true" />
               <span className="location-text">{selectedLocation}</span>
-              <FaChevronDown className={`location-arrow ${showLocationDropdown ? 'open' : ''}`} />
+              <FaChevronDown className={`location-arrow ${showLocationDropdown ? 'open' : ''}`} aria-hidden="true" />
             </button>
             
             {showLocationDropdown && (

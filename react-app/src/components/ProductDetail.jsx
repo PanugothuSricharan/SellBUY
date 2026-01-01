@@ -55,6 +55,61 @@ function ProductDetail() {
     checkIfLiked();
   }, [productId]);
 
+  // Add structured data for SEO
+  useEffect(() => {
+    if (product) {
+      // Update page title
+      document.title = `${product.pname} - ${product.category} | SellBUY`;
+      
+      // Update meta description
+      const metaDescription = document.querySelector('meta[name="description"]');
+      if (metaDescription) {
+        metaDescription.setAttribute('content', `Buy ${product.pname} - ${product.condition} condition. Price: ₹${product.price}. ${product.pdesc.substring(0, 120)}...`);
+      }
+
+      // Add structured data JSON-LD
+      const script = document.createElement('script');
+      script.type = 'application/ld+json';
+      script.id = 'product-schema';
+      script.text = JSON.stringify({
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": product.pname,
+        "image": getFullImageUrl(product.pimage),
+        "description": product.pdesc,
+        "category": product.category,
+        "offers": {
+          "@type": "Offer",
+          "url": `https://sell-buy.vercel.app/products/${product._id}`,
+          "priceCurrency": "INR",
+          "price": product.price,
+          "priceValidUntil": new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
+          "itemCondition": product.condition === "New" ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition",
+          "availability": product.status === "Sold" ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+          "seller": {
+            "@type": "Person",
+            "name": "Campus Student"
+          }
+        },
+        "brand": {
+          "@type": "Brand",
+          "name": "SellBUY Campus Marketplace"
+        },
+        "itemCondition": product.condition === "New" ? "https://schema.org/NewCondition" : "https://schema.org/UsedCondition"
+      });
+      document.head.appendChild(script);
+
+      return () => {
+        // Cleanup
+        const existingScript = document.getElementById('product-schema');
+        if (existingScript) {
+          document.head.removeChild(existingScript);
+        }
+        document.title = "SellBUY - Campus Marketplace";
+      };
+    }
+  }, [product]);
+
   const checkIfLiked = () => {
     const userId = localStorage.getItem("userId");
     if (!userId) return;

@@ -1,3 +1,14 @@
 # https://www.robotstxt.org/robotstxt.html
+# Allow all crawlers to index the site
 User-agent: *
-Disallow:
+Allow: /
+
+# Disallow specific admin and API paths
+Disallow: /admin
+Disallow: /api/
+
+# Sitemap location
+Sitemap: https://sell-buy.vercel.app/sitemap.xml
+
+# Crawl-delay to reduce server load
+Crawl-delay: 1

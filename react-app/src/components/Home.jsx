@@ -563,7 +563,7 @@ function Home() {
               {/* Show the Pro tip tooltip only on desktop */}
               {showLocationTip && window.innerWidth > 768 && (
                 <div className="location-tooltip">
-                  <button className="tooltip-close" onClick={dismissLocationTip}>×</button>
+                  <button className="tooltip-close" onClick={dismissLocationTip} aria-label="Dismiss location tip">×</button>
                   <p>💡 <strong>Pro tip:</strong > Filter products by your hostel to find items nearby!</p>
                 </div>
               )}
@@ -584,6 +584,7 @@ function Home() {
                     <button
                       className="clear-filters-link"
                       onClick={(e) => { e.stopPropagation(); clearAllFilters(); }}
+                      aria-label="Clear all filters"
                     >
                       Clear
                     </button>
@@ -746,6 +747,8 @@ function Home() {
                     className={`view-btn ${viewMode === VIEW_MODES.GRID ? "active" : ""}`}
                     onClick={() => handleViewModeChange(VIEW_MODES.GRID)}
                     title="Grid View"
+                    aria-label="Switch to grid view"
+                    aria-pressed={viewMode === VIEW_MODES.GRID}
                   >
                     <FaThLarge />
                   </button>
@@ -753,6 +756,8 @@ function Home() {
                     className={`view-btn ${viewMode === VIEW_MODES.COMPACT ? "active" : ""}`}
                     onClick={() => handleViewModeChange(VIEW_MODES.COMPACT)}
                     title="Compact View"
+                    aria-label="Switch to compact view"
+                    aria-pressed={viewMode === VIEW_MODES.COMPACT}
                   >
                     <FaTh />
                   </button>
@@ -760,6 +765,8 @@ function Home() {
                     className={`view-btn ${viewMode === VIEW_MODES.LIST ? "active" : ""}`}
                     onClick={() => handleViewModeChange(VIEW_MODES.LIST)}
                     title="List View"
+                    aria-label="Switch to list view"
+                    aria-pressed={viewMode === VIEW_MODES.LIST}
                   >
                     <FaList />
                   </button>
@@ -772,7 +779,7 @@ function Home() {
                   {search && (
                     <span className="filter-pill">
                       Search: "{search}"
-                      <button onClick={clearSearch}>
+                      <button onClick={clearSearch} aria-label="Clear search">
                         <FaTimes />
                       </button>
                     </span>
@@ -780,7 +787,7 @@ function Home() {
                   {selectedCategories.map((cat) => (
                     <span key={cat} className="filter-pill">
                       {cat}
-                      <button onClick={() => handleCategory(cat)}>
+                      <button onClick={() => handleCategory(cat)} aria-label={`Remove ${cat} filter`}>
                         <FaTimes />
                       </button>
                     </span>
@@ -788,7 +795,7 @@ function Home() {
                   {selectedConditions.map((cond) => (
                     <span key={cond} className="filter-pill">
                       {cond}
-                      <button onClick={() => toggleCondition(cond)}>
+                      <button onClick={() => toggleCondition(cond)} aria-label={`Remove ${cond} condition filter`}>
                         <FaTimes />
                       </button>
                     </span>
@@ -876,7 +883,7 @@ function Home() {
         <div className="fab-panel filter-panel">
           <div className="fab-panel-header">
             <h3><FaFilter /> Filters</h3>
-            <button className="close-fab" onClick={() => setMobileFilterOpen(false)}><FaTimes /></button>
+            <button className="close-fab" onClick={() => setMobileFilterOpen(false)} aria-label="Close filters"><FaTimes /></button>
           </div>
           
           {/* View Mode Toggle */}
