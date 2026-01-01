@@ -31,6 +31,45 @@
   margin: 0;
 }
 
+/* Back to Home Button */
+.back-to-home-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1rem;
+  background: transparent;
+  color: var(--gray-700);
+  border: 1px solid var(--gray-300);
+  border-radius: 8px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-bottom: var(--space-lg);
+}
+
+.back-to-home-btn:hover {
+  background: var(--gray-100);
+  color: var(--accent-orange);
+  border-color: var(--accent-orange);
+  transform: translateX(-2px);
+}
+
+.back-to-home-btn svg {
+  font-size: 1rem;
+}
+
+[data-theme="dark"] .back-to-home-btn {
+  color: var(--text-secondary);
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .back-to-home-btn:hover {
+  background: var(--bg-elevated);
+  color: var(--accent-orange);
+  border-color: var(--accent-orange);
+}
+
 /* Back Button */
 .back-btn {
   display: inline-flex;
