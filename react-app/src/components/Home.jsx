@@ -36,7 +36,6 @@ function Home() {
   const [selectedLocation, setSelectedLocation] = useState(
     localStorage.getItem("selectedLocation") || LOCATIONS.ENTIRE_CAMPUS
   );
-  const [loadingTip, setLoadingTip] = useState("");
 
   // Track liked products
   const [likedProducts, setLikedProducts] = useState(new Set());
@@ -53,34 +52,6 @@ function Home() {
   const [mobileFilterOpen, setMobileFilterOpen] = useState(false);
   const [mobileLocationOpen, setMobileLocationOpen] = useState(false);
   const [showLocationTip, setShowLocationTip] = useState(false);
-
-  // Engaging loading tips that cycle every 3 seconds
-  useEffect(() => {
-    const loadingTips = [
-      "💡 Pro tip: Use filters to find exactly what you need!",
-      "🎯 Did you know? You can filter products by your hostel location!",
-      "⚡ Quick tip: Negotiable prices mean you can chat with the seller!",
-      "🌟 New products are added daily by students like you!",
-      "📸 Tip: Products with multiple images sell faster!",
-      "🔔 Bookmark products you like using the heart icon!",
-      "💰 Great deals are waiting - keep exploring!",
-      "🤝 Connect with sellers via WhatsApp or phone call!",
-      "📱 Mobile-friendly: Browse, buy, and sell on the go!",
-      "🎓 Built by students, for students - happy shopping!"
-    ];
-    
-    if (isLoading) {
-      // Set initial tip
-      setLoadingTip(loadingTips[Math.floor(Math.random() * loadingTips.length)]);
-      
-      // Cycle through tips every 3 seconds while loading
-      const interval = setInterval(() => {
-        setLoadingTip(loadingTips[Math.floor(Math.random() * loadingTips.length)]);
-      }, 3000);
-      
-      return () => clearInterval(interval);
-    }
-  }, [isLoading]);
 
   // Show location tip for first-time users - only once ever
   useEffect(() => {
@@ -173,7 +144,7 @@ function Home() {
     }
 
     axios
-      .get(url, { timeout: 30000 })
+      .get(url)
       .then((res) => {
         if (res.data.products) {
           // Filter out sold products
@@ -467,6 +438,58 @@ function Home() {
       </div>
     </div>
   );
+
+  // Loading state with tips for first-time users
+  const LoadingState = () => {
+    const isFirstVisit = !localStorage.getItem("hasVisitedBefore");
+    const tips = [
+      "💡 You can filter products by your hostel to find items nearby!",
+      "🔍 Use the search bar to find specific items quickly",
+      "❤️ Save items you like by clicking the heart icon",
+      "📍 Change your location to see products from different hostels",
+      "💰 Use price filters to find items within your budget"
+    ];
+    const [currentTip, setCurrentTip] = useState(0);
+    
+    useEffect(() => {
+      if (isFirstVisit) {
+        const tipInterval = setInterval(() => {
+          setCurrentTip(prev => (prev + 1) % tips.length);
+        }, 3000);
+        return () => clearInterval(tipInterval);
+      }
+    }, [isFirstVisit, tips.length]);
+
+    useEffect(() => {
+      // Mark as visited after first load
+      localStorage.setItem("hasVisitedBefore", "true");
+    }, []);
+    
+    return (
+      <div className="loading-state">
+        <div className="loading-spinner-container">
+          <div className="loading-spinner"></div>
+          <p className="loading-text">Loading products...</p>
+        </div>
+        {isFirstVisit && (
+          <div className="first-visit-tips">
+            <h4>👋 Welcome to SellBUY!</h4>
+            <p className="tip-text">{tips[currentTip]}</p>
+            <div className="tip-dots">
+              {tips.map((_, i) => (
+                <span key={i} className={`tip-dot ${i === currentTip ? 'active' : ''}`}></span>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="products-grid grid loading-grid">
+          {[...Array(8)].map((_, i) => (
+            <SkeletonCard key={i} />
+          ))}
+        </div>
+      </div>
+    );
+  };
 
   // Empty State Component
   const EmptyState = () => (
@@ -787,25 +810,7 @@ function Home() {
 
               {/* Products Grid */}
               {isLoading ? (
-                <div className="loading-container">
-                  <div className="loading-content">
-                    <div className="loading-spinner">
-                      <div className="spinner"></div>
-                    </div>
-                    <h3 className="loading-title">Loading amazing deals for you...</h3>
-                    <p className="loading-tip">{loadingTip}</p>
-                    <div className="loading-dots">
-                      <span></span>
-                      <span></span>
-                      <span></span>
-                    </div>
-                  </div>
-                  <div className={`products-grid ${viewMode}`} style={{ opacity: 0.3 }}>
-                    {[...Array(6)].map((_, i) => (
-                      <SkeletonCard key={i} />
-                    ))}
-                  </div>
-                </div>
+                <LoadingState />
               ) : filteredProducts.length > 0 ? (
                 <div className={`products-grid ${viewMode}`}>
                   {filteredProducts.map((item) => (

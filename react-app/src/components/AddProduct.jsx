@@ -633,8 +633,8 @@ function AddProduct() {
                       Primary Image{" "}
                       <span style={{ color: "var(--error)" }}>*</span>
                     </p>
-                    <p className="image-upload-hint">Tap to take photo or upload</p>
-                    {/* Camera capture for mobile */}
+                    <p className="image-upload-hint">Tap to choose from gallery or take a photo</p>
+                    {/* Allow both gallery and camera selection */}
                     <input
                       type="file"
                       className="image-upload-input"
@@ -673,8 +673,8 @@ function AddProduct() {
                       Secondary Image{" "}
                       <span className="optional">(Optional)</span>
                     </p>
-                    <p className="image-upload-hint">Tap to take photo or upload</p>
-                    {/* Camera capture for mobile */}
+                    <p className="image-upload-hint">Tap to choose from gallery or take a photo</p>
+                    {/* Allow both gallery and camera selection */}
                     <input
                       type="file"
                       className="image-upload-input"
