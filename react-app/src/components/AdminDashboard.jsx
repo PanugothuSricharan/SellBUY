@@ -381,7 +381,7 @@ function AdminDashboard() {
               {products.map((product) => (
                 <div key={product._id} className={`admin-product-card ${product.addedBy?.isBlocked ? 'seller-blocked' : ''}`}>
                   <div className="product-image-container">
-                    <img src={product.pimage} alt={product.pname} className="product-image" />
+                    <img src={product.pimage} alt={product.pname} className="product-image" loading="lazy" />
                     <span className={`status-badge ${product.approvalStatus.toLowerCase()}`}>
                       {product.approvalStatus === 'APPROVED' ? '🟢 Live' : '🔴 Hidden'}
                     </span>
