@@ -904,6 +904,7 @@
     max-width: 280px;
     margin-top: 10px;
     z-index: 1001;
+    animation: none;
   }
 }
 
