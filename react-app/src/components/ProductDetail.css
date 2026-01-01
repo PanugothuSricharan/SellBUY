@@ -717,3 +717,76 @@
 [data-theme="dark"] .contact-action-btn.call-btn:hover {
   box-shadow: 0 0 25px var(--accent-orange-glow);
 }
+
+/* ============================================
+   INLINE MESSAGE STYLES
+   ============================================ */
+
+.inline-message {
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  margin-bottom: var(--space-md);
+  font-size: var(--font-size-sm);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  animation: slideIn 0.3s ease;
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.inline-message-info {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #7dd3fc;
+}
+
+.inline-message-error {
+  background: #fef2f2;
+  color: #dc2626;
+  border: 1px solid #fecaca;
+}
+
+.inline-message-success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #86efac;
+}
+
+/* Like button loading state */
+.action-btn-wishlist.loading {
+  opacity: 0.7;
+  cursor: wait;
+}
+
+.action-btn-wishlist:disabled {
+  cursor: not-allowed;
+}
+
+/* Dark mode inline messages */
+[data-theme="dark"] .inline-message-info {
+  background: #0c4a6e;
+  color: #bae6fd;
+  border-color: #0369a1;
+}
+
+[data-theme="dark"] .inline-message-error {
+  background: #450a0a;
+  color: #fecaca;
+  border-color: #dc2626;
+}
+
+[data-theme="dark"] .inline-message-success {
+  background: #052e16;
+  color: #86efac;
+  border-color: #16a34a;
+}

@@ -6,6 +6,7 @@ const userRoutes = require("./users");
 const productRoutes = require("./products");
 const adminRoutes = require("./admin");
 const messageRoutes = require("./messages");
+const feedbackRoutes = require("./feedback");
 
 const router = express.Router();
 
@@ -29,6 +30,9 @@ router.use("/", adminRoutes);
 
 // Message routes: /contact-admin, /my-messages/:userId
 router.use("/", messageRoutes);
+
+// Feedback routes: /exit-feedback
+router.use("/", feedbackRoutes);
 
 // Health check endpoint
 router.get("/health", (req, res) => {

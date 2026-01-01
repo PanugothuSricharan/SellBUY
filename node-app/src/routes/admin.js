@@ -2,6 +2,7 @@ const express = require("express");
 const User = require("../models/User");
 const Product = require("../models/Product");
 const Message = require("../models/Message");
+const ExitFeedback = require("../models/ExitFeedback");
 const { ADMIN_EMAIL } = require("../config/constants");
 const { requireAdmin } = require("../middleware/auth");
 const { invalidateBlockedUsersCache } = require("../services/cache");
@@ -307,6 +308,59 @@ router.put("/admin/message/resolve/:messageId", requireAdmin, asyncHandler(async
 router.delete("/admin/message/:messageId", requireAdmin, asyncHandler(async (req, res) => {
   await Message.findByIdAndDelete(req.params.messageId);
   res.json({ message: "Message deleted" });
+}));
+
+// ============ EXIT FEEDBACK ANALYTICS FOR ADMIN ============
+
+/**
+ * GET /admin/exit-feedback-stats/:userId
+ * Get aggregated exit-intent feedback stats (admin only)
+ * Privacy-preserving: No user identifiers exposed
+ */
+router.get("/admin/exit-feedback-stats/:userId", requireAdmin, asyncHandler(async (req, res) => {
+  const { days = 30 } = req.query;
+  
+  const stats = await ExitFeedback.getAggregatedStats(parseInt(days));
+  const recentComments = await ExitFeedback.getRecentComments(10);
+  
+  res.json({
+    message: "success",
+    stats,
+    recentComments,
+  });
+}));
+
+/**
+ * GET /admin/exit-feedback-trends/:userId
+ * Get daily trends for exit feedback (admin only)
+ */
+router.get("/admin/exit-feedback-trends/:userId", requireAdmin, asyncHandler(async (req, res) => {
+  const { days = 14 } = req.query;
+  const startDate = new Date();
+  startDate.setDate(startDate.getDate() - parseInt(days));
+
+  const trends = await ExitFeedback.aggregate([
+    { $match: { createdAt: { $gte: startDate } } },
+    {
+      $group: {
+        _id: {
+          date: { $dateToString: { format: "%Y-%m-%d", date: "$createdAt" } },
+        },
+        count: { $sum: 1 },
+        avgProgress: { $avg: "$formProgress" },
+      },
+    },
+    { $sort: { "_id.date": 1 } },
+  ]);
+
+  res.json({
+    message: "success",
+    trends: trends.map(t => ({
+      date: t._id.date,
+      count: t.count,
+      avgProgress: Math.round(t.avgProgress || 0),
+    })),
+  });
 }));
 
 module.exports = router;

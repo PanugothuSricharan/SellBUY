@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback, useMemo, memo } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import Header from "./Header";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import axios from "axios";
@@ -852,14 +852,9 @@ function Home() {
             </div>
             
             <div className="footer-center">
-              <a 
-                // href="https://youtu.be/Ph_beNQsIp0?si=cpiAN9HihHm1-yg1" 
-                // target="_blank" 
-                // rel="noopener noreferrer"
-                // className="footer-dev-link"
-              >
+              <span className="footer-message">
                 😊 See you Tomorrow With New Products!!
-              </a>
+              </span>
             </div>
 
             {/* <div className="footer-right">

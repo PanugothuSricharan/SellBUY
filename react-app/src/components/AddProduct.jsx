@@ -1,11 +1,12 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import Header from "./Header";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useBlocker } from "react-router-dom";
 import axios from "axios";
 import categories from "./CategoriesList";
 import { PRODUCT_LOCATIONS } from "./LocationList";
 import "./AddProduct.css";
 import { compressImageToSize } from "../utils/imageCompression";
+import ExitIntentPrompt from "./ExitIntentPrompt";
 import {
   FaCamera,
   FaTimes,
@@ -23,6 +24,7 @@ import {
   FaCheck,
   FaHome,
   FaShareAlt,
+  FaHeart,
 } from "react-icons/fa";
 import API_URL from "../constants";
 
@@ -62,7 +64,6 @@ function AddProduct() {
   const [showMobileModal, setShowMobileModal] = useState(false);
   const [mobileNumber, setMobileNumber] = useState("");
   const [mobileError, setMobileError] = useState("");
-  const [checkingMobile, setCheckingMobile] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [remainingUploads, setRemainingUploads] = useState(5);
   const [showLimitModal, setShowLimitModal] = useState(false);
@@ -75,6 +76,13 @@ function AddProduct() {
   const [showImagePicker, setShowImagePicker] = useState(false);
   const [activeImageSlot, setActiveImageSlot] = useState(null); // 1 or 2
   const [isDesktop, setIsDesktop] = useState(false);
+  
+  // Exit-intent state
+  const [showExitPrompt, setShowExitPrompt] = useState(false);
+  const [exitSessionId] = useState(() => `exit_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`);
+  const [hasShownExitPrompt, setHasShownExitPrompt] = useState(false);
+  const [pendingNavigation, setPendingNavigation] = useState(null);
+  const exitTypeRef = useRef('navigation');
   
   // Refs for hidden file inputs
   const cameraInput1Ref = useRef(null);
@@ -102,8 +110,116 @@ function AddProduct() {
     // Check if user has mobile number
     checkUserMobile();
     
-    return () => window.removeEventListener('resize', checkIsDesktop);
-  }, []);
+    // Handle browser close/back button for exit intent
+    const handleBeforeUnload = (e) => {
+      if (hasFormData() && !showSuccess && !hasShownExitPrompt) {
+        exitTypeRef.current = 'close_tab';
+        // Can't show custom modal on beforeunload, just track the attempt
+      }
+    };
+    
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    
+    return () => {
+      window.removeEventListener('resize', checkIsDesktop);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showSuccess, hasShownExitPrompt]);
+
+  // Calculate form progress percentage
+  const calculateProgress = useCallback(() => {
+    const fields = [
+      { filled: !!pname.trim(), weight: 15 },
+      { filled: !!pdesc.trim(), weight: 15 },
+      { filled: !!price.trim(), weight: 15 },
+      { filled: !!category, weight: 10 },
+      { filled: !!location, weight: 10 },
+      { filled: !!condition, weight: 10 },
+      { filled: !!productAge, weight: 10 },
+      { filled: !!pimage, weight: 15 },
+    ];
+    
+    const progress = fields.reduce((sum, field) => 
+      sum + (field.filled ? field.weight : 0), 0
+    );
+    return Math.min(100, progress);
+  }, [pname, pdesc, price, category, location, condition, productAge, pimage]);
+
+  // Get completed field names for analytics
+  const getCompletedFields = useCallback(() => {
+    const fields = [];
+    if (pname.trim()) fields.push('name');
+    if (pdesc.trim()) fields.push('description');
+    if (price.trim()) fields.push('price');
+    if (category) fields.push('category');
+    if (location) fields.push('location');
+    if (condition) fields.push('condition');
+    if (productAge) fields.push('age');
+    if (pimage) fields.push('image');
+    if (originalUrl) fields.push('url');
+    return fields;
+  }, [pname, pdesc, price, category, location, condition, productAge, pimage, originalUrl]);
+
+  // Check if user has entered any form data
+  const hasFormData = useCallback(() => {
+    return !!(pname.trim() || pdesc.trim() || price.trim() || category || 
+              location || condition || productAge || pimage);
+  }, [pname, pdesc, price, category, location, condition, productAge, pimage]);
+
+  // Get motivational message based on progress
+  const getMotivationalMessage = useCallback(() => {
+    const progress = calculateProgress();
+    if (progress === 0) return null;
+    if (progress < 25) return "Great start! Keep going 💪";
+    if (progress < 50) return "You're making progress! 🚀";
+    if (progress < 75) return "More than halfway there! 🎯";
+    if (progress < 100) return "Almost done — just a few more details! 🏁";
+    return "Ready to list your product! 🎉";
+  }, [calculateProgress]);
+
+  // Handle exit prompt close
+  const handleExitPromptClose = useCallback(() => {
+    setShowExitPrompt(false);
+    setHasShownExitPrompt(true);
+    
+    // If there's a pending navigation, proceed
+    if (pendingNavigation) {
+      pendingNavigation();
+      setPendingNavigation(null);
+    }
+  }, [pendingNavigation]);
+
+  // Handle exit prompt submit
+  const handleExitPromptSubmit = useCallback(() => {
+    setShowExitPrompt(false);
+    setHasShownExitPrompt(true);
+    
+    // Proceed with navigation if pending
+    if (pendingNavigation) {
+      pendingNavigation();
+      setPendingNavigation(null);
+    }
+  }, [pendingNavigation]);
+
+  // Use React Router's blocker for route changes
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      hasFormData() &&
+      !showSuccess &&
+      !hasShownExitPrompt &&
+      currentLocation.pathname !== nextLocation.pathname
+  );
+
+  // Handle blocker state changes
+  useEffect(() => {
+    if (blocker.state === 'blocked' && !hasShownExitPrompt && !showSuccess) {
+      exitTypeRef.current = 'route_change';
+      setPendingNavigation(() => () => blocker.proceed());
+      setShowExitPrompt(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blocker.state, hasShownExitPrompt, showSuccess]);
 
   const checkUserMobile = async () => {
     const userId = localStorage.getItem("userId");
@@ -124,8 +240,6 @@ function AddProduct() {
       }
     } catch (err) {
       console.error("Error checking user mobile:", err);
-    } finally {
-      setCheckingMobile(false);
     }
   };
 
@@ -259,7 +373,6 @@ function AddProduct() {
     
     // Scroll to first error
     if (Object.keys(newErrors).length > 0) {
-      const firstErrorKey = Object.keys(newErrors)[0];
       const errorElement = document.querySelector(`[class*="error"]`);
       if (errorElement) {
         errorElement.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -365,6 +478,38 @@ function AddProduct() {
   return (
     <div className="add-product-page">
       <Header hideSearch={true} />
+      
+      {/* Exit Intent Prompt - Non-blocking feedback */}
+      <ExitIntentPrompt
+        isOpen={showExitPrompt}
+        onClose={handleExitPromptClose}
+        onSubmit={handleExitPromptSubmit}
+        formProgress={calculateProgress()}
+        fieldsCompleted={getCompletedFields()}
+        sessionId={exitSessionId}
+      />
+
+      {/* Sticky Progress Bar */}
+      {hasFormData() && !showSuccess && (
+        <div className="sticky-progress-bar">
+          <div className="progress-content">
+            <div className="progress-info">
+              <span className="progress-label">
+                <FaHeart className="progress-heart" /> {calculateProgress()}% complete
+              </span>
+              {getMotivationalMessage() && (
+                <span className="progress-motivation">{getMotivationalMessage()}</span>
+              )}
+            </div>
+            <div className="progress-track">
+              <div 
+                className="progress-fill" 
+                style={{ width: `${calculateProgress()}%` }}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="add-product-container">
         <button 
@@ -378,6 +523,9 @@ function AddProduct() {
         <div className="add-product-header">
           <h1>Sell Your Product</h1>
           <p>Fill in the details below to list your item on SellBUY</p>
+          {hasFormData() && !showSuccess && (
+            <p className="header-encouragement">{getMotivationalMessage()}</p>
+          )}
         </div>
 
         <div className="add-product-form">

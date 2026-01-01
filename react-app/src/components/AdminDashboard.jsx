@@ -4,6 +4,17 @@ import API_URL from '../constants';
 import { useNavigate } from 'react-router-dom';
 import './AdminDashboard.css';
 
+// Exit reason labels for analytics display
+const EXIT_REASON_LABELS = {
+  form_too_long: 'Form too long',
+  confusing_fields: 'Confusing fields',
+  technical_issue: 'Technical issue',
+  missing_info: 'Missing info',
+  will_return_later: 'Will return later',
+  just_browsing: 'Just browsing',
+  other: 'Other',
+};
+
 function AdminDashboard() {
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -11,12 +22,14 @@ function AdminDashboard() {
   const [sellers, setSellers] = useState([]);
   const [messages, setMessages] = useState([]);
   const [messageCounts, setMessageCounts] = useState({ unread: 0, read: 0, resolved: 0 });
-  const [activeTab, setActiveTab] = useState('products'); // products, sellers, messages
+  const [activeTab, setActiveTab] = useState('products'); // products, sellers, messages, analytics
   const [filter, setFilter] = useState('ALL'); // ALL, APPROVED, HIDDEN
   const [messageFilter, setMessageFilter] = useState('all'); // all, unread, read, resolved
   const [actionLoading, setActionLoading] = useState(null);
   const [confirmModal, setConfirmModal] = useState(null);
   const [selectedMessage, setSelectedMessage] = useState(null);
+  const [exitFeedbackStats, setExitFeedbackStats] = useState(null);
+  const [analyticsPeriod, setAnalyticsPeriod] = useState(30);
   const navigate = useNavigate();
 
   const fetchProducts = useCallback(async () => {
@@ -62,6 +75,16 @@ function AdminDashboard() {
     }
   }, [messageFilter]);
 
+  const fetchExitFeedbackStats = useCallback(async () => {
+    const userId = localStorage.getItem('userId');
+    try {
+      const response = await axios.get(`${API_URL}/admin/exit-feedback-stats/${userId}?days=${analyticsPeriod}`);
+      setExitFeedbackStats(response.data);
+    } catch (error) {
+      console.error('Error fetching exit feedback stats:', error);
+    }
+  }, [analyticsPeriod]);
+
   useEffect(() => {
     checkAdminStatus();
   }, []);
@@ -74,9 +97,11 @@ function AdminDashboard() {
         fetchSellers();
       } else if (activeTab === 'messages') {
         fetchMessages();
+      } else if (activeTab === 'analytics') {
+        fetchExitFeedbackStats();
       }
     }
-  }, [isAdmin, activeTab, filter, messageFilter, fetchProducts, fetchSellers, fetchMessages]);
+  }, [isAdmin, activeTab, filter, messageFilter, analyticsPeriod, fetchProducts, fetchSellers, fetchMessages, fetchExitFeedbackStats]);
 
   const checkAdminStatus = async () => {
     const userId = localStorage.getItem('userId');
@@ -335,6 +360,12 @@ function AdminDashboard() {
           {messageCounts.unread > 0 && (
             <span className="unread-badge">{messageCounts.unread}</span>
           )}
+        </button>
+        <button 
+          className={`tab-btn ${activeTab === 'analytics' ? 'active' : ''}`}
+          onClick={() => setActiveTab('analytics')}
+        >
+          📊 Exit Analytics
         </button>
       </div>
 
@@ -697,6 +728,147 @@ function AdminDashboard() {
               </button>
             </div>
           </div>
+        </div>
+      )}
+
+      {/* Exit Analytics Tab */}
+      {activeTab === 'analytics' && (
+        <div className="analytics-tab">
+          <div className="analytics-header">
+            <h3>Seller Exit-Intent Analytics</h3>
+            <p className="analytics-subtitle">Understand why sellers leave the listing form</p>
+            <div className="period-selector">
+              <label>Time Period:</label>
+              <select 
+                value={analyticsPeriod} 
+                onChange={(e) => setAnalyticsPeriod(Number(e.target.value))}
+              >
+                <option value={7}>Last 7 days</option>
+                <option value={14}>Last 14 days</option>
+                <option value={30}>Last 30 days</option>
+                <option value={90}>Last 90 days</option>
+              </select>
+            </div>
+          </div>
+
+          {exitFeedbackStats ? (
+            <>
+              {/* Summary Stats */}
+              <div className="analytics-summary">
+                <div className="stat-card">
+                  <span className="stat-value">{exitFeedbackStats.stats?.totalExits || 0}</span>
+                  <span className="stat-label">Total Exits</span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-value">{exitFeedbackStats.stats?.avgProgress || 0}%</span>
+                  <span className="stat-label">Avg. Progress</span>
+                </div>
+                <div className="stat-card">
+                  <span className="stat-value">{exitFeedbackStats.stats?.helpRequests || 0}</span>
+                  <span className="stat-label">Help Requests</span>
+                </div>
+              </div>
+
+              {/* Reasons Breakdown */}
+              {exitFeedbackStats.stats?.reasonBreakdown && Object.keys(exitFeedbackStats.stats.reasonBreakdown).length > 0 && (
+                <div className="analytics-section">
+                  <h4>Exit Reasons</h4>
+                  <div className="reasons-chart">
+                    {Object.entries(exitFeedbackStats.stats.reasonBreakdown)
+                      .sort(([, a], [, b]) => b - a)
+                      .map(([reason, count]) => {
+                        const total = exitFeedbackStats.stats.totalExits || 1;
+                        const percentage = Math.round((count / total) * 100);
+                        return (
+                          <div key={reason} className="reason-bar-item">
+                            <div className="reason-info">
+                              <span className="reason-name">{EXIT_REASON_LABELS[reason] || reason}</span>
+                              <span className="reason-count">{count} ({percentage}%)</span>
+                            </div>
+                            <div className="reason-bar-bg">
+                              <div 
+                                className="reason-bar-fill" 
+                                style={{ width: `${percentage}%` }}
+                              />
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+              )}
+
+              {/* Device Breakdown */}
+              {exitFeedbackStats.stats?.deviceBreakdown && Object.keys(exitFeedbackStats.stats.deviceBreakdown).length > 0 && (
+                <div className="analytics-section">
+                  <h4>Device Types</h4>
+                  <div className="device-stats">
+                    {Object.entries(exitFeedbackStats.stats.deviceBreakdown).map(([device, count]) => (
+                      <div key={device} className="device-stat">
+                        <span className="device-icon">
+                          {device === 'mobile' ? '📱' : device === 'tablet' ? '📲' : '💻'}
+                        </span>
+                        <span className="device-name">{device}</span>
+                        <span className="device-count">{count}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Recent Comments */}
+              {exitFeedbackStats.recentComments && exitFeedbackStats.recentComments.length > 0 && (
+                <div className="analytics-section">
+                  <h4>Recent Feedback Comments</h4>
+                  <div className="comments-list">
+                    {exitFeedbackStats.recentComments.map((comment, idx) => (
+                      <div key={idx} className="comment-item">
+                        <p className="comment-text">"{comment.additionalFeedback}"</p>
+                        <div className="comment-meta">
+                          <span className="comment-reason">{EXIT_REASON_LABELS[comment.reason] || comment.reason}</span>
+                          <span className="comment-progress">{comment.formProgress}% complete</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Actionable Insights */}
+              <div className="analytics-section insights-section">
+                <h4>💡 Actionable Insights</h4>
+                <div className="insights-grid">
+                  {exitFeedbackStats.stats?.reasonBreakdown?.form_too_long > 2 && (
+                    <div className="insight-card warning">
+                      <p><strong>Form Length:</strong> Many users find the form too long. Consider simplifying required fields.</p>
+                    </div>
+                  )}
+                  {exitFeedbackStats.stats?.reasonBreakdown?.confusing_fields > 2 && (
+                    <div className="insight-card warning">
+                      <p><strong>Confusing Fields:</strong> Some fields may need clearer labels or examples.</p>
+                    </div>
+                  )}
+                  {exitFeedbackStats.stats?.reasonBreakdown?.technical_issue > 2 && (
+                    <div className="insight-card error">
+                      <p><strong>Technical Issues:</strong> Users are reporting technical problems. Review error logs.</p>
+                    </div>
+                  )}
+                  {exitFeedbackStats.stats?.avgProgress > 50 && exitFeedbackStats.stats?.totalExits > 5 && (
+                    <div className="insight-card info">
+                      <p><strong>High Abandonment:</strong> Users are leaving at {exitFeedbackStats.stats.avgProgress}% completion. The final steps may need improvement.</p>
+                    </div>
+                  )}
+                  {(!exitFeedbackStats.stats?.totalExits || exitFeedbackStats.stats.totalExits === 0) && (
+                    <div className="insight-card success">
+                      <p><strong>No Recent Exits:</strong> Great! No exit feedback recorded in this period.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </>
+          ) : (
+            <div className="loading-analytics">Loading analytics...</div>
+          )}
         </div>
       )}
 

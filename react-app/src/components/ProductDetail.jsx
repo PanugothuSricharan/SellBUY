@@ -26,7 +26,9 @@ function ProductDetail() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [isLiked, setIsLiked] = useState(false);
+  const [isLikeLoading, setIsLikeLoading] = useState(false);
   const [contactLoading, setContactLoading] = useState(false);
+  const [inlineMessage, setInlineMessage] = useState({ type: '', text: '' });
   const { productId } = useParams();
 
   const images = [];
@@ -129,6 +131,7 @@ function ProductDetail() {
 
   const handleContact = (addedBy) => {
     setContactLoading(true);
+    setInlineMessage({ type: '', text: '' });
     const url = `${API_URL}/get-user/${addedBy}`;
     axios
       .get(url)
@@ -139,19 +142,29 @@ function ProductDetail() {
         setContactLoading(false);
       })
       .catch((err) => {
-        alert("Server Error. Please try again.");
+        setInlineMessage({ type: 'error', text: 'Failed to load contact info. Please try again.' });
         setContactLoading(false);
       });
   };
 
+  // Auto-clear inline messages after 5 seconds
+  useEffect(() => {
+    if (inlineMessage.text) {
+      const timer = setTimeout(() => setInlineMessage({ type: '', text: '' }), 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [inlineMessage]);
+
   const handleLike = () => {
     const userId = localStorage.getItem("userId");
     if (!userId) {
-      alert("Please login to save products");
+      setInlineMessage({ type: 'info', text: 'Please login to save products to your wishlist' });
       return;
     }
 
-    // Optimistic UI update
+    // Optimistic UI update with loading state
+    setIsLikeLoading(true);
+    const wasLiked = isLiked;
     setIsLiked(!isLiked);
 
     const url = `${API_URL}/like-product`;
@@ -167,8 +180,11 @@ function ProductDetail() {
       .catch((err) => {
         console.log(err);
         // Revert on error
-        setIsLiked(!isLiked);
-        alert("Error updating wishlist");
+        setIsLiked(wasLiked);
+        setInlineMessage({ type: 'error', text: 'Error updating wishlist. Please try again.' });
+      })
+      .finally(() => {
+        setIsLikeLoading(false);
       });
   };
 
@@ -329,6 +345,17 @@ function ProductDetail() {
                     </div>
                   )}
 
+                  {/* Inline Message Display */}
+                  {inlineMessage.text && (
+                    <div 
+                      className={`inline-message inline-message-${inlineMessage.type}`}
+                      role={inlineMessage.type === 'error' ? 'alert' : 'status'}
+                      aria-live="polite"
+                    >
+                      {inlineMessage.text}
+                    </div>
+                  )}
+
                   <div className="product-actions">
                     {!user ? (
                       <button
@@ -389,13 +416,17 @@ function ProductDetail() {
                     <button
                       className={`action-btn action-btn-wishlist ${
                         isLiked ? "liked" : ""
-                      }`}
+                      } ${isLikeLoading ? "loading" : ""}`}
                       onClick={handleLike}
+                      disabled={isLikeLoading}
+                      aria-label={isLiked ? "Remove from wishlist" : "Save to wishlist"}
+                      aria-pressed={isLiked}
                     >
                       <FaHeart
                         style={{ color: isLiked ? "#e74c3c" : "inherit" }}
+                        aria-hidden="true"
                       />
-                      {isLiked ? "Saved to Wishlist" : "Save to Wishlist"}
+                      {isLikeLoading ? "Updating..." : isLiked ? "Saved to Wishlist" : "Save to Wishlist"}
                     </button>
                   </div>
                 </div>

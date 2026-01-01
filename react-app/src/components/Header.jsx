@@ -38,8 +38,10 @@ function Header(props) {
   const [mobileNumber, setMobileNumber] = useState("");
   const [mobileError, setMobileError] = useState("");
   const [mobileSuccess, setMobileSuccess] = useState(false);
+  const [isSubmittingMobile, setIsSubmittingMobile] = useState(false);
   const userMenuRef = useRef(null);
   const locationRef = useRef(null);
+  const mobileInputRef = useRef(null);
 
   useEffect(() => {
     // Check login status
@@ -108,6 +110,8 @@ function Header(props) {
     setShowMobileModal(true);
     setMobileError("");
     setMobileSuccess(false);
+    // Focus the input after modal opens
+    setTimeout(() => mobileInputRef.current?.focus(), 100);
   };
 
   const handleMobileSubmit = async () => {
@@ -121,6 +125,7 @@ function Header(props) {
       return;
     }
 
+    setIsSubmittingMobile(true);
     const userId = localStorage.getItem("userId");
     try {
       const res = await axios.put(`${API_URL}/update-mobile/${userId}`, {
@@ -138,6 +143,8 @@ function Header(props) {
       }
     } catch (err) {
       setMobileError("Error updating mobile number. Please try again.");
+    } finally {
+      setIsSubmittingMobile(false);
     }
   };
 
@@ -282,15 +289,19 @@ function Header(props) {
                 <button
                   className="user-menu-btn"
                   onClick={() => setShowUserMenu(!showUserMenu)}
+                  aria-label={`User menu for ${userName}`}
+                  aria-expanded={showUserMenu}
+                  aria-haspopup="menu"
                 >
-                  <FaUser />
+                  <FaUser aria-hidden="true" />
                   <FaChevronDown
                     className={`menu-arrow ${showUserMenu ? "open" : ""}`}
+                    aria-hidden="true"
                   />
                 </button>
 
                 {showUserMenu && (
-                  <div className="user-dropdown">
+                  <div className="user-dropdown" role="menu" aria-label="User account menu">
                     {/* User Info Section */}
                     <div className="dropdown-user-info">
                       <div className="user-avatar">
@@ -391,18 +402,31 @@ function Header(props) {
 
     {/* Edit Phone Number Modal */}
     {showMobileModal && (
-      <div className="mobile-modal-overlay" onClick={() => setShowMobileModal(false)}>
+      <div 
+        className="mobile-modal-overlay" 
+        onClick={() => setShowMobileModal(false)}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="mobile-modal-title"
+      >
         <div className="mobile-modal" onClick={(e) => e.stopPropagation()}>
-          <button className="modal-close" onClick={() => setShowMobileModal(false)}>×</button>
-          <h2>📱 {mobileSuccess ? "Updated!" : "Edit Phone Number"}</h2>
+          <button 
+            className="modal-close" 
+            onClick={() => setShowMobileModal(false)}
+            aria-label="Close modal"
+          >
+            ×
+          </button>
+          <h2 id="mobile-modal-title">📱 {mobileSuccess ? "Updated!" : "Edit Phone Number"}</h2>
           {mobileSuccess ? (
-            <p style={{ color: "var(--success-color)", textAlign: "center" }}>
+            <p style={{ color: "var(--success-color)", textAlign: "center" }} role="status" aria-live="polite">
               ✓ Mobile number updated successfully!
             </p>
           ) : (
             <>
-              <p>Update your phone number for buyers to contact you.</p>
+              <p id="mobile-modal-desc">Update your phone number for buyers to contact you.</p>
               <input
+                ref={mobileInputRef}
                 type="tel"
                 placeholder="Enter 10-digit mobile number"
                 value={mobileNumber}
@@ -411,10 +435,21 @@ function Header(props) {
                   setMobileError("");
                 }}
                 className="mobile-input"
+                aria-describedby="mobile-modal-desc mobile-error"
+                aria-invalid={!!mobileError}
               />
-              {mobileError && <p className="mobile-error">{mobileError}</p>}
-              <button className="mobile-submit-btn" onClick={handleMobileSubmit}>
-                Update Number
+              {mobileError && (
+                <p id="mobile-error" className="mobile-error" role="alert" aria-live="assertive">
+                  {mobileError}
+                </p>
+              )}
+              <button 
+                className="mobile-submit-btn" 
+                onClick={handleMobileSubmit}
+                disabled={isSubmittingMobile}
+                aria-busy={isSubmittingMobile}
+              >
+                {isSubmittingMobile ? "Updating..." : "Update Number"}
               </button>
             </>
           )}
