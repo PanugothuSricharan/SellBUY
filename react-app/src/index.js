@@ -6,6 +6,7 @@ import { createRoot } from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { Analytics } from "@vercel/analytics/react";
+const link = document.createElement("link"); link.href = "https://fonts.googleapis.com/css2?family=Dancing+Script:wght@600;700&display=swap"; link.rel = "stylesheet"; document.head.appendChild(link);
 
 // Lazy load components for code splitting
 const Home = lazy(() => import("./components/Home"));
@@ -42,6 +43,19 @@ const PageLoader = () => (
     <style>{`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}</style>
   </div>
 );
+
+const style = document.createElement("style");
+style.innerHTML = `
+@font-face {
+  font-family: 'Lemon Jelly';
+  src: url('/fonts/LemonJellyPersonalUse-dEqR.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+`;
+document.head.appendChild(style);
+
 
 const router = createBrowserRouter([
   {
