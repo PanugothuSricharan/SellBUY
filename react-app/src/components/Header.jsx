@@ -194,7 +194,7 @@ function Header(props) {
             </span>
             <span className="logo-text">
               <span className="logo-sell">Sell</span>
-              <span className="logo-buy">
+              <span className="logo-buy" style={{ color: '#00ff00' }}>
                 B<span className="flip-letter">U</span>Y
               </span>
             </span>
