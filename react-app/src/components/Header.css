@@ -92,7 +92,7 @@
 }
 
 .logo-buy {
-  color: var(--accent-orange);
+  color: #d84315;
   transition: all var(--transition-base);
 }
 

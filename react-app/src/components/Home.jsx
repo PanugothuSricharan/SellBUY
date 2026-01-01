@@ -495,7 +495,7 @@ function Home() {
   const EmptyState = () => (
     <div className="empty-state">
       <div className="empty-state-icon">📦</div>
-      <h3>No products found</h3>
+      <h2>No products found</h2>
       <p>
         {hasActiveFilters()
           ? "Try different filters or clear all filters"
@@ -615,6 +615,7 @@ function Home() {
                         min="0"
                         max={priceRange.max}
                         placeholder="Min"
+                        aria-label="Minimum price"
                       />
                     </div>
                     <span className="price-dash">-</span>
@@ -635,6 +636,7 @@ function Home() {
                         min={priceRange.min}
                         max={maxPriceLimit}
                         placeholder="Max"
+                        aria-label="Maximum price"
                       />
                     </div>
                   </div>
@@ -654,6 +656,7 @@ function Home() {
                         })
                       }
                       className="slider slider-min"
+                      aria-label="Minimum price slider"
                     />
                     <input
                       type="range"
@@ -670,6 +673,7 @@ function Home() {
                         })
                       }
                       className="slider slider-max"
+                      aria-label="Maximum price slider"
                     />
                     <div
                       className="slider-track"
@@ -695,6 +699,8 @@ function Home() {
                         selectedConditions.includes(cond) ? "active" : ""
                       }`}
                       onClick={() => toggleCondition(cond)}
+                      aria-label={`Filter by ${cond} condition`}
+                      aria-pressed={selectedConditions.includes(cond)}
                     >
                       {cond}
                     </button>
@@ -713,6 +719,8 @@ function Home() {
                         selectedCategories.includes(cat) ? "active" : ""
                       }`}
                       onClick={() => handleCategory(cat)}
+                      aria-label={`Filter by ${cat} category`}
+                      aria-pressed={selectedCategories.includes(cat)}
                     >
                       {cat}
                     </button>
@@ -807,6 +815,7 @@ function Home() {
                         onClick={() =>
                           setPriceRange({ min: 0, max: maxPriceLimit })
                         }
+                        aria-label="Remove price range filter"
                       >
                         <FaTimes />
                       </button>
@@ -875,6 +884,8 @@ function Home() {
             setMobileFilterOpen(!mobileFilterOpen);
             setMobileLocationOpen(false);
           }}
+          aria-label="Open filters"
+          aria-expanded={mobileFilterOpen}
         >
           <FaFilter />
           {hasActiveFilters() && <span className="fab-badge">{selectedCategories.length + selectedConditions.length + (priceRange.min > 0 || priceRange.max < maxPriceLimit ? 1 : 0)}</span>}
@@ -882,7 +893,7 @@ function Home() {
         
         <div className="fab-panel filter-panel">
           <div className="fab-panel-header">
-            <h3><FaFilter /> Filters</h3>
+            <h2><FaFilter /> Filters</h2>
             <button className="close-fab" onClick={() => setMobileFilterOpen(false)} aria-label="Close filters"><FaTimes /></button>
           </div>
           
@@ -893,18 +904,24 @@ function Home() {
               <button
                 className={`view-option ${viewMode === VIEW_MODES.GRID ? "active" : ""}`}
                 onClick={() => handleViewModeChange(VIEW_MODES.GRID)}
+                aria-label="Switch to grid view"
+                aria-pressed={viewMode === VIEW_MODES.GRID}
               >
                 <FaThLarge /> Grid
               </button>
               <button
                 className={`view-option ${viewMode === VIEW_MODES.COMPACT ? "active" : ""}`}
                 onClick={() => handleViewModeChange(VIEW_MODES.COMPACT)}
+                aria-label="Switch to compact view"
+                aria-pressed={viewMode === VIEW_MODES.COMPACT}
               >
                 <FaTh /> Compact
               </button>
               <button
                 className={`view-option ${viewMode === VIEW_MODES.LIST ? "active" : ""}`}
                 onClick={() => handleViewModeChange(VIEW_MODES.LIST)}
+                aria-label="Switch to list view"
+                aria-pressed={viewMode === VIEW_MODES.LIST}
               >
                 <FaList /> List
               </button>
@@ -917,12 +934,12 @@ function Home() {
             <div className="price-inputs-compact">
               <div className="price-input-compact">
                 <span>₹</span>
-                <input type="number" value={priceRange.min} onChange={(e) => setPriceRange({...priceRange, min: Math.max(0, parseInt(e.target.value) || 0)})} min="0" max={priceRange.max} />
+                <input type="number" value={priceRange.min} onChange={(e) => setPriceRange({...priceRange, min: Math.max(0, parseInt(e.target.value) || 0)})} min="0" max={priceRange.max} aria-label="Minimum price" />
               </div>
               <span className="price-dash">-</span>
               <div className="price-input-compact">
                 <span>₹</span>
-                <input type="number" value={priceRange.max} onChange={(e) => setPriceRange({...priceRange, max: Math.min(maxPriceLimit, parseInt(e.target.value) || maxPriceLimit)})} min={priceRange.min} max={maxPriceLimit} />
+                <input type="number" value={priceRange.max} onChange={(e) => setPriceRange({...priceRange, max: Math.min(maxPriceLimit, parseInt(e.target.value) || maxPriceLimit)})} min={priceRange.min} max={maxPriceLimit} aria-label="Maximum price" />
               </div>
             </div>
           </div>
@@ -932,7 +949,7 @@ function Home() {
             <h4 className="filter-title">Condition</h4>
             <div className="filter-chips-compact">
               {PRODUCT_CONDITIONS.map((cond) => (
-                <button key={cond} className={`filter-chip-compact ${selectedConditions.includes(cond) ? "active" : ""}`} onClick={() => toggleCondition(cond)}>{cond}</button>
+                <button key={cond} className={`filter-chip-compact ${selectedConditions.includes(cond) ? "active" : ""}`} onClick={() => toggleCondition(cond)} aria-label={`Filter by ${cond} condition`} aria-pressed={selectedConditions.includes(cond)}>{cond}</button>
               ))}
             </div>
           </div>
@@ -942,7 +959,7 @@ function Home() {
             <h4 className="filter-title">Categories</h4>
             <div className="filter-chips-compact category-list">
               {categories.map((cat) => (
-                <button key={cat} className={`filter-chip-compact ${selectedCategories.includes(cat) ? "active" : ""}`} onClick={() => handleCategory(cat)}>{cat}</button>
+                <button key={cat} className={`filter-chip-compact ${selectedCategories.includes(cat) ? "active" : ""}`} onClick={() => handleCategory(cat)} aria-label={`Filter by ${cat} category`} aria-pressed={selectedCategories.includes(cat)}>{cat}</button>
               ))}
             </div>
           </div>
@@ -968,14 +985,16 @@ function Home() {
             setMobileFilterOpen(false);
             dismissLocationTip();
           }}
+          aria-label="Select location"
+          aria-expanded={mobileLocationOpen}
         >
           <FaMapMarkerAlt />
         </button>
         
         <div className="fab-panel location-panel">
           <div className="fab-panel-header">
-            <h3><FaMapMarkerAlt /> Select Location</h3>
-            <button className="close-fab" onClick={() => setMobileLocationOpen(false)}><FaTimes /></button>
+            <h2><FaMapMarkerAlt /> Select Location</h2>
+            <button className="close-fab" onClick={() => setMobileLocationOpen(false)} aria-label="Close location selector"><FaTimes /></button>
           </div>
           <p className="location-hint">Find products closer to you by selecting your hostel or block</p>
           
@@ -988,6 +1007,8 @@ function Home() {
                   setSelectedLocation(loc);
                   setMobileLocationOpen(false);
                 }}
+                aria-label={`Select ${loc} location`}
+                aria-pressed={selectedLocation === loc}
               >
                 {loc}
               </button>
