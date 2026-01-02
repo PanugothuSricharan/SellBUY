@@ -22,6 +22,12 @@ import API_URL, { getImageUrl, getImageSrcSet } from "../constants";
 
 // Product conditions for filter
 const PRODUCT_CONDITIONS = ["New", "Sealed", "Like New", "Used"];
+// Product status options for filter
+const PRODUCT_STATUS = [
+  { value: "all", label: "All Products" },
+  { value: "Available", label: "Available" },
+  { value: "Sold", label: "Sold" }
+];
 // View modes
 const VIEW_MODES = { GRID: "grid", LIST: "list", COMPACT: "compact" };
 
@@ -43,6 +49,7 @@ function Home() {
   // Advanced filter states
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [selectedConditions, setSelectedConditions] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState("all"); // 'all', 'Available', 'Sold'
   const [priceRange, setPriceRange] = useState({ min: 0, max: 100000 });
   const [maxPriceLimit, setMaxPriceLimit] = useState(100000);
   const [viewMode, setViewMode] = useState(
@@ -76,8 +83,13 @@ function Home() {
   };
 
   // Core search/filter function - used everywhere
-  const filterProducts = useCallback((productsToFilter, searchValue, categories, conditions, price) => {
+  const filterProducts = useCallback((productsToFilter, searchValue, categories, conditions, price, status = 'all') => {
     let result = [...productsToFilter];
+    
+    // Status filter - filter by product availability status
+    if (status && status !== 'all') {
+      result = result.filter((item) => item.status === status);
+    }
     
     // Search filter - check title, description, AND category (case-insensitive)
     const currentSearch = (searchValue || '').trim().toLowerCase();
@@ -129,36 +141,43 @@ function Home() {
         searchQuery,
         selectedCategories,
         selectedConditions,
-        priceRange
+        priceRange,
+        selectedStatus
       );
       setFilteredProducts(filtered);
     }
-  }, [products, isLoading, searchParams, filterProducts, selectedCategories, selectedConditions, priceRange]);
+  }, [products, isLoading, searchParams, filterProducts, selectedCategories, selectedConditions, priceRange, selectedStatus]);
 
-  // Fetch all products
+  // Fetch all products (includes both Available and Sold)
   const fetchProducts = useCallback((location, searchQuery = null) => {
     setIsLoading(true);
     let url = `${API_URL}/get-products`;
+    const params = new URLSearchParams();
+    
     if (location && location !== LOCATIONS.ENTIRE_CAMPUS) {
-      url += `?location=${encodeURIComponent(location)}`;
+      params.append('location', location);
+    }
+    // Note: We fetch ALL products (both Available and Sold) and filter client-side
+    // This allows instant filter switching without additional API calls
+    
+    if (params.toString()) {
+      url += `?${params.toString()}`;
     }
 
     axios
       .get(url)
       .then((res) => {
         if (res.data.products) {
-          // Filter out sold products
-          const availableProducts = res.data.products.filter(
-            (p) => p.status !== "Sold"
-          );
-          setproducts(availableProducts);
+          // Store ALL products (both Available and Sold)
+          const allProducts = res.data.products;
+          setproducts(allProducts);
 
-          // Calculate max price for slider
+          // Calculate max price for slider from all products
           let newMaxPrice = 100000;
           let newPriceRange = { min: 0, max: 100000 };
-          if (availableProducts.length > 0) {
+          if (allProducts.length > 0) {
             const maxPrice = Math.max(
-              ...availableProducts.map((p) => parseFloat(p.price) || 0)
+              ...allProducts.map((p) => parseFloat(p.price) || 0)
             );
             newMaxPrice = Math.ceil(maxPrice / 1000) * 1000 || 100000;
             newPriceRange = { min: 0, max: newMaxPrice };
@@ -166,18 +185,28 @@ function Home() {
             setPriceRange(newPriceRange);
           }
 
-          // If there's a search query (from URL), apply it immediately after loading products
+          // Apply all filters including status
           if (searchQuery && searchQuery.trim()) {
             const filtered = filterProducts(
-              availableProducts,
+              allProducts,
               searchQuery,
               selectedCategories,
               selectedConditions,
-              newPriceRange
+              newPriceRange,
+              selectedStatus
             );
             setFilteredProducts(filtered);
           } else {
-            setFilteredProducts(availableProducts);
+            // Apply status filter even without search
+            const filtered = filterProducts(
+              allProducts,
+              '',
+              selectedCategories,
+              selectedConditions,
+              newPriceRange,
+              selectedStatus
+            );
+            setFilteredProducts(filtered);
           }
         }
       })
@@ -187,7 +216,7 @@ function Home() {
       .finally(() => {
         setIsLoading(false);
       });
-  }, [filterProducts, selectedCategories, selectedConditions]);
+  }, [filterProducts, selectedCategories, selectedConditions, selectedStatus]);
 
   useEffect(() => {
     // Pass the search query from URL to fetchProducts so it applies immediately
@@ -195,6 +224,21 @@ function Home() {
     fetchProducts(selectedLocation, searchQuery);
     fetchLikedProducts();
   }, [selectedLocation, fetchProducts, searchParams]);
+
+  // Re-apply filters when status changes
+  useEffect(() => {
+    if (products.length > 0 && !isLoading) {
+      const filtered = filterProducts(
+        products,
+        search,
+        selectedCategories,
+        selectedConditions,
+        priceRange,
+        selectedStatus
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [selectedStatus, products, search, selectedCategories, selectedConditions, priceRange, filterProducts, isLoading]);
 
   // Fetch liked products on mount
   const fetchLikedProducts = () => {
@@ -238,10 +282,11 @@ function Home() {
       search,
       selectedCategories,
       selectedConditions,
-      priceRange
+      priceRange,
+      selectedStatus
     );
     setFilteredProducts(result);
-  }, [products, search, selectedCategories, selectedConditions, priceRange, filterProducts]);
+  }, [products, search, selectedCategories, selectedConditions, priceRange, selectedStatus, filterProducts]);
 
   const handleLocationChange = (newLocation) => {
     setSelectedLocation(newLocation);
@@ -257,7 +302,7 @@ function Home() {
         navigate('/', { replace: true });
       }
       // Show all products with current filters (no search)
-      const result = filterProducts(products, '', selectedCategories, selectedConditions, priceRange);
+      const result = filterProducts(products, '', selectedCategories, selectedConditions, priceRange, selectedStatus);
       setFilteredProducts(result);
     }
   };
@@ -270,7 +315,7 @@ function Home() {
       navigate('/', { replace: true });
     }
     // Apply filters without search
-    const result = filterProducts(products, '', selectedCategories, selectedConditions, priceRange);
+    const result = filterProducts(products, '', selectedCategories, selectedConditions, priceRange, selectedStatus);
     setFilteredProducts(result);
   };
 
@@ -298,6 +343,7 @@ function Home() {
   const clearAllFilters = () => {
     setSelectedCategories([]);
     setSelectedConditions([]);
+    setSelectedStatus("all"); // Reset status filter
     setPriceRange({ min: 0, max: maxPriceLimit });
     setsearch("");
     // Clear URL search param if present
@@ -312,6 +358,7 @@ function Home() {
     return (
       selectedCategories.length > 0 ||
       selectedConditions.length > 0 ||
+      selectedStatus !== "all" ||
       priceRange.min > 0 ||
       priceRange.max < maxPriceLimit ||
       search.trim()
@@ -368,12 +415,13 @@ function Home() {
     localStorage.setItem("productViewMode", mode);
   };
 
-  // Product Card Component
+  // Product Card Component with Sold badge
   const ProductCard = React.memo(({ item }) => {
     const isLiked = likedProducts.has(item._id);
+    const isSold = item.status === "Sold";
     
     return (
-      <div className="product-card" onClick={() => handleProduct(item._id)}>
+      <div className={`product-card ${isSold ? 'sold' : ''}`} onClick={() => handleProduct(item._id)}>
         <div className="product-image-container">
           <img
             src={getImageUrl(item.pimage, { width: 400 })}
@@ -384,6 +432,12 @@ function Home() {
             loading="lazy"
             decoding="async"
           />
+          {/* Sold Overlay Badge */}
+          {isSold && (
+            <div className="sold-badge-overlay">
+              <span className="sold-badge-text">SOLD</span>
+            </div>
+          )}
           <button
             className={`like-btn ${isLiked ? "liked" : ""}`}
             onClick={(e) => handleLike(item._id, e)}
@@ -708,6 +762,26 @@ function Home() {
                 </div>
               </div>
 
+              {/* Availability Status Filter */}
+              <div className="filter-group">
+                <h4 className="filter-title">Availability</h4>
+                <div className="filter-chips-compact status-filter">
+                  {PRODUCT_STATUS.map((status) => (
+                    <button
+                      key={status.value}
+                      className={`filter-chip-compact ${
+                        selectedStatus === status.value ? "active" : ""
+                      }`}
+                      onClick={() => setSelectedStatus(status.value)}
+                      aria-label={`Filter by ${status.label}`}
+                      aria-pressed={selectedStatus === status.value}
+                    >
+                      {status.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Category Filter */}
               <div className="filter-group">
                 <h4 className="filter-title">Categories</h4>
@@ -945,6 +1019,16 @@ function Home() {
             <div className="filter-chips-compact">
               {PRODUCT_CONDITIONS.map((cond) => (
                 <button key={cond} className={`filter-chip-compact ${selectedConditions.includes(cond) ? "active" : ""}`} onClick={() => toggleCondition(cond)} aria-label={`Filter by ${cond} condition`} aria-pressed={selectedConditions.includes(cond)}>{cond}</button>
+              ))}
+            </div>
+          </div>
+
+          {/* Availability Status */}
+          <div className="filter-group">
+            <h4 className="filter-title">Availability</h4>
+            <div className="filter-chips-compact status-filter">
+              {PRODUCT_STATUS.map((status) => (
+                <button key={status.value} className={`filter-chip-compact ${selectedStatus === status.value ? "active" : ""}`} onClick={() => setSelectedStatus(status.value)} aria-label={`Filter by ${status.label}`} aria-pressed={selectedStatus === status.value}>{status.label}</button>
               ))}
             </div>
           </div>

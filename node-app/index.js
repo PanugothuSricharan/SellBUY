@@ -604,6 +604,7 @@ app.post(
 app.get("/get-products", async (req, res) => {
   const catName = req.query.catName;
   const location = req.query.location;
+  const status = req.query.status; // 'all', 'Available', 'Sold'
   const limit = parseInt(req.query.limit) || 50; // Default 50 products
   const skip = parseInt(req.query.skip) || 0;
   let filter = {};
@@ -612,6 +613,14 @@ app.get("/get-products", async (req, res) => {
   if (catName) {
     filter.category = catName;
   }
+
+  // ============ STATUS FILTERING ============
+  // By default, show ALL products (both Available and Sold)
+  // If status is specified, filter by that status
+  if (status && status !== 'all' && VALID_STATUS.includes(status)) {
+    filter.status = status;
+  }
+  // Note: 'all' or no status param returns both Available and Sold products
 
   // ============ LOCATION FILTERING (Server-side enforced) ============
   // If location is "Entire Campus" or not provided → no location filter (show all)
