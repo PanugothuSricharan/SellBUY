@@ -1,7 +1,6 @@
 const express = require("express");
 const User = require("../models/User");
 const Product = require("../models/Product");
-const OTP = require("../models/OTP");
 const { PRODUCTS_PER_DAY_LIMIT, RATE_LIMIT_HOURS } = require("../config/constants");
 const { asyncHandler } = require("../middleware/errorHandler");
 
@@ -42,10 +41,10 @@ router.get("/get-user/:userId", asyncHandler(async (req, res) => {
 
 /**
  * PUT /update-mobile/:userId
- * Update user's mobile number (requires OTP verification)
+ * Update user's mobile number (direct update)
  */
 router.put("/update-mobile/:userId", asyncHandler(async (req, res) => {
-  const { mobile, otp, skipOtp } = req.body;
+  const { mobile } = req.body;
 
   // Validate mobile number
   if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
@@ -54,124 +53,9 @@ router.put("/update-mobile/:userId", asyncHandler(async (req, res) => {
     });
   }
 
-  // If skipOtp is true (for backward compatibility during transition), allow direct update
-  // In production, you should remove this option
-  if (skipOtp) {
-    await User.updateOne({ _id: req.params.userId }, { mobile, mobileVerified: false });
-    return res.json({ message: "Mobile number updated successfully (unverified)" });
-  }
-
-  // Verify OTP
-  if (!otp) {
-    return res.status(400).json({
-      message: "OTP is required for mobile verification",
-      requiresOtp: true,
-    });
-  }
-
-  const result = await OTP.verifyOTP(mobile, req.params.userId, otp);
-  
-  if (!result.success) {
-    return res.status(400).json({ message: result.message });
-  }
-
-  // OTP verified - update mobile number
-  await User.updateOne({ _id: req.params.userId }, { mobile, mobileVerified: true });
-  res.json({ message: "Mobile number verified and updated successfully" });
-}));
-
-/**
- * POST /send-otp
- * Send OTP to mobile number for verification
- */
-router.post("/send-otp", asyncHandler(async (req, res) => {
-  const { mobile, userId } = req.body;
-
-  // Validate mobile number
-  if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
-    return res.status(400).json({
-      message: "Please provide a valid 10-digit mobile number",
-    });
-  }
-
-  if (!userId) {
-    return res.status(400).json({
-      message: "User ID is required",
-    });
-  }
-
-  // Check if user exists
-  const user = await User.findById(userId);
-  if (!user) {
-    return res.status(404).json({ message: "User not found" });
-  }
-
-  // Generate and store OTP
-  const otp = await OTP.createOTP(mobile, userId);
-
-  // In production, you would send this OTP via SMS using Twilio, MSG91, etc.
-  // For now, we'll return it in development mode or log it
-  console.log(`[DEV] OTP for ${mobile}: ${otp}`);
-
-  // For development/demo purposes, include OTP in response
-  // REMOVE THIS IN PRODUCTION!
-  const isDev = process.env.NODE_ENV !== 'production';
-  
-  res.json({
-    message: "OTP sent successfully",
-    expiresIn: "5 minutes",
-    // Only include OTP in development mode for testing
-    ...(isDev && { devOtp: otp }),
-  });
-}));
-
-/**
- * POST /verify-otp
- * Verify OTP without updating mobile (for validation)
- */
-router.post("/verify-otp", asyncHandler(async (req, res) => {
-  const { mobile, userId, otp } = req.body;
-
-  if (!mobile || !userId || !otp) {
-    return res.status(400).json({
-      message: "Mobile, userId, and OTP are required",
-    });
-  }
-
-  const result = await OTP.verifyOTP(mobile, userId, otp);
-  
-  if (!result.success) {
-    return res.status(400).json({ message: result.message, verified: false });
-  }
-
-  res.json({ message: result.message, verified: true });
-}));
-
-/**
- * POST /resend-otp
- * Resend OTP (rate limited to prevent abuse)
- */
-router.post("/resend-otp", asyncHandler(async (req, res) => {
-  const { mobile, userId } = req.body;
-
-  if (!mobile || !userId) {
-    return res.status(400).json({
-      message: "Mobile and userId are required",
-    });
-  }
-
-  // Generate new OTP
-  const otp = await OTP.createOTP(mobile, userId);
-
-  console.log(`[DEV] Resent OTP for ${mobile}: ${otp}`);
-
-  const isDev = process.env.NODE_ENV !== 'production';
-  
-  res.json({
-    message: "OTP resent successfully",
-    expiresIn: "5 minutes",
-    ...(isDev && { devOtp: otp }),
-  });
+  // Direct update without OTP
+  await User.updateOne({ _id: req.params.userId }, { mobile });
+  res.json({ message: "Mobile number updated successfully" });
 }));
 
 /**

@@ -64,13 +64,7 @@ function AddProduct() {
   const [showMobileModal, setShowMobileModal] = useState(false);
   const [mobileNumber, setMobileNumber] = useState("");
   const [mobileError, setMobileError] = useState("");
-  // OTP states for AddProduct
-  const [otpStep, setOtpStep] = useState('phone'); // 'phone' or 'otp'
-  const [otp, setOtp] = useState('');
-  const [otpSending, setOtpSending] = useState(false);
-  const [otpVerifying, setOtpVerifying] = useState(false);
-  const [otpTimer, setOtpTimer] = useState(0);
-  const [devOtp, setDevOtp] = useState('');
+  const [isUpdatingMobile, setIsUpdatingMobile] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [remainingUploads, setRemainingUploads] = useState(5);
   const [showLimitModal, setShowLimitModal] = useState(false);
@@ -250,15 +244,7 @@ function AddProduct() {
     }
   };
 
-  // OTP timer countdown
-  useEffect(() => {
-    if (otpTimer > 0) {
-      const timer = setTimeout(() => setOtpTimer(otpTimer - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [otpTimer]);
-
-  const handleSendOtp = async () => {
+  const handleMobileSubmit = async () => {
     if (!mobileNumber.trim()) {
       setMobileError("Please enter your mobile number");
       return;
@@ -268,95 +254,26 @@ function AddProduct() {
       return;
     }
 
-    setOtpSending(true);
+    setIsUpdatingMobile(true);
     setMobileError("");
     const userId = localStorage.getItem("userId");
 
-    try {
-      const res = await axios.post(`${API_URL}/send-otp`, {
-        mobile: mobileNumber,
-        userId,
-      });
-      
-      if (res.data.message.includes("success")) {
-        setOtpStep('otp');
-        setOtpTimer(60);
-        if (res.data.devOtp) {
-          setDevOtp(res.data.devOtp);
-        }
-      } else {
-        setMobileError(res.data.message || "Failed to send OTP");
-      }
-    } catch (err) {
-      setMobileError(err.response?.data?.message || "Error sending OTP");
-    } finally {
-      setOtpSending(false);
-    }
-  };
-
-  const handleResendOtp = async () => {
-    if (otpTimer > 0) return;
-    
-    setOtpSending(true);
-    setMobileError("");
-    const userId = localStorage.getItem("userId");
-
-    try {
-      const res = await axios.post(`${API_URL}/resend-otp`, {
-        mobile: mobileNumber,
-        userId,
-      });
-      
-      if (res.data.message.includes("success")) {
-        setOtpTimer(60);
-        setOtp('');
-        if (res.data.devOtp) {
-          setDevOtp(res.data.devOtp);
-        }
-      } else {
-        setMobileError(res.data.message || "Failed to resend OTP");
-      }
-    } catch (err) {
-      setMobileError(err.response?.data?.message || "Error resending OTP");
-    } finally {
-      setOtpSending(false);
-    }
-  };
-
-  const handleMobileSubmit = async () => {
-    if (otpStep === 'phone') {
-      handleSendOtp();
-      return;
-    }
-
-    // OTP step - verify and update
-    if (!otp.trim() || otp.length !== 6) {
-      setMobileError("Please enter the 6-digit OTP");
-      return;
-    }
-
-    setOtpVerifying(true);
-    const userId = localStorage.getItem("userId");
-    
     try {
       const res = await axios.put(`${API_URL}/update-mobile/${userId}`, {
         mobile: mobileNumber,
-        otp: otp,
       });
       
-      if (res.data.message.includes("success") || res.data.message.includes("verified")) {
+      if (res.data.message.includes("success")) {
         setShowMobileModal(false);
         setMobileError("");
-        setOtp('');
-        setOtpStep('phone');
-        setDevOtp('');
+        setMobileNumber("");
       } else {
-        setMobileError(res.data.message || "Failed to verify OTP");
+        setMobileError(res.data.message || "Failed to update mobile number");
       }
     } catch (err) {
-      setMobileError(err.response?.data?.message || "Error verifying OTP");
+      setMobileError(err.response?.data?.message || "Error updating mobile number");
     } finally {
-      setOtpVerifying(false);
+      setIsUpdatingMobile(false);
     }
   };
 
@@ -1212,120 +1129,53 @@ function AddProduct() {
         </div>
       )}
 
-      {/* Mobile Number Modal with OTP */}
+      {/* Mobile Number Modal */}
       {showMobileModal && (
         <div className="modal-overlay">
           <div className="mobile-modal">
             <div className="mobile-modal-header">
               <FaPhone className="mobile-icon" />
-              <h2>{otpStep === 'otp' ? 'Verify OTP' : 'Add Your Mobile Number'}</h2>
-              <p>
-                {otpStep === 'otp' 
-                  ? `Enter the 6-digit OTP sent to +91 ${mobileNumber}`
-                  : "We'll send an OTP to verify your number"
-                }
-              </p>
+              <h2>Add Your Mobile Number</h2>
+              <p>Enter your 10-digit mobile number</p>
             </div>
             
             <div className="mobile-modal-body">
-              {otpStep === 'phone' ? (
-                <div className="form-group">
-                  <label>Mobile Number</label>
-                  <div className="input-wrapper">
-                    <FaPhone className="input-icon" />
-                    <input
-                      type="tel"
-                      placeholder="10-digit mobile number"
-                      value={mobileNumber}
-                      onChange={(e) => {
-                        setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 10));
-                        setMobileError("");
-                      }}
-                      maxLength="10"
-                      autoFocus
-                    />
-                  </div>
-                  {mobileError && (
-                    <p className="error-message">{mobileError}</p>
-                  )}
+              <div className="form-group">
+                <label>Mobile Number</label>
+                <div className="input-wrapper">
+                  <FaPhone className="input-icon" />
+                  <input
+                    type="tel"
+                    placeholder="10-digit mobile number"
+                    value={mobileNumber}
+                    onChange={(e) => {
+                      setMobileNumber(e.target.value.replace(/\D/g, "").slice(0, 10));
+                      setMobileError("");
+                    }}
+                    maxLength="10"
+                    autoFocus
+                  />
                 </div>
-              ) : (
-                <div className="form-group">
-                  <label>Enter OTP</label>
-                  {/* Dev OTP display */}
-                  {devOtp && (
-                    <div style={{ 
-                      background: '#fef3c7', 
-                      padding: '8px 12px', 
-                      borderRadius: '6px', 
-                      fontSize: '0.85rem',
-                      marginBottom: '12px',
-                      color: '#92400e'
-                    }}>
-                      🔧 Dev Mode OTP: <strong>{devOtp}</strong>
-                    </div>
-                  )}
-                  <div className="input-wrapper">
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      placeholder="Enter 6-digit OTP"
-                      value={otp}
-                      onChange={(e) => {
-                        setOtp(e.target.value.replace(/\D/g, "").slice(0, 6));
-                        setMobileError("");
-                      }}
-                      maxLength="6"
-                      autoFocus
-                      style={{ letterSpacing: '0.5em', textAlign: 'center', fontSize: '1.25rem' }}
-                    />
-                  </div>
-                  {mobileError && (
-                    <p className="error-message">{mobileError}</p>
-                  )}
-                  <div className="otp-actions" style={{ display: 'flex', justifyContent: 'space-between', marginTop: '1rem' }}>
-                    <button 
-                      type="button"
-                      className="btn-secondary"
-                      onClick={() => {
-                        setOtpStep('phone');
-                        setOtp('');
-                        setMobileError('');
-                      }}
-                      style={{ padding: '8px 16px', fontSize: '0.9rem' }}
-                    >
-                      ← Change Number
-                    </button>
-                    <button 
-                      type="button"
-                      className="btn-secondary"
-                      onClick={handleResendOtp}
-                      disabled={otpTimer > 0 || otpSending}
-                      style={{ padding: '8px 16px', fontSize: '0.9rem' }}
-                    >
-                      {otpTimer > 0 ? `Resend in ${otpTimer}s` : 'Resend OTP'}
-                    </button>
-                  </div>
-                </div>
-              )}
+                {mobileError && (
+                  <p className="error-message">{mobileError}</p>
+                )}
+              </div>
 
-              {otpStep === 'phone' && (
-                <div className="mobile-note">
-                  <FaWhatsapp style={{ color: "#25D366" }} />
-                  <span>
-                    This number will be shown to buyers. Make sure WhatsApp is enabled if you select WhatsApp as contact preference.
-                  </span>
-                </div>
-              )}
+              <div className="mobile-note">
+                <FaWhatsapp style={{ color: "#25D366" }} />
+                <span>
+                  This number will be shown to buyers. Make sure WhatsApp is enabled if you select WhatsApp as contact preference.
+                </span>
+              </div>
             </div>
 
             <div className="mobile-modal-footer">
               <button 
                 className="btn-primary" 
                 onClick={handleMobileSubmit}
-                disabled={otpSending || otpVerifying || (otpStep === 'otp' && otp.length !== 6)}
+                disabled={isUpdatingMobile || mobileNumber.length !== 10}
               >
-                {otpSending ? 'Sending OTP...' : otpVerifying ? 'Verifying...' : otpStep === 'otp' ? 'Verify & Continue' : 'Send OTP'}
+                {isUpdatingMobile ? 'Updating...' : 'Update Number'}
               </button>
             </div>
           </div>

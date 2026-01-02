@@ -75,33 +75,12 @@ const Users = mongoose.model("User", {
   password: String,
   email: String,
   mobile: String,
-  mobileVerified: { type: Boolean, default: false }, // Whether mobile is OTP verified
   googleId: String, // For Google OAuth users
   likedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
   isBlocked: { type: Boolean, default: false }, // Admin can block sellers
   blockedReason: String, // Reason for blocking
   blockedAt: Date,
 });
-
-// ============ OTP SCHEMA FOR MOBILE VERIFICATION ============
-const OTPSchema = new mongoose.Schema({
-  mobile: { type: String, required: true, index: true },
-  otp: { type: String, required: true },
-  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
-  attempts: { type: Number, default: 0 }, // Track wrong attempts (max 3)
-  verified: { type: Boolean, default: false },
-  createdAt: { type: Date, default: Date.now, expires: 300 }, // Auto-delete after 5 mins
-});
-
-// Compound index for faster lookups
-OTPSchema.index({ mobile: 1, userId: 1 });
-
-const OTPs = mongoose.model("OTP", OTPSchema);
-
-// Helper function to generate 6-digit OTP
-const generateOTP = () => {
-  return Math.floor(100000 + Math.random() * 900000).toString();
-};
 
 // ============ ADMIN MESSAGES SCHEMA ============
 const MessageSchema = new mongoose.Schema({
@@ -116,6 +95,35 @@ const MessageSchema = new mongoose.Schema({
 });
 
 const Messages = mongoose.model("Message", MessageSchema);
+
+// ============ EXIT FEEDBACK SCHEMA ============
+const ExitFeedbackSchema = new mongoose.Schema({
+  sessionId: { type: String, required: true, unique: true, index: true },
+  reason: {
+    type: String,
+    enum: [
+      "complex_form",
+      "pricing_issue",
+      "need_help",
+      "just_browsing",
+      "technical_issue",
+      "changed_mind",
+      "other",
+    ],
+  },
+  formProgress: { type: Number, default: 0, min: 0, max: 100 },
+  lastFieldFilled: { type: String, default: "" },
+  comment: { type: String, default: "", maxlength: 500 },
+  needsHelp: { type: Boolean, default: false },
+  contactEmail: { type: String, default: "" },
+  deviceType: { type: String, enum: ["desktop", "mobile", "tablet"], default: "desktop" },
+  createdAt: { type: Date, default: Date.now, index: true },
+});
+
+// Index for analytics queries
+ExitFeedbackSchema.index({ reason: 1, createdAt: -1 });
+
+const ExitFeedback = mongoose.model("ExitFeedback", ExitFeedbackSchema);
 
 // ============ PRODUCT CONDITION ENUM ============
 const VALID_CONDITIONS = ["New", "Sealed", "Like New", "Used"];
@@ -442,25 +450,17 @@ app.post("/google-login", async (req, res) => {
   }
 });
 
-// ============ OTP ROUTES FOR MOBILE VERIFICATION ============
-
-/**
- * POST /send-otp
- * Send OTP to mobile number for verification
- */
-app.post("/send-otp", async (req, res) => {
+// ============ UPDATE USER MOBILE NUMBER ============
+app.put("/update-mobile/:userId", async (req, res) => {
   try {
-    const { mobile, userId } = req.body;
+    const userId = req.params.userId;
+    const { mobile } = req.body;
 
     // Validate mobile number
     if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
       return res.status(400).json({
         message: "Please provide a valid 10-digit mobile number",
       });
-    }
-
-    if (!userId) {
-      return res.status(400).json({ message: "User ID is required" });
     }
 
     // Check if user exists
@@ -469,209 +469,9 @@ app.post("/send-otp", async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Delete any existing OTP for this mobile/user
-    await OTPs.deleteMany({ mobile, userId });
-
-    // Generate new OTP
-    const otp = generateOTP();
-
-    // Store OTP in database
-    await OTPs.create({ mobile, otp, userId });
-
-    // In production, send OTP via SMS (Twilio, MSG91, etc.)
-    // For now, log it and return in response
-    console.log(`[OTP] Mobile: ${mobile}, OTP: ${otp}`);
-
-    // TODO: Integrate SMS service (Twilio/MSG91) before removing devOtp
-    // For now, always include OTP for demo purposes
-    const showOtpInResponse = true; // Set to false after SMS integration
-
-    res.json({
-      success: true,
-      message: "OTP sent successfully",
-      expiresIn: "5 minutes",
-      ...(showOtpInResponse && { devOtp: otp }),
-    });
-  } catch (err) {
-    console.error("Error sending OTP:", err);
-    res.status(500).json({ message: "Error sending OTP" });
-  }
-});
-
-/**
- * POST /verify-otp
- * Verify OTP without updating mobile (for validation)
- */
-app.post("/verify-otp", async (req, res) => {
-  try {
-    const { mobile, userId, otp } = req.body;
-
-    if (!mobile || !userId || !otp) {
-      return res.status(400).json({
-        message: "Mobile, userId, and OTP are required",
-      });
-    }
-
-    // Find OTP record
-    const otpRecord = await OTPs.findOne({ mobile, userId });
-
-    if (!otpRecord) {
-      return res.status(400).json({
-        message: "OTP expired or not found. Please request a new one.",
-        verified: false,
-      });
-    }
-
-    // Check max attempts
-    if (otpRecord.attempts >= 3) {
-      await OTPs.deleteOne({ _id: otpRecord._id });
-      return res.status(400).json({
-        message: "Too many wrong attempts. Please request a new OTP.",
-        verified: false,
-      });
-    }
-
-    // Verify OTP
-    if (otpRecord.otp !== otp) {
-      // Increment attempts
-      await OTPs.updateOne({ _id: otpRecord._id }, { $inc: { attempts: 1 } });
-      const attemptsLeft = 3 - (otpRecord.attempts + 1);
-      return res.status(400).json({
-        message: `Invalid OTP. ${attemptsLeft} attempt(s) remaining.`,
-        verified: false,
-      });
-    }
-
-    // OTP is correct - mark as verified
-    await OTPs.updateOne({ _id: otpRecord._id }, { verified: true });
-
-    res.json({
-      message: "OTP verified successfully",
-      verified: true,
-    });
-  } catch (err) {
-    console.error("Error verifying OTP:", err);
-    res.status(500).json({ message: "Error verifying OTP", verified: false });
-  }
-});
-
-/**
- * POST /resend-otp
- * Resend OTP (rate limited to prevent abuse)
- */
-app.post("/resend-otp", async (req, res) => {
-  try {
-    const { mobile, userId } = req.body;
-
-    if (!mobile || !userId) {
-      return res.status(400).json({ message: "Mobile and userId are required" });
-    }
-
-    // Check for existing OTP (rate limiting - must wait for expiry)
-    const existingOTP = await OTPs.findOne({ mobile, userId });
-    
-    if (existingOTP) {
-      const timeSinceCreation = Date.now() - existingOTP.createdAt.getTime();
-      const minWaitTime = 30 * 1000; // 30 seconds minimum between resends
-      
-      if (timeSinceCreation < minWaitTime) {
-        const waitSeconds = Math.ceil((minWaitTime - timeSinceCreation) / 1000);
-        return res.status(429).json({
-          message: `Please wait ${waitSeconds} seconds before requesting a new OTP`,
-          retryAfter: waitSeconds,
-        });
-      }
-    }
-
-    // Delete old OTP and create new one
-    await OTPs.deleteMany({ mobile, userId });
-    const otp = generateOTP();
-    await OTPs.create({ mobile, otp, userId });
-
-    console.log(`[OTP RESEND] Mobile: ${mobile}, OTP: ${otp}`);
-
-    // TODO: Integrate SMS service before removing devOtp
-    const showOtpInResponse = true; // Set to false after SMS integration
-
-    res.json({
-      success: true,
-      message: "New OTP sent successfully",
-      expiresIn: "5 minutes",
-      ...(showOtpInResponse && { devOtp: otp }),
-    });
-  } catch (err) {
-    console.error("Error resending OTP:", err);
-    res.status(500).json({ message: "Error resending OTP" });
-  }
-});
-
-// ============ UPDATE USER MOBILE NUMBER (OTP SECURED) ============
-app.put("/update-mobile/:userId", async (req, res) => {
-  try {
-    const userId = req.params.userId;
-    const { mobile, otp, skipOtp } = req.body;
-
-    // Validate mobile number
-    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
-      return res.status(400).json({
-        message: "Please provide a valid 10-digit mobile number",
-      });
-    }
-
-    // For backward compatibility during transition (REMOVE IN PRODUCTION)
-    if (skipOtp) {
-      await Users.updateOne({ _id: userId }, { mobile, mobileVerified: false });
-      return res.json({ message: "Mobile number updated (unverified)" });
-    }
-
-    // OTP is required for secure update
-    if (!otp) {
-      return res.status(400).json({
-        message: "OTP is required for mobile verification",
-        requiresOtp: true,
-      });
-    }
-
-    // Find and verify OTP
-    const otpRecord = await OTPs.findOne({ mobile, userId, verified: true });
-
-    if (!otpRecord) {
-      // Check if unverified OTP exists
-      const unverifiedOTP = await OTPs.findOne({ mobile, userId });
-      
-      if (unverifiedOTP) {
-        // Verify the OTP inline
-        if (unverifiedOTP.attempts >= 3) {
-          await OTPs.deleteOne({ _id: unverifiedOTP._id });
-          return res.status(400).json({
-            message: "Too many wrong attempts. Please request a new OTP.",
-          });
-        }
-
-        if (unverifiedOTP.otp !== otp) {
-          await OTPs.updateOne({ _id: unverifiedOTP._id }, { $inc: { attempts: 1 } });
-          const attemptsLeft = 3 - (unverifiedOTP.attempts + 1);
-          return res.status(400).json({
-            message: `Invalid OTP. ${attemptsLeft} attempt(s) remaining.`,
-          });
-        }
-
-        // OTP matches - proceed with update
-      } else {
-        return res.status(400).json({
-          message: "OTP expired or not found. Please request a new one.",
-          requiresOtp: true,
-        });
-      }
-    }
-
-    // OTP verified - update mobile number
-    await Users.updateOne({ _id: userId }, { mobile, mobileVerified: true });
-    
-    // Clean up OTP
-    await OTPs.deleteMany({ mobile, userId });
-
-    res.json({ message: "Mobile number verified and updated successfully" });
+    // Update mobile number
+    await Users.updateOne({ _id: userId }, { mobile });
+    res.json({ message: "Mobile number updated successfully" });
   } catch (err) {
     console.error("Error updating mobile:", err);
     res.status(500).json({ message: "Error updating mobile number" });
@@ -1436,6 +1236,124 @@ app.delete("/admin/message/:messageId", async (req, res) => {
     res.json({ message: "Message deleted" });
   } catch (error) {
     console.error("Error deleting message:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// ============ EXIT FEEDBACK ROUTES ============
+
+// Submit exit feedback
+app.post("/exit-feedback", async (req, res) => {
+  try {
+    const { sessionId, reason, formProgress, lastFieldFilled, comment, needsHelp, contactEmail, deviceType } = req.body;
+
+    if (!sessionId) {
+      return res.status(400).json({ message: "Session ID is required" });
+    }
+
+    // Check if feedback already exists for this session
+    const existing = await ExitFeedback.findOne({ sessionId });
+    if (existing) {
+      return res.status(409).json({ 
+        message: "Feedback already recorded for this session",
+        alreadyRecorded: true 
+      });
+    }
+
+    // Create new feedback
+    const feedback = await ExitFeedback.create({
+      sessionId,
+      reason: reason || "other",
+      formProgress: formProgress || 0,
+      lastFieldFilled: lastFieldFilled || "",
+      comment: comment || "",
+      needsHelp: needsHelp || false,
+      contactEmail: contactEmail || "",
+      deviceType: deviceType || "desktop",
+    });
+
+    console.log(`[Exit Feedback] Session: ${sessionId}, Reason: ${reason}, Progress: ${formProgress}%`);
+
+    res.json({ message: "Feedback recorded successfully", feedbackId: feedback._id });
+  } catch (error) {
+    console.error("Error recording exit feedback:", error);
+    res.status(500).json({ message: "Failed to record feedback" });
+  }
+});
+
+// Check if session already has feedback
+app.get("/exit-feedback/check/:sessionId", async (req, res) => {
+  try {
+    const existing = await ExitFeedback.findOne({ sessionId: req.params.sessionId });
+    res.json({ hasRecorded: !!existing });
+  } catch (error) {
+    console.error("Error checking exit feedback:", error);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// Admin: Get exit feedback statistics
+app.get("/admin/exit-feedback-stats/:userId", async (req, res) => {
+  try {
+    const user = await Users.findById(req.params.userId);
+    if (!user || user.email !== ADMIN_EMAIL) {
+      return res.status(403).json({ message: "Unauthorized: Admin access required" });
+    }
+
+    const days = parseInt(req.query.days) || 30;
+    const startDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+
+    // Get aggregated stats
+    const feedbacks = await ExitFeedback.find({ createdAt: { $gte: startDate } });
+
+    // Calculate stats
+    const totalExits = feedbacks.length;
+    const avgProgress = totalExits > 0 
+      ? Math.round(feedbacks.reduce((sum, f) => sum + (f.formProgress || 0), 0) / totalExits)
+      : 0;
+    const helpRequests = feedbacks.filter(f => f.needsHelp).length;
+
+    // Reason breakdown
+    const reasonBreakdown = {};
+    feedbacks.forEach(f => {
+      const reason = f.reason || "other";
+      reasonBreakdown[reason] = (reasonBreakdown[reason] || 0) + 1;
+    });
+
+    // Device breakdown
+    const deviceBreakdown = {};
+    feedbacks.forEach(f => {
+      const device = f.deviceType || "desktop";
+      deviceBreakdown[device] = (deviceBreakdown[device] || 0) + 1;
+    });
+
+    // Recent comments (non-empty)
+    const recentComments = feedbacks
+      .filter(f => f.comment && f.comment.trim())
+      .sort((a, b) => b.createdAt - a.createdAt)
+      .slice(0, 10)
+      .map(f => ({
+        comment: f.comment,
+        reason: f.reason,
+        progress: f.formProgress,
+        date: f.createdAt,
+        needsHelp: f.needsHelp,
+        email: f.contactEmail,
+      }));
+
+    res.json({
+      stats: {
+        totalExits,
+        avgProgress,
+        helpRequests,
+        reasonBreakdown,
+        deviceBreakdown,
+      },
+      recentComments,
+      period: `${days} days`,
+    });
+  } catch (error) {
+    console.error("Error fetching exit feedback stats:", error);
     res.status(500).json({ message: "Server error" });
   }
 });
