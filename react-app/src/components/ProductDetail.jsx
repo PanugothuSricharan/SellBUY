@@ -69,6 +69,23 @@ function ProductDetail() {
         metaDescription.setAttribute('content', `Buy ${product.pname} - ${product.condition} condition. Price: ₹${product.price}. ${product.pdesc.substring(0, 120)}...`);
       }
 
+      // Update Open Graph tags for social sharing (WhatsApp preview)
+      const updateMeta = (property, content) => {
+        let element = document.querySelector(`meta[property="${property}"]`);
+        if (!element) {
+          element = document.createElement('meta');
+          element.setAttribute('property', property);
+          document.head.appendChild(element);
+        }
+        element.setAttribute('content', content);
+      };
+
+      updateMeta('og:title', `${product.pname} - ₹${product.price}`);
+      updateMeta('og:description', `Buy ${product.pname} (${product.condition}) at ${product.location || 'Campus'}. ${product.pdesc.substring(0, 100)}...`);
+      updateMeta('og:image', getFullImageUrl(product.pimage));
+      updateMeta('og:url', window.location.href);
+      updateMeta('og:type', 'product');
+
       // Add structured data JSON-LD
       const script = document.createElement('script');
       script.type = 'application/ld+json';
