@@ -1099,6 +1099,8 @@
   outline: none;
   transition: border-color 0.3s, box-shadow 0.3s;
   box-sizing: border-box;
+  color: #333; /* Explicit text color for light mode */
+  background: #fff;
 }
 
 .mobile-modal .mobile-input:focus {

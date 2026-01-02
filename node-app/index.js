@@ -479,18 +479,18 @@ app.post("/send-otp", async (req, res) => {
     await OTPs.create({ mobile, otp, userId });
 
     // In production, send OTP via SMS (Twilio, MSG91, etc.)
-    // For now, log it and return in dev mode
+    // For now, log it and return in response
     console.log(`[OTP] Mobile: ${mobile}, OTP: ${otp}`);
 
-    // For development/demo - include OTP in response
-    // REMOVE THIS IN PRODUCTION!
-    const isDev = process.env.NODE_ENV !== 'production';
+    // TODO: Integrate SMS service (Twilio/MSG91) before removing devOtp
+    // For now, always include OTP for demo purposes
+    const showOtpInResponse = true; // Set to false after SMS integration
 
     res.json({
       success: true,
       message: "OTP sent successfully",
       expiresIn: "5 minutes",
-      ...(isDev && { devOtp: otp }), // Only in dev mode
+      ...(showOtpInResponse && { devOtp: otp }),
     });
   } catch (err) {
     console.error("Error sending OTP:", err);
@@ -590,13 +590,14 @@ app.post("/resend-otp", async (req, res) => {
 
     console.log(`[OTP RESEND] Mobile: ${mobile}, OTP: ${otp}`);
 
-    const isDev = process.env.NODE_ENV !== 'production';
+    // TODO: Integrate SMS service before removing devOtp
+    const showOtpInResponse = true; // Set to false after SMS integration
 
     res.json({
       success: true,
       message: "New OTP sent successfully",
       expiresIn: "5 minutes",
-      ...(isDev && { devOtp: otp }),
+      ...(showOtpInResponse && { devOtp: otp }),
     });
   } catch (err) {
     console.error("Error resending OTP:", err);
