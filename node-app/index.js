@@ -75,12 +75,33 @@ const Users = mongoose.model("User", {
   password: String,
   email: String,
   mobile: String,
+  mobileVerified: { type: Boolean, default: false }, // Whether mobile is OTP verified
   googleId: String, // For Google OAuth users
   likedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: "Product" }],
   isBlocked: { type: Boolean, default: false }, // Admin can block sellers
   blockedReason: String, // Reason for blocking
   blockedAt: Date,
 });
+
+// ============ OTP SCHEMA FOR MOBILE VERIFICATION ============
+const OTPSchema = new mongoose.Schema({
+  mobile: { type: String, required: true, index: true },
+  otp: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+  attempts: { type: Number, default: 0 }, // Track wrong attempts (max 3)
+  verified: { type: Boolean, default: false },
+  createdAt: { type: Date, default: Date.now, expires: 300 }, // Auto-delete after 5 mins
+});
+
+// Compound index for faster lookups
+OTPSchema.index({ mobile: 1, userId: 1 });
+
+const OTPs = mongoose.model("OTP", OTPSchema);
+
+// Helper function to generate 6-digit OTP
+const generateOTP = () => {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+};
 
 // ============ ADMIN MESSAGES SCHEMA ============
 const MessageSchema = new mongoose.Schema({
@@ -421,26 +442,239 @@ app.post("/google-login", async (req, res) => {
   }
 });
 
-// ============ UPDATE USER MOBILE NUMBER ============
-app.put("/update-mobile/:userId", (req, res) => {
-  const userId = req.params.userId;
-  const { mobile } = req.body;
+// ============ OTP ROUTES FOR MOBILE VERIFICATION ============
 
-  // Validate mobile number
-  if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
-    return res.status(400).json({
-      message: "Please provide a valid 10-digit mobile number",
+/**
+ * POST /send-otp
+ * Send OTP to mobile number for verification
+ */
+app.post("/send-otp", async (req, res) => {
+  try {
+    const { mobile, userId } = req.body;
+
+    // Validate mobile number
+    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
+      return res.status(400).json({
+        message: "Please provide a valid 10-digit mobile number",
+      });
+    }
+
+    if (!userId) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    // Check if user exists
+    const user = await Users.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Delete any existing OTP for this mobile/user
+    await OTPs.deleteMany({ mobile, userId });
+
+    // Generate new OTP
+    const otp = generateOTP();
+
+    // Store OTP in database
+    await OTPs.create({ mobile, otp, userId });
+
+    // In production, send OTP via SMS (Twilio, MSG91, etc.)
+    // For now, log it and return in dev mode
+    console.log(`[OTP] Mobile: ${mobile}, OTP: ${otp}`);
+
+    // For development/demo - include OTP in response
+    // REMOVE THIS IN PRODUCTION!
+    const isDev = process.env.NODE_ENV !== 'production';
+
+    res.json({
+      success: true,
+      message: "OTP sent successfully",
+      expiresIn: "5 minutes",
+      ...(isDev && { devOtp: otp }), // Only in dev mode
     });
+  } catch (err) {
+    console.error("Error sending OTP:", err);
+    res.status(500).json({ message: "Error sending OTP" });
   }
+});
 
-  Users.updateOne({ _id: userId }, { mobile: mobile })
-    .then(() => {
-      res.json({ message: "Mobile number updated successfully" });
-    })
-    .catch((err) => {
-      console.error("Error updating mobile:", err);
-      res.status(500).json({ message: "Error updating mobile number" });
+/**
+ * POST /verify-otp
+ * Verify OTP without updating mobile (for validation)
+ */
+app.post("/verify-otp", async (req, res) => {
+  try {
+    const { mobile, userId, otp } = req.body;
+
+    if (!mobile || !userId || !otp) {
+      return res.status(400).json({
+        message: "Mobile, userId, and OTP are required",
+      });
+    }
+
+    // Find OTP record
+    const otpRecord = await OTPs.findOne({ mobile, userId });
+
+    if (!otpRecord) {
+      return res.status(400).json({
+        message: "OTP expired or not found. Please request a new one.",
+        verified: false,
+      });
+    }
+
+    // Check max attempts
+    if (otpRecord.attempts >= 3) {
+      await OTPs.deleteOne({ _id: otpRecord._id });
+      return res.status(400).json({
+        message: "Too many wrong attempts. Please request a new OTP.",
+        verified: false,
+      });
+    }
+
+    // Verify OTP
+    if (otpRecord.otp !== otp) {
+      // Increment attempts
+      await OTPs.updateOne({ _id: otpRecord._id }, { $inc: { attempts: 1 } });
+      const attemptsLeft = 3 - (otpRecord.attempts + 1);
+      return res.status(400).json({
+        message: `Invalid OTP. ${attemptsLeft} attempt(s) remaining.`,
+        verified: false,
+      });
+    }
+
+    // OTP is correct - mark as verified
+    await OTPs.updateOne({ _id: otpRecord._id }, { verified: true });
+
+    res.json({
+      message: "OTP verified successfully",
+      verified: true,
     });
+  } catch (err) {
+    console.error("Error verifying OTP:", err);
+    res.status(500).json({ message: "Error verifying OTP", verified: false });
+  }
+});
+
+/**
+ * POST /resend-otp
+ * Resend OTP (rate limited to prevent abuse)
+ */
+app.post("/resend-otp", async (req, res) => {
+  try {
+    const { mobile, userId } = req.body;
+
+    if (!mobile || !userId) {
+      return res.status(400).json({ message: "Mobile and userId are required" });
+    }
+
+    // Check for existing OTP (rate limiting - must wait for expiry)
+    const existingOTP = await OTPs.findOne({ mobile, userId });
+    
+    if (existingOTP) {
+      const timeSinceCreation = Date.now() - existingOTP.createdAt.getTime();
+      const minWaitTime = 30 * 1000; // 30 seconds minimum between resends
+      
+      if (timeSinceCreation < minWaitTime) {
+        const waitSeconds = Math.ceil((minWaitTime - timeSinceCreation) / 1000);
+        return res.status(429).json({
+          message: `Please wait ${waitSeconds} seconds before requesting a new OTP`,
+          retryAfter: waitSeconds,
+        });
+      }
+    }
+
+    // Delete old OTP and create new one
+    await OTPs.deleteMany({ mobile, userId });
+    const otp = generateOTP();
+    await OTPs.create({ mobile, otp, userId });
+
+    console.log(`[OTP RESEND] Mobile: ${mobile}, OTP: ${otp}`);
+
+    const isDev = process.env.NODE_ENV !== 'production';
+
+    res.json({
+      success: true,
+      message: "New OTP sent successfully",
+      expiresIn: "5 minutes",
+      ...(isDev && { devOtp: otp }),
+    });
+  } catch (err) {
+    console.error("Error resending OTP:", err);
+    res.status(500).json({ message: "Error resending OTP" });
+  }
+});
+
+// ============ UPDATE USER MOBILE NUMBER (OTP SECURED) ============
+app.put("/update-mobile/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { mobile, otp, skipOtp } = req.body;
+
+    // Validate mobile number
+    if (!mobile || !/^[0-9]{10}$/.test(mobile)) {
+      return res.status(400).json({
+        message: "Please provide a valid 10-digit mobile number",
+      });
+    }
+
+    // For backward compatibility during transition (REMOVE IN PRODUCTION)
+    if (skipOtp) {
+      await Users.updateOne({ _id: userId }, { mobile, mobileVerified: false });
+      return res.json({ message: "Mobile number updated (unverified)" });
+    }
+
+    // OTP is required for secure update
+    if (!otp) {
+      return res.status(400).json({
+        message: "OTP is required for mobile verification",
+        requiresOtp: true,
+      });
+    }
+
+    // Find and verify OTP
+    const otpRecord = await OTPs.findOne({ mobile, userId, verified: true });
+
+    if (!otpRecord) {
+      // Check if unverified OTP exists
+      const unverifiedOTP = await OTPs.findOne({ mobile, userId });
+      
+      if (unverifiedOTP) {
+        // Verify the OTP inline
+        if (unverifiedOTP.attempts >= 3) {
+          await OTPs.deleteOne({ _id: unverifiedOTP._id });
+          return res.status(400).json({
+            message: "Too many wrong attempts. Please request a new OTP.",
+          });
+        }
+
+        if (unverifiedOTP.otp !== otp) {
+          await OTPs.updateOne({ _id: unverifiedOTP._id }, { $inc: { attempts: 1 } });
+          const attemptsLeft = 3 - (unverifiedOTP.attempts + 1);
+          return res.status(400).json({
+            message: `Invalid OTP. ${attemptsLeft} attempt(s) remaining.`,
+          });
+        }
+
+        // OTP matches - proceed with update
+      } else {
+        return res.status(400).json({
+          message: "OTP expired or not found. Please request a new one.",
+          requiresOtp: true,
+        });
+      }
+    }
+
+    // OTP verified - update mobile number
+    await Users.updateOne({ _id: userId }, { mobile, mobileVerified: true });
+    
+    // Clean up OTP
+    await OTPs.deleteMany({ mobile, userId });
+
+    res.json({ message: "Mobile number verified and updated successfully" });
+  } catch (err) {
+    console.error("Error updating mobile:", err);
+    res.status(500).json({ message: "Error updating mobile number" });
+  }
 });
 
 app.post(
