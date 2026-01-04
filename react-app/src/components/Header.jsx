@@ -348,7 +348,7 @@ function Header(props) {
                           onClick={() => setShowUserMenu(false)}
                         >
                           <FaShieldAlt />
-                          <span>Admin Pannel</span>
+                          <span>Admin Panel</span>
                         </Link>
                       </>
                     )}
