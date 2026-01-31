@@ -55,6 +55,7 @@ function ProductDetail() {
 
     // Check if product is liked from backend
     checkIfLiked();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [productId]);
 
   // Add structured data for SEO

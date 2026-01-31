@@ -2,14 +2,6 @@
 // This compresses images before upload to reduce file size while maintaining quality
 
 /**
- * Check if browser supports HEIC/HEIF format
- */
-const supportsHeic = () => {
-  const canvas = document.createElement('canvas');
-  return canvas.toDataURL('image/heic').indexOf('data:image/heic') === 0;
-};
-
-/**
  * Compress an image file
  * @param {File} file - The image file to compress
  * @param {Object} options - Compression options

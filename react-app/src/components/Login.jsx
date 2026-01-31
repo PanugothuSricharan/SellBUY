@@ -14,7 +14,7 @@ import {
 
 function Login() {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleGoogleSuccess = async (credentialResponse) => {
