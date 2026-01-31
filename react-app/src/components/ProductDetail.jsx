@@ -462,38 +462,37 @@ function ProductDetail() {
                   </div>
                 )}
                 
-                {/* YouTube Video Embed */}
+                {/* YouTube Video Link */}
                 {product.videoUrl && isYouTubeVideo(product.videoUrl) && (
-                  <div className="video-embed-section">
+                  <div className="video-link-section">
                     <h3 className="video-section-title">
                       <FaYoutube /> Product Video
                     </h3>
-                    <div className="youtube-embed-container">
-                      <iframe
-                        src={`https://www.youtube.com/embed/${getYouTubeVideoId(product.videoUrl)}?rel=0&modestbranding=1`}
-                        title="Product Video"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                        loading="lazy"
-                      ></iframe>
-                    </div>
                     <a
                       href={product.videoUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="youtube-fallback-link"
+                      className="youtube-video-link"
                     >
-                      <FaYoutube />
-                      <span>Can't see the video? Watch on YouTube</span>
-                      <FaExternalLinkAlt />
+                      <img 
+                        src={`https://img.youtube.com/vi/${getYouTubeVideoId(product.videoUrl)}/maxresdefault.jpg`}
+                        alt="Video thumbnail"
+                        className="youtube-thumbnail"
+                        onError={(e) => {
+                          e.target.src = `https://img.youtube.com/vi/${getYouTubeVideoId(product.videoUrl)}/hqdefault.jpg`;
+                        }}
+                      />
+                      <div className="youtube-play-overlay">
+                        <FaYoutube className="youtube-play-icon" />
+                      </div>
+                      <span className="watch-on-youtube">Watch on YouTube</span>
                     </a>
                   </div>
                 )}
                 
-                {/* Google Drive Video Link (can't embed, show link) */}
+                {/* Other Video Link (Google Drive, etc.) */}
                 {product.videoUrl && !isYouTubeVideo(product.videoUrl) && (
-                  <div className="video-embed-section">
+                  <div className="video-link-section">
                     <h3 className="video-section-title">
                       <FaVideo /> Product Video
                     </h3>
@@ -504,7 +503,7 @@ function ProductDetail() {
                       className="drive-video-link"
                     >
                       <FaVideo />
-                      <span>Watch Video on Google Drive</span>
+                      <span>Watch Video</span>
                       <FaExternalLinkAlt />
                     </a>
                   </div>
