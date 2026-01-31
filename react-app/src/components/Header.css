@@ -403,7 +403,7 @@
 
 .search-container:focus-within {
   border-color: var(--accent-orange);
-  box-shadow: 0 4px 20px rgba(255, 107, 53, 0.15);
+  /* box-shadow: 0 4px 20px rgba(255, 107, 53, 0.15); */
 }
 
 /* Dark Mode Search */

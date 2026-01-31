@@ -2,6 +2,14 @@
 // This compresses images before upload to reduce file size while maintaining quality
 
 /**
+ * Check if browser supports HEIC/HEIF format
+ */
+const supportsHeic = () => {
+  const canvas = document.createElement('canvas');
+  return canvas.toDataURL('image/heic').indexOf('data:image/heic') === 0;
+};
+
+/**
  * Compress an image file
  * @param {File} file - The image file to compress
  * @param {Object} options - Compression options
@@ -54,7 +62,7 @@ export const compressImage = (file, options = {}) => {
         
         ctx.drawImage(img, 0, 0, width, height);
         
-        // Convert to blob with compression
+        // Convert to blob with compression - always output as JPEG for compatibility
         canvas.toBlob(
           (blob) => {
             if (!blob) {
@@ -62,8 +70,9 @@ export const compressImage = (file, options = {}) => {
               return;
             }
             
-            // Create a new file from the blob
-            const compressedFile = new File([blob], file.name, {
+            // Create a new file from the blob with .jpg extension
+            const fileName = file.name.replace(/\.[^/.]+$/, '') + '.jpg';
+            const compressedFile = new File([blob], fileName, {
               type: 'image/jpeg',
               lastModified: Date.now(),
             });

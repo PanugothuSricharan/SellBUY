@@ -289,12 +289,21 @@ function AddProduct() {
       }
 
       try {
-        // Compress image if larger than 2MB
+        // Always compress images to ensure compatibility and smaller file size
+        // This is especially important for mobile devices that may capture
+        // large images or use HEIC format
         let processedFile = file;
-        if (file.size > 2 * 1024 * 1024) {
-          console.log(`Compressing image: ${(file.size / 1024 / 1024).toFixed(2)}MB`);
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        
+        // Check if file is HEIC/HEIF or larger than 2MB - always compress
+        const isHeic = file.type === 'image/heic' || file.type === 'image/heif' || 
+                       file.name.toLowerCase().endsWith('.heic') || 
+                       file.name.toLowerCase().endsWith('.heif');
+        
+        if (file.size > maxSize || isHeic) {
+          console.log(`Processing image: ${(file.size / 1024 / 1024).toFixed(2)}MB, type: ${file.type}`);
           processedFile = await compressImageToSize(file, 2);
-          console.log(`Compressed to: ${(processedFile.size / 1024 / 1024).toFixed(2)}MB`);
+          console.log(`Processed to: ${(processedFile.size / 1024 / 1024).toFixed(2)}MB`);
         }
 
         if (imageNumber === 1) {
@@ -303,8 +312,8 @@ function AddProduct() {
           setPimage2(processedFile);
         }
       } catch (error) {
-        console.error('Image compression failed:', error);
-        // Use original file if compression fails
+        console.error('Image processing failed:', error);
+        // Use original file if processing fails
         if (imageNumber === 1) {
           setPimage(file);
         } else {
@@ -441,7 +450,10 @@ function AddProduct() {
 
     axios
       .post(url, formData, {
-        timeout: 120000, // 2 minutes timeout for image uploads
+        timeout: 180000, // 3 minutes timeout for image uploads (increased for mobile)
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
         onUploadProgress: (progressEvent) => {
           const percentCompleted = Math.round(
             (progressEvent.loaded * 100) / progressEvent.total
@@ -466,7 +478,7 @@ function AddProduct() {
       .catch((err) => {
         setIsSubmitting(false);
         setUploadProgress(0);
-        console.log(err);
+        console.error('Upload error:', err);
         
         // Handle specific error cases
         if (err.code === "ECONNABORTED" || err.message?.includes("timeout")) {
@@ -475,6 +487,11 @@ function AddProduct() {
           setShowLimitModal(true);
         } else if (err.response?.status === 413) {
           alert("Images are too large. Please use smaller images (under 5MB each).");
+        } else if (err.response?.status === 400) {
+          // Bad request - likely image format issue
+          alert(err.response?.data?.message || "Invalid image format. Please try a different image (JPEG or PNG recommended).");
+        } else if (err.message?.includes("Network Error")) {
+          alert("Network error. Please check your internet connection and try again.");
         } else {
           alert(err.response?.data?.message || "Error adding product. Please try again.");
         }
