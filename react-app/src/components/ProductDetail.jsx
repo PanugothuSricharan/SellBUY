@@ -1,5 +1,5 @@
 import { useParams, Link } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import axios from "axios";
 import Header from "./Header";
 import "./ProductDetail.css";
@@ -13,6 +13,7 @@ import {
   FaPhone,
   FaHeart,
   FaChevronRight,
+  FaChevronLeft,
   FaHome,
   FaBoxOpen,
   FaExternalLinkAlt,
@@ -20,6 +21,9 @@ import {
   FaWhatsapp,
   FaVideo,
   FaYoutube,
+  FaExpand,
+  FaTimes,
+  FaSearchPlus,
 } from "react-icons/fa";
 
 function ProductDetail() {
@@ -32,6 +36,14 @@ function ProductDetail() {
   const [contactLoading, setContactLoading] = useState(false);
   const [inlineMessage, setInlineMessage] = useState({ type: '', text: '' });
   const { productId } = useParams();
+  
+  // Image zoom and fullscreen states
+  const [isZooming, setIsZooming] = useState(false);
+  const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
+  const [showFullscreen, setShowFullscreen] = useState(false);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const mainImageRef = useRef(null);
+  const zoomLensRef = useRef(null);
 
   const images = [];
 
@@ -39,6 +51,78 @@ function ProductDetail() {
     if (product.pimage) images.push(product.pimage);
     if (product.pimage2) images.push(product.pimage2);
   }
+
+  // Extract YouTube video ID from URL
+  const getYouTubeVideoId = useCallback((url) => {
+    if (!url) return null;
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+  }, []);
+
+  // Check if URL is a YouTube video
+  const isYouTubeVideo = useCallback((url) => {
+    if (!url) return false;
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  }, []);
+
+  // Navigate to next/previous image
+  const nextImage = useCallback(() => {
+    setActiveImage((prev) => (prev + 1) % images.length);
+    setImageLoaded(false);
+  }, [images.length]);
+
+  const prevImage = useCallback(() => {
+    setActiveImage((prev) => (prev - 1 + images.length) % images.length);
+    setImageLoaded(false);
+  }, [images.length]);
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (showFullscreen) {
+        if (e.key === 'Escape') setShowFullscreen(false);
+        if (e.key === 'ArrowRight') nextImage();
+        if (e.key === 'ArrowLeft') prevImage();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [showFullscreen, nextImage, prevImage]);
+
+  // Handle mouse move for zoom effect
+  const handleMouseMove = useCallback((e) => {
+    if (!mainImageRef.current) return;
+    
+    const rect = mainImageRef.current.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    
+    setZoomPosition({ x: Math.max(0, Math.min(100, x)), y: Math.max(0, Math.min(100, y)) });
+  }, []);
+
+  const handleMouseEnter = useCallback(() => {
+    if (imageLoaded) setIsZooming(true);
+  }, [imageLoaded]);
+
+  const handleMouseLeave = useCallback(() => {
+    setIsZooming(false);
+  }, []);
+
+  // Touch support for mobile swipe
+  const touchStartX = useRef(0);
+  const handleTouchStart = (e) => {
+    touchStartX.current = e.touches[0].clientX;
+  };
+  
+  const handleTouchEnd = (e) => {
+    const touchEndX = e.changedTouches[0].clientX;
+    const diff = touchStartX.current - touchEndX;
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) nextImage();
+      else prevImage();
+    }
+  };
 
   useEffect(() => {
     const url = `${API_URL}/get-product/${productId}`;
@@ -264,15 +348,101 @@ function ProductDetail() {
             <div className="product-detail-layout">
               {/* Image Gallery */}
               <div className="product-gallery">
-                <div className="main-image-container">
+                <div 
+                  className={`main-image-container ${isZooming ? 'zooming' : ''}`}
+                  ref={mainImageRef}
+                  onMouseMove={handleMouseMove}
+                  onMouseEnter={handleMouseEnter}
+                  onMouseLeave={handleMouseLeave}
+                  onTouchStart={handleTouchStart}
+                  onTouchEnd={handleTouchEnd}
+                >
+                  {/* Main Image */}
                   <img
                     className="main-image"
                     src={getFullImageUrl(images[activeImage])}
                     srcSet={getImageSrcSet(images[activeImage])}
                     sizes="(max-width: 768px) 100vw, 600px"
                     alt={product.pname}
+                    onLoad={() => setImageLoaded(true)}
+                    style={{ opacity: imageLoaded ? 1 : 0.5 }}
                   />
+                  
+                  {/* Loading indicator */}
+                  {!imageLoaded && (
+                    <div className="image-loading-overlay">
+                      <div className="image-loading-spinner"></div>
+                    </div>
+                  )}
+                  
+                  {/* Zoom lens indicator */}
+                  {isZooming && (
+                    <div 
+                      className="zoom-lens"
+                      ref={zoomLensRef}
+                      style={{
+                        left: `${zoomPosition.x}%`,
+                        top: `${zoomPosition.y}%`,
+                      }}
+                    />
+                  )}
+                  
+                  {/* Navigation Arrows */}
+                  {images.length > 1 && (
+                    <>
+                      <button 
+                        className="image-nav-btn image-nav-prev"
+                        onClick={(e) => { e.stopPropagation(); prevImage(); }}
+                        aria-label="Previous image"
+                      >
+                        <FaChevronLeft />
+                      </button>
+                      <button 
+                        className="image-nav-btn image-nav-next"
+                        onClick={(e) => { e.stopPropagation(); nextImage(); }}
+                        aria-label="Next image"
+                      >
+                        <FaChevronRight />
+                      </button>
+                    </>
+                  )}
+                  
+                  {/* Image counter */}
+                  {images.length > 1 && (
+                    <div className="image-counter">
+                      {activeImage + 1} / {images.length}
+                    </div>
+                  )}
+                  
+                  {/* Fullscreen button */}
+                  <button 
+                    className="fullscreen-btn"
+                    onClick={() => setShowFullscreen(true)}
+                    aria-label="View fullscreen"
+                  >
+                    <FaExpand />
+                  </button>
+                  
+                  {/* Zoom hint */}
+                  <div className="zoom-hint">
+                    <FaSearchPlus /> Hover to zoom
+                  </div>
                 </div>
+                
+                {/* Zoomed preview panel (Amazon-style) */}
+                {isZooming && (
+                  <div className="zoom-preview-panel">
+                    <div 
+                      className="zoom-preview-image"
+                      style={{
+                        backgroundImage: `url(${getFullImageUrl(images[activeImage])})`,
+                        backgroundPosition: `${zoomPosition.x}% ${zoomPosition.y}%`,
+                      }}
+                    />
+                  </div>
+                )}
+                
+                {/* Thumbnails */}
                 {images.length > 1 && (
                   <div className="thumbnail-grid">
                     {images.map((img, index) => (
@@ -281,7 +451,7 @@ function ProductDetail() {
                         className={`thumbnail ${
                           activeImage === index ? "active" : ""
                         }`}
-                        onClick={() => setActiveImage(index)}
+                        onClick={() => { setActiveImage(index); setImageLoaded(false); }}
                       >
                         <img
                           src={getImageUrl(img, { width: 150 })}
@@ -291,6 +461,97 @@ function ProductDetail() {
                     ))}
                   </div>
                 )}
+                
+                {/* YouTube Video Embed */}
+                {product.videoUrl && isYouTubeVideo(product.videoUrl) && (
+                  <div className="video-embed-section">
+                    <h3 className="video-section-title">
+                      <FaYoutube /> Product Video
+                    </h3>
+                    <div className="youtube-embed-container">
+                      <iframe
+                        src={`https://www.youtube.com/embed/${getYouTubeVideoId(product.videoUrl)}?rel=0`}
+                        title="Product Video"
+                        frameBorder="0"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                  </div>
+                )}
+                
+                {/* Google Drive Video Link (can't embed, show link) */}
+                {product.videoUrl && !isYouTubeVideo(product.videoUrl) && (
+                  <div className="video-embed-section">
+                    <h3 className="video-section-title">
+                      <FaVideo /> Product Video
+                    </h3>
+                    <a
+                      href={product.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="drive-video-link"
+                    >
+                      <FaVideo />
+                      <span>Watch Video on Google Drive</span>
+                      <FaExternalLinkAlt />
+                    </a>
+                  </div>
+                )}
+              </div>
+
+              {/* Fullscreen Modal */}
+              {showFullscreen && (
+                <div className="fullscreen-modal" onClick={() => setShowFullscreen(false)}>
+                  <button 
+                    className="fullscreen-close-btn"
+                    onClick={() => setShowFullscreen(false)}
+                  >
+                    <FaTimes />
+                  </button>
+                  
+                  <div className="fullscreen-content" onClick={(e) => e.stopPropagation()}>
+                    <img
+                      src={getFullImageUrl(images[activeImage])}
+                      alt={product.pname}
+                      className="fullscreen-image"
+                    />
+                    
+                    {images.length > 1 && (
+                      <>
+                        <button 
+                          className="fullscreen-nav-btn fullscreen-prev"
+                          onClick={prevImage}
+                        >
+                          <FaChevronLeft />
+                        </button>
+                        <button 
+                          className="fullscreen-nav-btn fullscreen-next"
+                          onClick={nextImage}
+                        >
+                          <FaChevronRight />
+                        </button>
+                      </>
+                    )}
+                    
+                    <div className="fullscreen-thumbnails">
+                      {images.map((img, index) => (
+                        <div
+                          key={index}
+                          className={`fullscreen-thumb ${activeImage === index ? 'active' : ''}`}
+                          onClick={() => setActiveImage(index)}
+                        >
+                          <img src={getImageUrl(img, { width: 100 })} alt="" />
+                        </div>
+                      ))}
+                    </div>
+                    
+                    <div className="fullscreen-counter">
+                      {activeImage + 1} / {images.length}
+                    </div>
+                  </div>
+                </div>
+              )}
               </div>
 
               {/* Product Info Sidebar */}
@@ -361,28 +622,6 @@ function ProductDetail() {
                       </a>
                       <p className="original-link-hint">
                         Check the original specs and compare prices
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Product Video Link */}
-                  {product.videoUrl && (
-                    <div className="product-video-link">
-                      <a
-                        href={product.videoUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="video-link-btn"
-                      >
-                        {product.videoUrl.includes('youtube') || product.videoUrl.includes('youtu.be') ? (
-                          <FaYoutube />
-                        ) : (
-                          <FaVideo />
-                        )}
-                        Watch Product Video
-                      </a>
-                      <p className="video-link-hint">
-                        See the product in action
                       </p>
                     </div>
                   )}
