@@ -25,6 +25,7 @@ import {
   FaHome,
   FaShareAlt,
   FaHeart,
+  FaVideo,
 } from "react-icons/fa";
 import API_URL from "../constants";
 
@@ -51,6 +52,7 @@ function AddProduct() {
   const [condition, setCondition] = useState("");
   const [productAge, setProductAge] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [contactPreference, setContactPreference] = useState("Both");
   const [pimage, setPimage] = useState(null);
   const [pimage2, setPimage2] = useState(null);
@@ -384,6 +386,11 @@ function AddProduct() {
       newErrors.originalUrl = "Please enter a valid URL";
     }
 
+    // Validate video URL if provided
+    if (videoUrl && !isValidVideoUrl(videoUrl)) {
+      newErrors.videoUrl = "Please enter a valid YouTube or Google Drive link";
+    }
+
     setErrors(newErrors);
     
     // Scroll to first error
@@ -405,6 +412,19 @@ function AddProduct() {
     } catch (_) {
       return false;
     }
+  };
+
+  // Video URL validation helper (YouTube or Google Drive)
+  const isValidVideoUrl = (string) => {
+    if (!isValidUrl(string)) return false;
+    
+    const url = string.toLowerCase();
+    // Check for YouTube links
+    const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+    // Check for Google Drive links
+    const isDrive = url.includes('drive.google.com');
+    
+    return isYouTube || isDrive;
   };
 
   const handleApi = () => {
@@ -441,6 +461,7 @@ function AddProduct() {
     formData.append("condition", condition);
     formData.append("productAge", productAge);
     formData.append("originalUrl", originalUrl);
+    formData.append("videoUrl", videoUrl);
     formData.append("contactPreference", contactPreference);
     formData.append("pimage", pimage);
     if (pimage2) {
@@ -612,6 +633,27 @@ function AddProduct() {
               )}
               <p className="form-hint">
                 💡 Copy the product URL and paste here. Buyers can verify original price & specs.
+              </p>
+            </div>
+
+            {/* Video URL Field */}
+            <div className="form-group">
+              <label className="form-label">
+                <FaVideo style={{ marginRight: "4px" }} /> Product Video Link
+                <span className="optional"> (Optional)</span>
+              </label>
+              <input
+                type="url"
+                className={`form-input ${errors.videoUrl ? "error" : ""}`}
+                placeholder="Paste YouTube or Google Drive video link"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+              />
+              {errors.videoUrl && (
+                <p className="error-message">{errors.videoUrl}</p>
+              )}
+              <p className="form-hint">
+                🎥 Add a video to showcase your product! Supports YouTube & Google Drive links.
               </p>
             </div>
 

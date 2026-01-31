@@ -58,6 +58,9 @@ const ProductSchema = new mongoose.Schema({
   originalUrl: {
     type: String,
   },
+  videoUrl: {
+    type: String,
+  },
   contactPreference: {
     type: String,
     enum: VALID_CONTACT_PREFERENCES,

@@ -18,6 +18,8 @@ import {
   FaExternalLinkAlt,
   FaCheckCircle,
   FaWhatsapp,
+  FaVideo,
+  FaYoutube,
 } from "react-icons/fa";
 
 function ProductDetail() {
@@ -359,6 +361,28 @@ function ProductDetail() {
                       </a>
                       <p className="original-link-hint">
                         Check the original specs and compare prices
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Product Video Link */}
+                  {product.videoUrl && (
+                    <div className="product-video-link">
+                      <a
+                        href={product.videoUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="video-link-btn"
+                      >
+                        {product.videoUrl.includes('youtube') || product.videoUrl.includes('youtu.be') ? (
+                          <FaYoutube />
+                        ) : (
+                          <FaVideo />
+                        )}
+                        Watch Product Video
+                      </a>
+                      <p className="video-link-hint">
+                        See the product in action
                       </p>
                     </div>
                   )}

@@ -644,6 +644,58 @@
   box-shadow: 0 0 25px rgba(255, 153, 0, 0.5);
 }
 
+/* Product Video Link Styles */
+.product-video-link {
+  margin-top: var(--space-md);
+  padding-top: var(--space-md);
+  border-top: 1px solid var(--gray-200);
+}
+
+.video-link-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  width: 100%;
+  padding: var(--space-md);
+  background: linear-gradient(135deg, #ff0000, #cc0000);
+  color: white;
+  text-decoration: none;
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  transition: all var(--transition-fast);
+  box-shadow: 0 2px 8px rgba(255, 0, 0, 0.3);
+}
+
+.video-link-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255, 0, 0, 0.4);
+  background: linear-gradient(135deg, #e60000, #b30000);
+}
+
+.video-link-btn svg {
+  font-size: 1.2rem;
+}
+
+.video-link-hint {
+  text-align: center;
+  font-size: var(--font-size-xs);
+  color: var(--text-muted);
+  margin-top: var(--space-xs);
+}
+
+[data-theme="dark"] .product-video-link {
+  border-top-color: var(--border-color);
+}
+
+[data-theme="dark"] .video-link-btn {
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.3);
+}
+
+[data-theme="dark"] .video-link-btn:hover {
+  box-shadow: 0 0 25px rgba(255, 0, 0, 0.5);
+}
+
 /* ============================================
    CONTACT ACTION BUTTONS
    ============================================ */

@@ -189,6 +189,7 @@ router.post("/add-product", uploadProductImages, asyncHandler(async (req, res) =
     condition = "Used",
     productAge = "",
     originalUrl = "",
+    videoUrl = "",
     contactPreference = "Both",
     userId,
   } = req.body;
@@ -251,6 +252,7 @@ router.post("/add-product", uploadProductImages, asyncHandler(async (req, res) =
     condition,
     productAge,
     originalUrl,
+    videoUrl,
     contactPreference,
     pimage,
     pimage2,
