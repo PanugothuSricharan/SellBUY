@@ -296,6 +296,7 @@ router.put("/update-product/:productId", uploadProductImages, asyncHandler(async
     condition: req.body.condition || product.condition,
     productAge: req.body.productAge || product.productAge,
     originalUrl: req.body.originalUrl || product.originalUrl,
+    videoUrl: req.body.videoUrl || product.videoUrl,
     contactPreference: req.body.contactPreference || product.contactPreference || "Both",
   };
 

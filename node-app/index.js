@@ -151,6 +151,7 @@ const ProductSchema = new mongoose.Schema({
   condition: { type: String, enum: VALID_CONDITIONS, default: "Good" },
   productAge: String,
   originalUrl: String,
+  videoUrl: String,
   contactPreference: {
     type: String,
     enum: VALID_CONTACT_PREFERENCES,
@@ -494,6 +495,7 @@ app.post(
     const condition = req.body.condition || "Good";
     const productAge = req.body.productAge || "";
     const originalUrl = req.body.originalUrl || "";
+    const videoUrl = req.body.videoUrl || "";
     const contactPreference = req.body.contactPreference || "Both";
     // Cloudinary returns the full URL in path
     const pimage = req.files?.pimage?.[0]?.path;
@@ -580,6 +582,7 @@ app.post(
       condition,
       productAge,
       originalUrl,
+      videoUrl,
       contactPreference,
       pimage,
       pimage2,
@@ -736,6 +739,7 @@ app.put(
         condition: req.body.condition || product.condition,
         productAge: req.body.productAge || product.productAge,
         originalUrl: req.body.originalUrl || product.originalUrl,
+        videoUrl: req.body.videoUrl || product.videoUrl,
         contactPreference:
           req.body.contactPreference || product.contactPreference || "Both",
       };

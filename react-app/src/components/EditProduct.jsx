@@ -21,6 +21,7 @@ import {
   FaArrowLeft,
   FaWhatsapp,
   FaPhone,
+  FaVideo,
 } from "react-icons/fa";
 
 // Product condition and age options
@@ -47,6 +48,7 @@ function EditProduct() {
   const [condition, setCondition] = useState("");
   const [productAge, setProductAge] = useState("");
   const [originalUrl, setOriginalUrl] = useState("");
+  const [videoUrl, setVideoUrl] = useState("");
   const [contactPreference, setContactPreference] = useState("Both");
   const [pimage, setPimage] = useState(null);
   const [pimage2, setPimage2] = useState(null);
@@ -81,6 +83,7 @@ function EditProduct() {
           setCondition(p.condition || "");
           setProductAge(p.productAge || "");
           setOriginalUrl(p.originalUrl || "");
+          setVideoUrl(p.videoUrl || "");
           setContactPreference(p.contactPreference || "Both");
           setExistingImage1(p.pimage || null);
           setExistingImage2(p.pimage2 || null);
@@ -167,6 +170,11 @@ function EditProduct() {
       newErrors.originalUrl = "Please enter a valid URL";
     }
 
+    // Validate video URL if provided
+    if (videoUrl && !isValidVideoUrl(videoUrl)) {
+      newErrors.videoUrl = "Please enter a valid YouTube or Google Drive link";
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -178,6 +186,17 @@ function EditProduct() {
     } catch (_) {
       return false;
     }
+  };
+
+  // Video URL validation helper (YouTube or Google Drive)
+  const isValidVideoUrl = (string) => {
+    if (!isValidUrl(string)) return false;
+    
+    const url = string.toLowerCase();
+    const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+    const isDrive = url.includes('drive.google.com');
+    
+    return isYouTube || isDrive;
   };
 
   const handleSubmit = async (e) => {
@@ -197,6 +216,7 @@ function EditProduct() {
     formData.append("condition", condition);
     formData.append("productAge", productAge);
     formData.append("originalUrl", originalUrl);
+    formData.append("videoUrl", videoUrl);
     formData.append("contactPreference", contactPreference);
     formData.append("userId", localStorage.getItem("userId"));
 
@@ -411,6 +431,27 @@ function EditProduct() {
               )}
               <p className="form-hint">
                 💡 Copy the product URL and paste here. Buyers can verify original price & specs.
+              </p>
+            </div>
+
+            {/* Video URL Field */}
+            <div className="form-group">
+              <label className="form-label">
+                <FaVideo style={{ marginRight: "4px" }} /> Product Video Link
+                <span className="optional"> (Optional)</span>
+              </label>
+              <input
+                type="url"
+                className={`form-input ${errors.videoUrl ? "error" : ""}`}
+                placeholder="Paste YouTube or Google Drive video link"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+              />
+              {errors.videoUrl && (
+                <p className="error-message">{errors.videoUrl}</p>
+              )}
+              <p className="form-hint">
+                🎥 Add a video to showcase your product! Supports YouTube & Google Drive links.
               </p>
             </div>
 
