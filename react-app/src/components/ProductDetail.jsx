@@ -470,13 +470,24 @@ function ProductDetail() {
                     </h3>
                     <div className="youtube-embed-container">
                       <iframe
-                        src={`https://www.youtube.com/embed/${getYouTubeVideoId(product.videoUrl)}?rel=0`}
+                        src={`https://www.youtube.com/embed/${getYouTubeVideoId(product.videoUrl)}?rel=0&modestbranding=1`}
                         title="Product Video"
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
+                        loading="lazy"
                       ></iframe>
                     </div>
+                    <a
+                      href={product.videoUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="youtube-fallback-link"
+                    >
+                      <FaYoutube />
+                      <span>Can't see the video? Watch on YouTube</span>
+                      <FaExternalLinkAlt />
+                    </a>
                   </div>
                 )}
                 
