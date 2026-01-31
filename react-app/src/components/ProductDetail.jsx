@@ -552,7 +552,6 @@ function ProductDetail() {
                   </div>
                 </div>
               )}
-              </div>
 
               {/* Product Info Sidebar */}
               <div className="product-info-sidebar">
